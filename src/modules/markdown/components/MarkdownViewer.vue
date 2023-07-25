@@ -45,6 +45,20 @@ const markdown = computed(
 .main-panel
   height: calc( 100vh - 50px )
 
+/* markdown styles */
+:deep(code)
+  color: #c7254e
+  background-color: #f9f2f4
+  border-radius: 4px
+  padding: 2px 4px
+
+:deep(pre code)
+  padding: 0
+  font-size: inherit
+  color: inherit
+  background-color: transparent
+  border-radius: 0
+
 :deep(h1),
 :deep(h2),
 :deep(h3),
