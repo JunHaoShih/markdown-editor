@@ -59,6 +59,39 @@ const markdown = computed(
   background-color: transparent
   border-radius: 0
 
+:deep(table)
+  border: 1px solid hsla(0,0%,50%,.33)
+  border-collapse: collapse
+
+:deep(thead)
+  display: table-header-group
+  vertical-align: middle
+  border-color: inherit
+
+:deep(tr)
+  display: table-row
+  vertical-align: inherit
+  border-color: inherit
+
+:deep(th)
+  display: table-cell
+  vertical-align: inherit
+  font-weight: bold
+  padding: 8px
+  border: 1px solid hsla(0,0%,50%,.33)
+
+:deep(tr th)
+  border-bottom-width: 2px
+
+:deep(tbody)
+  display: table-row-group
+  vertical-align: middle
+  border-color: inherit
+
+:deep(td)
+  padding: 8px
+  border: 1px solid hsla(0,0%,50%,.33)
+
 :deep(h1),
 :deep(h2),
 :deep(h3),
