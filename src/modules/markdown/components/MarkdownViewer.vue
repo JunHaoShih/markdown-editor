@@ -37,7 +37,7 @@ const md: MarkdownIt = new MarkdownIt({
 });
 
 const markdown = computed(
-  () => md.render(DOMPurify.sanitize(mdText.value)),
+  () => md.render(mdText.value),
 );
 </script>
 
