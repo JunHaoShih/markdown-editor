@@ -34,6 +34,7 @@ module.exports = configure((/* ctx */) => ({
     'i18n',
     'axios',
     'firebase',
+    'notify-defaults',
   ],
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -62,7 +63,7 @@ module.exports = configure((/* ctx */) => ({
       node: 'node16',
     },
 
-    vueRouterMode: 'hash', // available values: 'hash', 'history'
+    vueRouterMode: 'history', // available values: 'hash', 'history'
     // vueRouterBase,
     // vueDevtools,
     // vueOptionsAPI: false,
@@ -117,7 +118,9 @@ module.exports = configure((/* ctx */) => ({
     // directives: [],
 
     // Quasar plugins
-    plugins: [],
+    plugins: [
+      'Notify',
+    ],
   },
 
   // animations: 'all', // --- includes all animations

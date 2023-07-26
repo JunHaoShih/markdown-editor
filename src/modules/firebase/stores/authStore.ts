@@ -1,10 +1,18 @@
 import { defineStore } from 'pinia';
 import {
-  User as FirebaseUser, GoogleAuthProvider, getAuth, signInWithPopup,
+  User as FirebaseUser,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
 } from 'firebase/auth';
+import { auth } from 'src/boot/firebase';
+import { Notify } from 'quasar';
 
 export interface AuthData {
-  user?: FirebaseUser,
+  user?: FirebaseUser | null,
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -13,7 +21,6 @@ export const useAuthStore = defineStore('auth', {
     googleLogin() {
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-      const auth = getAuth();
       signInWithPopup(auth, provider)
         .then((result) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
@@ -24,10 +31,8 @@ export const useAuthStore = defineStore('auth', {
           // The signed-in user info.
           const appUser = result.user;
           this.user = appUser;
-          console.log(appUser);
-          // IdP data available using getAdditionalUserInfo(result)
-          // ...
-        }).catch((error) => {
+        })
+        .catch((error) => {
           // Handle Errors here.
           const errorCode = error.code;
           const errorMessage = error.message;
@@ -35,8 +40,66 @@ export const useAuthStore = defineStore('auth', {
           const { email } = error.customData;
           // The AuthCredential type that was used.
           const credential = GoogleAuthProvider.credentialFromError(error);
-          // ...
+          Notify.create({
+            type: 'error',
+            message: `Error ${errorCode}, ${errorMessage}`,
+          });
         });
+    },
+    async register(email: string, password: string, displayName: string): Promise<boolean> {
+      const response = await createUserWithEmailAndPassword(auth, email, password)
+        .then(async (result): Promise<boolean> => {
+          this.user = result.user;
+          await updateProfile(this.user, {
+            displayName,
+          });
+          return true;
+        })
+        .catch((error): boolean => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          Notify.create({
+            type: 'error',
+            message: `Error ${errorCode}, ${errorMessage}`,
+          });
+          return false;
+        });
+      return response;
+    },
+    async login(email: string, password: string): Promise<boolean> {
+      const response = await signInWithEmailAndPassword(auth, email, password)
+        .then((result): boolean => {
+          this.user = result.user;
+          return true;
+        })
+        .catch((error): boolean => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          Notify.create({
+            type: 'error',
+            message: `Error ${errorCode}, ${errorMessage}`,
+          });
+          return false;
+        });
+      return response;
+    },
+    async logout() {
+      const response = await signOut(auth)
+        .then(() => {
+          this.user = null;
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          Notify.create({
+            type: 'error',
+            message: `Error ${errorCode}, ${errorMessage}`,
+          });
+        });
+      return response;
     },
   },
 });

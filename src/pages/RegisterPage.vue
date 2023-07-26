@@ -12,14 +12,13 @@
         <q-page padding class="row justify-center items-center">
           <div class="column">
             <div class="row">
-              <h5 class="text-h5 q-my-md">{{ $t('actions.login') }}</h5>
+              <h5 class="text-h5 q-my-md">{{ $t('actions.register') }}</h5>
             </div>
             <div class="row">
               <q-card square bordered class="q-pa-lg shadow-1">
                 <q-card-section>
                   <q-form class="q-gutter-md">
                     <q-input
-                      ref="inputRef"
                       filled
                       v-model="username"
                       type="email"
@@ -50,6 +49,21 @@
                         />
                       </template>
                     </q-input>
+                    <q-input
+                      filled
+                      v-model="displayName"
+                      type="text"
+                      :label="$t('displayName')"
+                      style="width: 300px;"
+                    >
+                      <template v-if="displayName" v-slot:append>
+                        <q-icon
+                          name="cancel"
+                          class="cursor-pointer"
+                          @click.stop.prevent="displayName = ''"
+                        />
+                      </template>
+                    </q-input>
                   </q-form>
                 </q-card-section>
                 <q-card-actions class="q-px-md">
@@ -58,14 +72,14 @@
                     color="secondary"
                     size="lg"
                     class="full-width"
-                    :label="$t('actions.login')"
+                    :label="$t('actions.register')"
                     @click="onSubmit"
                   />
                 </q-card-actions>
                 <q-card-section class="text-center q-pa-none">
                   <p class="text-grey-6">
-                    {{ $t('loginPage.registerHint') }}
-                    <a href="/register">{{ $t('loginPage.createAccount') }}</a>
+                    {{ $t('registerPage.loginHint') }}
+                    <a href="/login">{{ $t('registerPage.login') }}</a>
                   </p>
                 </q-card-section>
               </q-card>
@@ -91,8 +105,10 @@ const username = ref('');
 
 const password = ref('');
 
+const displayName = ref('');
+
 async function onSubmit() {
-  const success = await authStore.login(username.value, password.value);
+  const success = await authStore.register(username.value, password.value, displayName.value);
   if (success) {
     router.push('/');
   }

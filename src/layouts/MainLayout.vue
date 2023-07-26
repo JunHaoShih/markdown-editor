@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
+      <q-toolbar class="bg-dark">
         <q-btn
           flat
           dense
@@ -12,10 +12,33 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Markdown Editor
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <q-avatar size="48px" icon="account_circle">
+          <q-menu>
+            <q-item clickable v-close-popup>
+              <q-item-section avatar>
+                <q-avatar icon="account_circle">
+                </q-avatar>
+              </q-item-section>
+              <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
+            </q-item>
+            <q-separator />
+            <!-- language -->
+            <q-item clickable v-close-popup>
+              <q-item-section @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup>
+              <q-item-section @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
+            </q-item>
+            <q-separator />
+            <!-- logout -->
+            <q-item clickable v-close-popup>
+              <q-item-section @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
+            </q-item>
+          </q-menu>
+        </q-avatar>
       </q-toolbar>
     </q-header>
 
@@ -48,6 +71,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import { onAuthStateChanged } from '@firebase/auth';
+import { auth } from 'src/boot/firebase';
+import { useAuthStore } from 'src/modules/firebase/stores/authStore';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
+const i18n = useI18n();
+
+const router = useRouter();
+
+const authStore = useAuthStore();
 
 const essentialLinks: EssentialLinkProps[] = [
   {
@@ -99,4 +133,20 @@ const leftDrawerOpen = ref(false);
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
+
+function setLanguage(lang: string): void {
+  i18n.locale.value = lang;
+}
+
+async function onLogoutClicked(): Promise<void> {
+  await authStore.logout();
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    authStore.user = user;
+  } else {
+    router.push('/login');
+  }
+});
 </script>
