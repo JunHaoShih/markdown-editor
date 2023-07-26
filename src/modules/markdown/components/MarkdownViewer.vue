@@ -8,7 +8,6 @@
 import { computed } from 'vue';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
-import DOMPurify from 'dompurify';
 
 const props = defineProps<{
   modelValue: string,
