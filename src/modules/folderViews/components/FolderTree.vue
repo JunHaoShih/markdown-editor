@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
 import { QTree, QTreeNode } from 'quasar';
 import { v4 as uuidv4 } from 'uuid';
@@ -53,8 +52,6 @@ export interface FolderTreeNode extends QTreeNode {
 }
 
 const i18n = useI18n();
-
-const router = useRouter();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
@@ -200,7 +197,6 @@ watch(folderView, async (newValue, oldValue) => {
 watch(selectedNode, (newValue) => {
   if (newValue) {
     emit('onSelectedNodeUpdate', newValue);
-    router.push(`/${newValue.id}`);
   }
 });
 </script>
