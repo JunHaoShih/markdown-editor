@@ -44,22 +44,23 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
+      :width="drawerWidth"
       show-if-above
       bordered
     >
       <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+        <FolderTree
+          v-model="id"
+          class="q-px-sm"
+          @on-selected-node-update="onSelectedNode"
+        ></FolderTree>
       </q-list>
+      <!-- drawer resizer -->
+      <!-- https://github.com/quasarframework/quasar/issues/7099 -->
+      <div
+        v-touch-pan.preserveCursor.prevent.mouse.horizontal="resizeDrawer as TouchPanValue"
+        class="q-drawer__resizer"
+      ></div>
     </q-drawer>
 
     <q-page-container>
@@ -70,12 +71,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import FolderTree, { FolderTreeNode } from 'src/modules/folderViews/components/FolderTree.vue';
 import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { TouchPanValue } from 'quasar';
 
 const i18n = useI18n();
 
@@ -83,52 +85,15 @@ const router = useRouter();
 
 const authStore = useAuthStore();
 
-const essentialLinks: EssentialLinkProps[] = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev',
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework',
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev',
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev',
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev',
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev',
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev',
-  },
-];
+let initialDrawerWidth = 0;
+
+const drawerMaxWidth = 600;
+
+const drawerWidth = ref(300);
 
 const leftDrawerOpen = ref(false);
+
+const id = ref('');
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -142,6 +107,23 @@ async function onLogoutClicked(): Promise<void> {
   await authStore.logout();
 }
 
+function resizeDrawer(details: {
+  isFirst: boolean,
+  offset: {
+    x: number,
+    y: number,
+  },
+}) {
+  if (details.isFirst) {
+    initialDrawerWidth = drawerWidth.value;
+  }
+  drawerWidth.value = Math.min(initialDrawerWidth + details.offset.x, drawerMaxWidth);
+}
+
+function onSelectedNode(node: FolderTreeNode) {
+  // console.log(node.label);
+}
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     authStore.user = user;
@@ -150,3 +132,25 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 </script>
+
+<style lang="sass" scoped>
+.q-drawer__resizer
+  position: absolute
+  top: 0
+  bottom: 0
+  right: -2px
+  width: 1px
+  background-color: $grey-5
+  cursor: ew-resize
+
+  &:after
+    content: ''
+    position: absolute
+    top: 50%
+    height: 30px
+    left: -2px
+    right: -2px
+    transform: translateY(-50%)
+    background-color: $accent
+    border-radius: 4px
+</style>

@@ -2,6 +2,7 @@ import { boot } from 'quasar/wrappers';
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
+import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -25,10 +26,12 @@ const auth = getAuth(firebaseApp);
 
 const analytics = getAnalytics(firebaseApp);
 
+const db = getFirestore(firebaseApp);
+
 // "async" is optional;
 // more info on params: https://v2.quasar.dev/quasar-cli/boot-files
 export default boot(async (/* { app, router, ... } */) => {
   // something to do
 });
 
-export { firebaseApp, auth };
+export { firebaseApp, auth, db };

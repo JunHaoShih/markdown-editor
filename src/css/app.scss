@@ -115,3 +115,45 @@
 .hljs-tag {
   /* purposely ignored */
 }
+
+.action-btn {
+  background-color: $grey-2;
+  color: $dark;
+  border-radius: 15px;
+}
+
+/* scroll bar */
+// Thanks to hawkeye64
+// https://github.com/quasarframework/quasar/issues/10825#issuecomment-936256646
+:root {
+  --scrollbar-width-height: 10px;
+  --scrollbar-track: #eeeeee;
+  --scrollbar-thumb: rgba(204, 204, 204, 1);
+  --scrollbar-thumb-hover: rgba(178, 178, 178, 1);
+  --scrollbar-track-dark: #eeeeee;
+  --scrollbar-thumb-dark: rgba(204, 204, 204, 1);
+  --scrollbar-thumb-hover-dark: rgba(178, 178, 178, 1);
+}
+::-webkit-scrollbar {
+  width: var(--scrollbar-width-height);
+  height: var(--scrollbar-width-height);
+}
+// the track (progress bar) of the scrollbar
+::-webkit-scrollbar-track {  // border-top: var(--markdown-border)
+  background: var(--scrollbar-track-dark);
+  box-shadow: inset 0 0 4px var(--scrollbar-track-dark);
+}
+// the bottom corner of the scrollbar, where both horizontal and vertical scrollbars meet
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track-dark);
+}
+// the draggable scrolling handle
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-dark);
+  border-radius: 5px;
+
+  &:hover {
+    background: var(--scrollbar-thumb-hover-dark);
+  }
+}
+
