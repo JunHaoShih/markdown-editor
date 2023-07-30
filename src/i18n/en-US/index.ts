@@ -27,4 +27,7 @@ export default {
     loginHint: 'Already has an account?',
     login: 'Login now!',
   },
+  markdownPage: {
+    editHere: 'Edit your markdown here!',
+  },
 };

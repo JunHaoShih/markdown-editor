@@ -1,16 +1,9 @@
 <template>
   <div>
     <q-btn
-      icon="create_new_folder"
-      class="action-btn q-pa-sm"
-      @click="addFolder"
-      :disable="disableCreate"
-    ></q-btn>
-    <q-btn
       icon="description"
       class="action-btn q-pa-sm"
       @click="addFile"
-      :disable="disableCreate"
     ></q-btn>
     <q-separator
       class="q-ma-sm"
@@ -40,18 +33,30 @@ import { QTree, QTreeNode } from 'quasar';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from 'src/boot/firebase';
 import { setMarkdown } from 'src/modules/markdown/services/markdownService';
+import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
 import { onAuthStateChanged } from 'firebase/auth';
+import {
+  onBeforeRouteUpdate, useRoute, useRouter,
+} from 'vue-router';
 import { FolderItemType, FolderView, FolderItem } from '../models/folderView';
 import { getMarkdownFolderView, setFolderView } from '../services/folderViewService';
 import NewFileDialog from './NewFileDialog.vue';
+import { useFolderTreeStore } from '../stores/folderTreeStore';
 
 export interface FolderTreeNode extends QTreeNode {
   id: string,
   type: FolderItemType,
   ref?: FolderItem,
+  parent?: FolderTreeNode | null,
 }
 
 const i18n = useI18n();
+
+const router = useRouter();
+
+const route = useRoute();
+
+const folderTreeStore = useFolderTreeStore();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
@@ -65,38 +70,30 @@ const folderView = ref<FolderView>({
   userId: '',
 });
 
-const props = defineProps<{
-  modelValue: string,
-}>();
-
-type Emit = {
-  (e: 'update:modelValue', value: string): void,
-  (e: 'onSelectedNodeUpdate', value: FolderTreeNode): void,
-}
-const emit = defineEmits<Emit>();
-
-const selectedNodeKey = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-});
+const selectedNodeKey = ref('');
 
 const selectedNode = computed(
   (): FolderTreeNode => treeRef.value?.getNodeByKey(selectedNodeKey.value),
 );
 
-const disableCreate = computed(
-  () => selectedNode.value?.type === 'item',
-);
-
+/**
+ * Parse folder item array to folder tree
+ * @param folderItems Folder item array you want to parse
+ */
 function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
   const children = folderItems.map((item):FolderTreeNode => ({
     label: item.name,
-    icon: item.type === 'folder' ? 'folder' : 'article',
+    icon: item.type,
     id: item.id,
     type: item.type,
     ref: item,
     children: toFolderTreeNodes(item.children),
   }));
+  children.forEach((child) => {
+    child.children?.forEach((subChild) => {
+      subChild.parent = child;
+    });
+  });
   return children;
 }
 
@@ -119,12 +116,13 @@ async function addNewItem(itemName: string, type: FolderItemType) {
   // Add new tree node and set reference
   selectedNode.value.children?.push({
     label: itemName,
-    icon: type === 'folder' ? 'folder' : 'article',
+    icon: type,
     id,
     type,
     ref: newItem,
+    parent: selectedNode.value,
     children: [],
-  });
+  } as FolderTreeNode);
   // We expand folder node here so user don't need to expand again
   treeRef.value?.setExpanded(selectedNode.value.id, true);
   // Update folder view
@@ -134,12 +132,11 @@ async function addNewItem(itemName: string, type: FolderItemType) {
     folderView.value.content.push(newItem);
   }
   // Set markdown document
-  if (type === 'item') {
-    await setMarkdown({
-      content: 'Hello',
-      userId: folderView.value.userId,
-    }, id);
-  }
+  await setMarkdown({
+    content: `# ${itemName}`,
+    userId: folderView.value.userId,
+  }, id);
+  router.push(`/${id}`);
 }
 
 function setupDialog(title: string, type: FolderItemType) {
@@ -158,30 +155,39 @@ function setupDialog(title: string, type: FolderItemType) {
   }
 }
 
-function addFolder() {
-  setupDialog(i18n.t('folderViews.addFolder'), 'folder');
-}
-
 function addFile() {
-  setupDialog(i18n.t('folderViews.addFile'), 'item');
+  setupDialog(i18n.t('folderViews.addFile'), 'article');
 }
 
+function selectedNodeKeyInit(path: string) {
+  const pathTokens = path.split('/');
+  const itemId = pathTokens[1];
+  selectedNodeKey.value = itemId;
+}
+
+/**
+ * Initialize folder tree on user authed
+ */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     // Use userId to get folder view
     const markdownFolderView = await getMarkdownFolderView(user.uid);
     if (markdownFolderView) {
       folderView.value = markdownFolderView;
-      folderTreeNodes.value = [
-        {
-          label: folderView.value.name,
-          icon: 'circle',
-          id: '',
-          type: 'folder',
-          children: toFolderTreeNodes(folderView.value.content),
-        },
-      ];
-      expandedKeys.value.push('');
+      const rootNode: FolderTreeNode = {
+        label: folderView.value.name,
+        icon: 'home',
+        id: '',
+        type: 'article',
+        children: toFolderTreeNodes(folderView.value.content),
+      };
+      rootNode.children?.forEach((child) => {
+        child.parent = rootNode;
+      });
+      folderTreeNodes.value = [rootNode];
+      selectedNodeKeyInit(route.path);
+    } else {
+      await setDefaultFolderView(user.uid);
     }
   }
 });
@@ -194,9 +200,31 @@ watch(folderView, async (newValue, oldValue) => {
   deep: true,
 });
 
-watch(selectedNode, (newValue) => {
-  if (newValue) {
-    emit('onSelectedNodeUpdate', newValue);
+function allParents(node: FolderTreeNode): FolderTreeNode[] {
+  const arr: FolderTreeNode[] = [];
+  if (!node) {
+    return arr;
   }
+  arr.push(node);
+  if (node.parent) {
+    return arr.concat(allParents(node.parent));
+  }
+  return arr;
+}
+
+watch(selectedNode, (newValue, oldValue) => {
+  const parents = allParents(newValue);
+  folderTreeStore.selectedNodeParents = parents.reverse();
+  folderTreeStore.selectedNodeParents.forEach((p) => expandedKeys.value.push(p.id));
+  if (!oldValue) {
+    return;
+  }
+  if (newValue) {
+    router.push(`/${newValue.id}`);
+  }
+});
+
+onBeforeRouteUpdate((to) => {
+  selectedNodeKeyInit(to.path);
 });
 </script>

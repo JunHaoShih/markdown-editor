@@ -10,7 +10,6 @@ import {
 } from 'firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { Notify } from 'quasar';
-import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
 
 export interface AuthData {
   user?: FirebaseUser | null,
@@ -54,7 +53,7 @@ export const useAuthStore = defineStore('auth', {
           await updateProfile(this.user, {
             displayName,
           });
-          await setDefaultFolderView(result.user.uid);
+          // await setDefaultFolderView(result.user.uid);
           return true;
         })
         .catch((error): boolean => {

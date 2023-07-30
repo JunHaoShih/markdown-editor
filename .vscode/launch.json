@@ -16,6 +16,19 @@
       "sourceMapPathOverrides": {
         "webpack://package-name/./src/*": "${webRoot}/*"
       }
+    },
+    {
+      "type": "msedge",
+      "request": "launch",
+      "name": "Quasar App: Edge",
+      "url": "http://localhost:9000",
+      // To properly reflect changes after HMR with Vite
+      "enableContentValidation": false,
+      "webRoot": "${workspaceFolder}/src",
+      // No need to configure sourcemap explicitly for vite.
+      "sourceMapPathOverrides": {
+        "webpack://package-name/./src/*": "${webRoot}/*"
+      }
     }
   ]
 }

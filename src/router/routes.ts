@@ -4,7 +4,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/modules/markdown/MarkdownEditor.vue'), props: true }],
+    children: [
+      {
+        path: '', component: () => import('pages/IndexPage.vue'),
+      },
+      {
+        path: ':id', component: () => import('pages/MarkdownPage.vue'), props: true,
+      },
+    ],
   },
   {
     path: '/login',

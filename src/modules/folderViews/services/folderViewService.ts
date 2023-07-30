@@ -30,6 +30,8 @@ export async function setDefaultFolderView(userId: string) {
 
 export async function getMarkdownFolderView(userId: string): Promise<FolderView | undefined> {
   const ref = doc(db, collectionName, userId).withConverter(converter);
-  const folderViews = await getDoc(ref);
-  return folderViews.data();
+  const folderViews = await getDoc(ref)
+    .then((value) => value)
+    .catch((error) => null);
+  return folderViews?.data();
 }

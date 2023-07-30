@@ -1,4 +1,4 @@
-export type FolderItemType = 'folder' | 'item';
+export type FolderItemType = 'article';
 
 export interface FolderItem {
   id: string,

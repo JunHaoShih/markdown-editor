@@ -10,6 +10,7 @@
           type="textarea"
           autogrow
           class="left-panel"
+          :label="$t('markdownPage.editHere')"
         />
       </template>
       <template v-slot:after>
@@ -23,12 +24,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import MarkdownViewer from './components/MarkdownViewer.vue';
+import { computed, ref } from 'vue';
+import MarkdownViewer from './MarkdownViewer.vue';
 
 const splitterModel = ref(50);
 
-const mdText = ref('');
+const props = defineProps<{
+  modelValue: string,
+}>();
+
+type Emit = {
+  (e: 'update:modelValue', value: string): void
+}
+const emit = defineEmits<Emit>();
+
+const mdText = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+});
 </script>
 
 <style lang="sass" scoped>

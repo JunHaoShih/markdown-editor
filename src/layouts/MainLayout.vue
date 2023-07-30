@@ -50,9 +50,7 @@
     >
       <q-list>
         <FolderTree
-          v-model="id"
           class="q-px-sm"
-          @on-selected-node-update="onSelectedNode"
         ></FolderTree>
       </q-list>
       <!-- drawer resizer -->
@@ -71,7 +69,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import FolderTree, { FolderTreeNode } from 'src/modules/folderViews/components/FolderTree.vue';
+import FolderTree from 'src/modules/folderViews/components/FolderTree.vue';
 import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
@@ -92,8 +90,6 @@ const drawerMaxWidth = 600;
 const drawerWidth = ref(300);
 
 const leftDrawerOpen = ref(false);
-
-const id = ref('');
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -118,10 +114,6 @@ function resizeDrawer(details: {
     initialDrawerWidth = drawerWidth.value;
   }
   drawerWidth.value = Math.min(initialDrawerWidth + details.offset.x, drawerMaxWidth);
-}
-
-function onSelectedNode(node: FolderTreeNode) {
-  // console.log(node.label);
 }
 
 onAuthStateChanged(auth, (user) => {

@@ -27,4 +27,7 @@ export default {
     loginHint: '已經擁有帳號?',
     login: '馬上登入!',
   },
+  markdownPage: {
+    editHere: '在此編輯您的Markdown',
+  },
 };
