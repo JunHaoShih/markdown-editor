@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
 import {
   User as FirebaseUser,
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
   signOut,
   updateProfile,
 } from 'firebase/auth';
@@ -18,34 +16,6 @@ export interface AuthData {
 export const useAuthStore = defineStore('auth', {
   state: (): AuthData => ({}),
   actions: {
-    googleLogin() {
-      const provider = new GoogleAuthProvider();
-      provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          const credential = GoogleAuthProvider.credentialFromResult(result);
-          if (credential) {
-            const token = credential.accessToken;
-          }
-          // The signed-in user info.
-          const appUser = result.user;
-          this.user = appUser;
-        })
-        .catch((error) => {
-          // Handle Errors here.
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // The email of the user's account used.
-          const { email } = error.customData;
-          // The AuthCredential type that was used.
-          const credential = GoogleAuthProvider.credentialFromError(error);
-          Notify.create({
-            type: 'error',
-            message: `Error ${errorCode}, ${errorMessage}`,
-          });
-        });
-    },
     async register(email: string, password: string, displayName: string): Promise<boolean> {
       const response = await createUserWithEmailAndPassword(auth, email, password)
         .then(async (result): Promise<boolean> => {

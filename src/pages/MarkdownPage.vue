@@ -30,7 +30,6 @@ import { onBeforeMount, ref } from 'vue';
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute } from 'vue-router';
 import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { Markdown } from 'src/modules/markdown/models/markdown';
-import { load } from 'mime';
 
 const route = useRoute();
 
