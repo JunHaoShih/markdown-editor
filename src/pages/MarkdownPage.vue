@@ -27,13 +27,22 @@
 import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
 import { onBeforeMount, ref } from 'vue';
-import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute } from 'vue-router';
+import {
+  onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter,
+} from 'vue-router';
 import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { Markdown } from 'src/modules/markdown/models/markdown';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from 'src/boot/firebase';
+import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 
 const route = useRoute();
 
+const router = useRouter();
+
 const folderTreeStore = useFolderTreeStore();
+
+const authStore = useAuthStore();
 
 const mdSource = ref<Markdown>({} as Markdown);
 
@@ -81,5 +90,13 @@ onBeforeRouteUpdate(async (to, from) => {
 
 onBeforeMount(async () => {
   await markdownInit(route.path);
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    authStore.user = user;
+  } else {
+    router.push('/login');
+  }
 });
 </script>
