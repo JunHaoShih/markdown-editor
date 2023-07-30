@@ -46,5 +46,5 @@ const mdText = computed({
 
 <style lang="sass" scoped>
 .main-panel
-  height: calc( 100vh - 50px )
+  height: calc( 100vh - 150px )
 </style>
