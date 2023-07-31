@@ -9,10 +9,12 @@ export default {
     register: '註冊',
     cancel: '取消',
     confirm: '確定',
+    rename: '重新命名',
   },
   folderViews: {
     addFolder: '新增資料夾',
     addFile: '新增檔案',
+    rename: '重新命名',
     fileNameExist: '檔名已存在',
     fileNameCannotBeEmpty: '檔名不可為空',
   },

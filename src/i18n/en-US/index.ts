@@ -9,10 +9,12 @@ export default {
     register: 'Register',
     cancel: 'Cancel',
     confirm: 'Confirm',
+    rename: 'Rename',
   },
   folderViews: {
     addFolder: 'Add folder',
     addFile: 'Add file',
+    rename: 'Rename',
     fileNameExist: 'File name already exist',
     fileNameCannotBeEmpty: 'File name cannot be empty',
   },

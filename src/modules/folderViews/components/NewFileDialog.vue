@@ -87,8 +87,11 @@ function setTitle(inputTitle: string) {
   title.value = inputTitle;
 }
 
+function setFileName(fileName: string) {
+  inputFileName.value = fileName;
+}
+
 function promptDialog() {
-  inputFileName.value = '';
   prompt.value = true;
 }
 
@@ -103,6 +106,7 @@ function onConfirm(func: (fileName: string) => void) {
 defineExpose({
   setFileNames,
   setTitle,
+  setFileName,
   promptDialog,
   closeDialog,
   onConfirm,

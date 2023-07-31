@@ -4,7 +4,11 @@
       icon="description"
       class="action-btn q-pa-sm"
       @click="addFile"
-    ></q-btn>
+    >
+      <q-tooltip>
+        {{ $t('folderViews.addFile') }}
+      </q-tooltip>
+    </q-btn>
     <q-separator
       class="q-ma-sm"
     />
@@ -18,8 +22,48 @@
       selected-color="primary"
       :duration="0"
       no-selection-unset
-      default-expand-all
-    ></q-tree>
+    >
+      <template v-slot:default-header="prop">
+        <div class="row items-center">
+          <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
+          <div>{{ prop.node.label }}</div>
+        </div>
+        <q-menu
+          touch-position
+          context-menu
+        >
+          <q-list dense style="min-width: 100px">
+            <q-item
+              clickable
+              v-close-popup
+            >
+              <q-item-section>
+                <div
+                  @click="addFileByRightClick(prop.node)"
+                >
+                  <q-icon name="description" color="primary"/>
+                  {{ $t('folderViews.addFile') }}
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+            >
+              <q-item-section>
+                <div
+                  @click="setRenameDialog($t('folderViews.rename'), prop.node)"
+                >
+                  <q-icon name="edit" color="primary"/>
+                  {{ $t('actions.rename') }}
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </template>
+    </q-tree>
     <NewFileDialog
       ref="dialogRef"
     ></NewFileDialog>
@@ -104,7 +148,7 @@ const folderTreeNodes = ref<FolderTreeNode[]>([]);
  * @param itemName Item name
  * @param type Item type
  */
-async function addNewItem(itemName: string, type: FolderItemType) {
+async function addNewItem(itemName: string, type: FolderItemType, node: FolderTreeNode) {
   const id = uuidv4();
   // Create new folder item
   const newItem: FolderItem = {
@@ -114,20 +158,20 @@ async function addNewItem(itemName: string, type: FolderItemType) {
     children: [],
   };
   // Add new tree node and set reference
-  selectedNode.value.children?.push({
+  node.children?.push({
     label: itemName,
     icon: type,
     id,
     type,
     ref: newItem,
-    parent: selectedNode.value,
+    parent: node,
     children: [],
   } as FolderTreeNode);
   // We expand folder node here so user don't need to expand again
-  treeRef.value?.setExpanded(selectedNode.value.id, true);
+  treeRef.value?.setExpanded(node.id, true);
   // Update folder view
-  if (selectedNode.value.ref) {
-    selectedNode.value.ref.children.push(newItem);
+  if (node.ref) {
+    node.ref.children.push(newItem);
   } else {
     folderView.value.content.push(newItem);
   }
@@ -139,16 +183,17 @@ async function addNewItem(itemName: string, type: FolderItemType) {
   router.push(`/${id}`);
 }
 
-function setupDialog(title: string, type: FolderItemType) {
+function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) {
   // Get children item names in order to check if filename already exist
-  const itemNames = selectedNode.value.ref
-    ? selectedNode.value.ref.children.map((item) => item.name)
+  const itemNames = node.ref
+    ? node.ref.children.map((item) => item.name)
     : folderView.value.content.map((item) => item.name);
   if (dialogRef.value) {
     dialogRef.value.setTitle(title);
     dialogRef.value.setFileNames(itemNames);
+    dialogRef.value.setFileName('');
     dialogRef.value.onConfirm(async (folderName) => {
-      await addNewItem(folderName, type);
+      await addNewItem(folderName, type, node);
       dialogRef.value?.closeDialog();
     });
     dialogRef.value.promptDialog();
@@ -156,7 +201,40 @@ function setupDialog(title: string, type: FolderItemType) {
 }
 
 function addFile() {
-  setupDialog(i18n.t('folderViews.addFile'), 'article');
+  setupDialog(i18n.t('folderViews.addFile'), 'article', selectedNode.value);
+}
+
+function addFileByRightClick(node: FolderTreeNode) {
+  setupDialog(i18n.t('folderViews.addFile'), 'article', node);
+}
+
+/**
+ * Rename
+ * @param title Rename dialog title
+ * @param node selected node
+ */
+function setRenameDialog(title: string, node: FolderTreeNode) {
+  // Get children item names of parent node in order to check if filename already exist
+  const itemNames = node.parent?.children
+    ? node.parent.children
+      .map((child) => child.label)
+      .filter((itemName): itemName is string => !!itemName)
+      .filter((itemName) => itemName !== node.label)
+    : [];
+  if (dialogRef.value) {
+    dialogRef.value.setTitle(title);
+    dialogRef.value.setFileNames(itemNames);
+    dialogRef.value.setFileName(node.label ?? '');
+    dialogRef.value.onConfirm(async (folderName) => {
+      // Rename here
+      node.label = folderName;
+      if (node.ref) {
+        node.ref.name = folderName;
+      }
+      dialogRef.value?.closeDialog();
+    });
+    dialogRef.value.promptDialog();
+  }
 }
 
 function selectedNodeKeyInit(path: string) {
