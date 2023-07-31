@@ -44,8 +44,16 @@
                   <q-icon name="description" color="primary"/>
                   {{ $t('folderViews.addFile') }}
                 </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+            >
+              <q-item-section>
                 <div
-                  v-if="(prop.node as FolderTreeNode).id"
+                  @click="setRenameDialog($t('folderViews.rename'), prop.node)"
                 >
                   <q-icon name="edit" color="primary"/>
                   {{ $t('actions.rename') }}
@@ -183,6 +191,7 @@ function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) 
   if (dialogRef.value) {
     dialogRef.value.setTitle(title);
     dialogRef.value.setFileNames(itemNames);
+    dialogRef.value.setFileName('');
     dialogRef.value.onConfirm(async (folderName) => {
       await addNewItem(folderName, type, node);
       dialogRef.value?.closeDialog();
@@ -197,6 +206,35 @@ function addFile() {
 
 function addFileByRightClick(node: FolderTreeNode) {
   setupDialog(i18n.t('folderViews.addFile'), 'article', node);
+}
+
+/**
+ * Rename
+ * @param title Rename dialog title
+ * @param node selected node
+ */
+function setRenameDialog(title: string, node: FolderTreeNode) {
+  // Get children item names of parent node in order to check if filename already exist
+  const itemNames = node.parent?.children
+    ? node.parent.children
+      .map((child) => child.label)
+      .filter((itemName): itemName is string => !!itemName)
+      .filter((itemName) => itemName !== node.label)
+    : [];
+  if (dialogRef.value) {
+    dialogRef.value.setTitle(title);
+    dialogRef.value.setFileNames(itemNames);
+    dialogRef.value.setFileName(node.label ?? '');
+    dialogRef.value.onConfirm(async (folderName) => {
+      // Rename here
+      node.label = folderName;
+      if (node.ref) {
+        node.ref.name = folderName;
+      }
+      dialogRef.value?.closeDialog();
+    });
+    dialogRef.value.promptDialog();
+  }
 }
 
 function selectedNodeKeyInit(path: string) {
