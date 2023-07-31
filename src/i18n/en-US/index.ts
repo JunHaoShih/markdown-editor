@@ -9,6 +9,7 @@ export default {
     register: 'Register',
     cancel: 'Cancel',
     confirm: 'Confirm',
+    rename: 'Rename',
   },
   folderViews: {
     addFolder: 'Add folder',

@@ -9,6 +9,7 @@ export default {
     register: '註冊',
     cancel: '取消',
     confirm: '確定',
+    rename: '重新命名',
   },
   folderViews: {
     addFolder: '新增資料夾',
