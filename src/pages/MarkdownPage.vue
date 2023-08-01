@@ -62,6 +62,8 @@ async function markdownInit(path: string) {
   if (md) {
     mdSource.value = md;
     mdEdit.value = md.content;
+  } else {
+    router.push('/');
   }
 }
 

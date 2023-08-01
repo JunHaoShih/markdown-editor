@@ -91,6 +91,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { auth } from 'src/boot/firebase';
 import { setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
+import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   onBeforeRouteUpdate, useRoute, useRouter,
@@ -99,6 +100,8 @@ import { FolderItemType, FolderView, FolderItem } from '../models/folderView';
 import { getMarkdownFolderView, setFolderView } from '../services/folderViewService';
 import NewFileDialog from './NewFileDialog.vue';
 import { useFolderTreeStore } from '../stores/folderTreeStore';
+import { getTrashBin, setDefaultTrashBin, setTrashBin } from '../services/trashBinService';
+import { TrashBin } from '../models/trashBin';
 
 export interface FolderTreeNode extends QTreeNode {
   id: string,
@@ -115,6 +118,8 @@ const router = useRouter();
 
 const route = useRoute();
 
+const authStore = useAuthStore();
+
 const folderTreeStore = useFolderTreeStore();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
@@ -124,6 +129,12 @@ const treeRef = ref<QTree>();
 const expandedKeys = ref<string[]>([]);
 
 const folderView = ref<FolderView>({
+  name: '',
+  content: [],
+  userId: '',
+});
+
+const trashBin = ref<TrashBin>({
   name: '',
   content: [],
   userId: '',
@@ -263,11 +274,28 @@ function onDeleteClicked(node: FolderTreeNode) {
     message: i18n.t('folderViews.deleteConfirm'),
     cancel: true,
     persistent: true,
-  }).onOk(() => {
-    $q.notify({
-      type: 'success',
-      message: '123',
-    });
+  }).onOk(async () => {
+    const appUser = authStore.user;
+    if (!node.ref || !appUser) {
+      $q.notify({
+        type: 'error',
+        message: i18n.t('unknownError'),
+      });
+      return;
+    }
+    trashBin.value.content.push(node.ref);
+    // TODO fix delete
+    if (node.parent?.id) {
+      const parentNode = node.parent;
+      const index = parentNode.ref?.children.findIndex((child) => child.id === node.id);
+      if (index) {
+        parentNode.ref?.children.splice(index, 1);
+      }
+      const nodeIndex = parentNode.children?.findIndex((child) => child.id === node.id);
+      if (nodeIndex) {
+        parentNode.children?.splice(nodeIndex, 1);
+      }
+    }
   });
 }
 
@@ -283,6 +311,7 @@ function selectedNodeKeyInit(path: string) {
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     // Use userId to get folder view
+    let reload = false;
     const markdownFolderView = await getMarkdownFolderView(user.uid);
     if (markdownFolderView) {
       folderView.value = markdownFolderView;
@@ -300,6 +329,17 @@ onAuthStateChanged(auth, async (user) => {
       selectedNodeKeyInit(route.path);
     } else {
       await setDefaultFolderView(user.uid);
+      reload = true;
+    }
+    const trashBinDoc = await getTrashBin(user.uid);
+    if (trashBinDoc) {
+      trashBin.value = trashBinDoc;
+    } else {
+      await setDefaultTrashBin(user.uid);
+      reload = true;
+    }
+    if (reload) {
+      window.location.reload();
     }
   }
 });
@@ -307,6 +347,14 @@ onAuthStateChanged(auth, async (user) => {
 watch(folderView, async (newValue, oldValue) => {
   if (oldValue.name) {
     await setFolderView(newValue);
+  }
+}, {
+  deep: true,
+});
+
+watch(trashBin, async (newValue, oldValue) => {
+  if (oldValue.name) {
+    await setTrashBin(newValue);
   }
 }, {
   deep: true,

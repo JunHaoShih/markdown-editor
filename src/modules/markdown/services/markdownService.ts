@@ -19,6 +19,8 @@ export async function setMarkdown(markdown: Markdown, id: string) {
 
 export async function getMarkdown(id: string): Promise<Markdown | undefined> {
   const ref = doc(db, collectionName, id).withConverter(converter);
-  const folderViews = await getDoc(ref);
-  return folderViews.data();
+  const folderViews = await getDoc(ref)
+    .then((response) => response)
+    .catch(() => null);
+  return folderViews?.data();
 }

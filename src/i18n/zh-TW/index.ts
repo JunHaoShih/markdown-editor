@@ -34,4 +34,5 @@ export default {
   markdownPage: {
     editHere: '在此編輯您的Markdown',
   },
+  unknownError: '未知錯誤',
 };

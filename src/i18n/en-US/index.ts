@@ -34,4 +34,5 @@ export default {
   markdownPage: {
     editHere: 'Edit your markdown here!',
   },
+  unknownError: 'Something went wrong!',
 };
