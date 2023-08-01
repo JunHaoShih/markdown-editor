@@ -10,6 +10,7 @@ export default {
     cancel: 'Cancel',
     confirm: 'Confirm',
     rename: 'Rename',
+    delete: 'Delete',
   },
   folderViews: {
     addFolder: 'Add folder',
@@ -17,6 +18,7 @@ export default {
     rename: 'Rename',
     fileNameExist: 'File name already exist',
     fileNameCannotBeEmpty: 'File name cannot be empty',
+    deleteConfirm: 'Are you sure to delete this file and its children?',
   },
   email: 'Email',
   password: 'Password',

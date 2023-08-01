@@ -10,6 +10,7 @@ export default {
     cancel: '取消',
     confirm: '確定',
     rename: '重新命名',
+    delete: '刪除',
   },
   folderViews: {
     addFolder: '新增資料夾',
@@ -17,6 +18,7 @@ export default {
     rename: '重新命名',
     fileNameExist: '檔名已存在',
     fileNameCannotBeEmpty: '檔名不可為空',
+    deleteConfirm: '是否刪除該檔案與其子檔案',
   },
   email: 'Email',
   password: '密碼',

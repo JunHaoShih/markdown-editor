@@ -60,6 +60,19 @@
                 </div>
               </q-item-section>
             </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+              @click="onDeleteClicked(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="delete" color="primary"/>
+                  {{ $t('actions.delete') }}
+                </div>
+              </q-item-section>
+            </q-item>
           </q-list>
         </q-menu>
       </template>
@@ -73,7 +86,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { computed, ref, watch } from 'vue';
-import { QTree, QTreeNode } from 'quasar';
+import { QTree, QTreeNode, useQuasar } from 'quasar';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from 'src/boot/firebase';
 import { setMarkdown } from 'src/modules/markdown/services/markdownService';
@@ -93,6 +106,8 @@ export interface FolderTreeNode extends QTreeNode {
   ref?: FolderItem,
   parent?: FolderTreeNode | null,
 }
+
+const $q = useQuasar();
 
 const i18n = useI18n();
 
@@ -235,6 +250,25 @@ function setRenameDialog(title: string, node: FolderTreeNode) {
     });
     dialogRef.value.promptDialog();
   }
+}
+
+/**
+ * Delete file
+ * @param node The node you want to delete
+ */
+function onDeleteClicked(node: FolderTreeNode) {
+  $q.dialog({
+    dark: true,
+    title: i18n.t('actions.delete'),
+    message: i18n.t('folderViews.deleteConfirm'),
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    $q.notify({
+      type: 'success',
+      message: '123',
+    });
+  });
 }
 
 function selectedNodeKeyInit(path: string) {
