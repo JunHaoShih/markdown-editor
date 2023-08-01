@@ -50,18 +50,11 @@ const mdText = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-function onTabPressed(): void {
+function onTabPressed() {
   const nativeInput = inputRef.value?.getNativeElement();
   if (nativeInput) {
-    const start = nativeInput.selectionStart;
-    const end = nativeInput.selectionEnd;
-    if (start && end) {
-      const indent = ' '.repeat(indentSize.value);
-      const newValue = `${nativeInput.value.slice(0, start)}${indent}${nativeInput.value.slice(end)}`;
-      nativeInput.value = newValue;
-      nativeInput.selectionStart = start + indentSize.value;
-      nativeInput.selectionEnd = start + indentSize.value;
-    }
+    const indent = ' '.repeat(indentSize.value);
+    document.execCommand('insertText', false, indent);
   }
 }
 </script>
