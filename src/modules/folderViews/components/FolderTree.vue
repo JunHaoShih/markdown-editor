@@ -73,7 +73,7 @@
             >
               <q-item-section>
                 <div>
-                  <q-icon name="delete" color="primary"/>
+                  <q-icon name="delete" color="red"/>
                   {{ $t('actions.delete') }}
                 </div>
               </q-item-section>
