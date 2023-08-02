@@ -44,7 +44,10 @@ const folderTreeStore = useFolderTreeStore();
 
 const authStore = useAuthStore();
 
-const mdSource = ref<Markdown>({} as Markdown);
+const mdSource = ref<Markdown>({
+  content: '',
+  userId: '',
+});
 
 const mdEdit = ref('');
 
@@ -82,7 +85,9 @@ async function onSaveClicked() {
 }
 
 onBeforeRouteLeave(async (_to, from) => {
-  await saveMarkdown(from.path);
+  if (mdSource.value.userId) {
+    await saveMarkdown(from.path);
+  }
 });
 
 onBeforeRouteUpdate(async (to, from) => {
