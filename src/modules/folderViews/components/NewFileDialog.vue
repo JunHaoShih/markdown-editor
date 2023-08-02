@@ -28,6 +28,7 @@
         >
           <q-input
             v-model="inputFileName"
+            autofocus
             dense
             filled
             type="text"

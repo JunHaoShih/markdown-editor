@@ -32,6 +32,6 @@ export async function getMarkdownFolderView(userId: string): Promise<FolderView 
   const ref = doc(db, collectionName, userId).withConverter(converter);
   const folderViews = await getDoc(ref)
     .then((value) => value)
-    .catch((error) => null);
+    .catch(() => null);
   return folderViews?.data();
 }

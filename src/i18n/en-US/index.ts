@@ -10,6 +10,7 @@ export default {
     cancel: 'Cancel',
     confirm: 'Confirm',
     rename: 'Rename',
+    delete: 'Delete',
   },
   folderViews: {
     addFolder: 'Add folder',
@@ -17,6 +18,9 @@ export default {
     rename: 'Rename',
     fileNameExist: 'File name already exist',
     fileNameCannotBeEmpty: 'File name cannot be empty',
+    deleteConfirm: 'Are you sure to delete this file and its children?',
+    cannotDeleteRoot: 'Cannot delete root folder',
+    selectOneNodeToContinue: 'Please select one node to continue',
   },
   email: 'Email',
   password: 'Password',
@@ -32,4 +36,5 @@ export default {
   markdownPage: {
     editHere: 'Edit your markdown here!',
   },
+  unknownError: 'Something went wrong!',
 };
