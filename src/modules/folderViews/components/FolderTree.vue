@@ -94,6 +94,19 @@
             <q-item
               clickable
               v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+              @click="onCopyClicked(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="content_copy" color="primary"/>
+                  {{ $t('actions.copy') }}
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
               v-if="movedAction != 'none' && pastable(prop.node)"
             >
               <q-item-section>
@@ -383,9 +396,17 @@ function cancelMarked() {
  */
 function onCutClicked(node: FolderTreeNode) {
   cancelMarked();
+  // Marked the node on the tree
   node.marked = true;
   markedKey.value = node.id;
   movedAction.value = 'cut';
+}
+
+function onCopyClicked(node: FolderTreeNode) {
+  cancelMarked();
+  // We don't need to mark the node on copy, so just set markedKey
+  markedKey.value = node.id;
+  movedAction.value = 'copy';
 }
 
 /**
@@ -416,6 +437,9 @@ function pastable(node: FolderTreeNode) {
     const childrenIds = getChildrenIds(markedNode);
     // Target node cannot be one of marked node and its children
     return !childrenIds.find((childId) => childId === node.id);
+  }
+  if (markedNode && movedAction.value === 'copy') {
+    return true;
   }
   return false;
 }
