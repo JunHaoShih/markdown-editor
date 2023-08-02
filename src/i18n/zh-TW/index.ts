@@ -19,6 +19,7 @@ export default {
     fileNameExist: '檔名已存在',
     fileNameCannotBeEmpty: '檔名不可為空',
     deleteConfirm: '是否刪除該檔案與其子檔案',
+    cannotDeleteRoot: '不可刪除根目錄',
   },
   email: 'Email',
   password: '密碼',

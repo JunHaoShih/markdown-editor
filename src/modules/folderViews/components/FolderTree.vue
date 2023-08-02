@@ -284,17 +284,26 @@ function onDeleteClicked(node: FolderTreeNode) {
       return;
     }
     trashBin.value.content.push(node.ref);
-    // TODO fix delete
-    if (node.parent?.id) {
-      const parentNode = node.parent;
-      const index = parentNode.ref?.children.findIndex((child) => child.id === node.id);
-      if (index) {
-        parentNode.ref?.children.splice(index, 1);
-      }
-      const nodeIndex = parentNode.children?.findIndex((child) => child.id === node.id);
-      if (nodeIndex) {
-        parentNode.children?.splice(nodeIndex, 1);
-      }
+    const parentNode = node.parent;
+    if (!parentNode) {
+      $q.notify({
+        type: 'error',
+        message: i18n.t('folderViews.cannotDeleteRoot'),
+      });
+      return;
+    }
+    // Get children of parent folder item
+    const targetChildren = parentNode.id
+      ? parentNode.ref?.children
+      : folderView.value.content;
+    const index = targetChildren?.findIndex((child) => child.id === node.id);
+    if (index !== undefined && index >= 0) {
+      targetChildren?.splice(index, 1);
+    }
+    // Delete tree node
+    const nodeIndex = parentNode.children?.findIndex((child) => child.id === node.id);
+    if (nodeIndex !== undefined && nodeIndex >= 0) {
+      parentNode.children?.splice(nodeIndex, 1);
     }
   });
 }

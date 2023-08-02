@@ -19,6 +19,7 @@ export default {
     fileNameExist: 'File name already exist',
     fileNameCannotBeEmpty: 'File name cannot be empty',
     deleteConfirm: 'Are you sure to delete this file and its children?',
+    cannotDeleteRoot: 'Cannot delete root folder',
   },
   email: 'Email',
   password: 'Password',
