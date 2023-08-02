@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    v-on:keydown.esc.prevent="cancelMarked"
+    tabindex="-1"
+  >
     <q-btn
       icon="description"
       class="action-btn q-pa-sm"
@@ -24,9 +27,11 @@
       no-selection-unset
     >
       <template v-slot:default-header="prop">
-        <div class="row items-center">
-          <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
-          <div>{{ prop.node.label }}</div>
+        <div :class="prop.node.marked ? 'filter-marked' : ''">
+          <div class="row items-center">
+            <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
+            <div>{{ prop.node.label }}</div>
+          </div>
         </div>
         <q-menu
           touch-position
@@ -73,6 +78,31 @@
                 </div>
               </q-item-section>
             </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+              @click="onCutClicked(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="content_cut" color="primary"/>
+                  {{ $t('actions.cut') }}
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="movedAction != 'none' && pastable(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="content_paste" color="primary"/>
+                  {{ $t('actions.paste') }}
+                </div>
+              </q-item-section>
+            </q-item>
           </q-list>
         </q-menu>
       </template>
@@ -107,7 +137,10 @@ export interface FolderTreeNode extends QTreeNode {
   type: FolderItemType,
   ref?: FolderItem,
   parent?: FolderTreeNode | null,
+  marked?: boolean,
 }
+
+type MoveAction = 'cut' | 'copy' | 'none';
 
 const $q = useQuasar();
 
@@ -123,7 +156,14 @@ const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
 const treeRef = ref<QTree>();
 
+/**
+ * All the node keys that is expanded in the tree
+ */
 const expandedKeys = ref<string[]>([]);
+
+const markedKey = ref<string>();
+
+const movedAction = ref<MoveAction>('none');
 
 const folderView = ref<FolderView>({
   name: '',
@@ -137,6 +177,9 @@ const trashBin = ref<TrashBin>({
   userId: '',
 });
 
+/**
+ * Current selected node's key
+ */
 const selectedNodeKey = ref('');
 
 const selectedNode = computed(
@@ -323,6 +366,61 @@ function onDeleteClicked(node: FolderTreeNode) {
 }
 
 /**
+ * Unmark node and reset markedKey and moveAction
+ */
+function cancelMarked() {
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (markedNode) {
+    markedNode.marked = false;
+    movedAction.value = 'none';
+    markedKey.value = undefined;
+  }
+}
+
+/**
+ * On cut context menu clicked
+ * @param node Target node
+ */
+function onCutClicked(node: FolderTreeNode) {
+  cancelMarked();
+  node.marked = true;
+  markedKey.value = node.id;
+  movedAction.value = 'cut';
+}
+
+/**
+ * Get all node childen node and itself's id list
+ * @param node Target node
+ */
+function getChildrenIds(node: FolderTreeNode): string[] {
+  const ids: string[] = [];
+  ids.push(node.id);
+  if (!node.children || node.children.length === 0) {
+    return ids;
+  }
+  const re = node.children.map((child) => getChildrenIds(child as FolderTreeNode));
+  const childrenIds = re.reduce((previousArr, currentArr) => previousArr.concat(currentArr));
+  return ids.concat(childrenIds);
+}
+
+/**
+ * Check is node pastable
+ * @param node Target node
+ */
+function pastable(node: FolderTreeNode) {
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (markedNode && movedAction.value === 'cut') {
+    if (markedNode.parent?.id === node.id) {
+      return false;
+    }
+    const childrenIds = getChildrenIds(markedNode);
+    // Target node cannot be one of marked node and its children
+    return !childrenIds.find((childId) => childId === node.id);
+  }
+  return false;
+}
+
+/**
  * Initialize selected node by route path
  * @param path Route path
  */
@@ -435,3 +533,8 @@ onBeforeRouteUpdate((to) => {
   selectedNodeKeyInit(to.path);
 });
 </script>
+
+<style lang="sass" scoped>
+.filter-marked
+  filter: opacity(50%)
+</style>

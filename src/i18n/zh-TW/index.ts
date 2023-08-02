@@ -11,6 +11,9 @@ export default {
     confirm: '確定',
     rename: '重新命名',
     delete: '刪除',
+    cut: '剪下',
+    copy: '複製',
+    paste: '貼上',
   },
   folderViews: {
     addFolder: '新增資料夾',
