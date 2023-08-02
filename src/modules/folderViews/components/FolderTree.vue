@@ -91,7 +91,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { auth } from 'src/boot/firebase';
 import { setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
-import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   onBeforeRouteUpdate, useRoute, useRouter,
@@ -118,8 +117,6 @@ const router = useRouter();
 
 const route = useRoute();
 
-const authStore = useAuthStore();
-
 const folderTreeStore = useFolderTreeStore();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
@@ -143,8 +140,10 @@ const trashBin = ref<TrashBin>({
 const selectedNodeKey = ref('');
 
 const selectedNode = computed(
-  (): FolderTreeNode => treeRef.value?.getNodeByKey(selectedNodeKey.value),
+  (): FolderTreeNode | null => treeRef.value?.getNodeByKey(selectedNodeKey.value),
 );
+
+const folderTreeNodes = ref<FolderTreeNode[]>([]);
 
 /**
  * Parse folder item array to folder tree
@@ -166,8 +165,6 @@ function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
   });
   return children;
 }
-
-const folderTreeNodes = ref<FolderTreeNode[]>([]);
 
 /**
  * Add new item to folder view and update tree
@@ -227,6 +224,13 @@ function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) 
 }
 
 function addFile() {
+  if (!selectedNode.value) {
+    $q.notify({
+      type: 'error',
+      message: i18n.t('folderViews.selectOneNodeToContinue'),
+    });
+    return;
+  }
   setupDialog(i18n.t('folderViews.addFile'), 'article', selectedNode.value);
 }
 
@@ -267,6 +271,45 @@ function setRenameDialog(title: string, node: FolderTreeNode) {
  * Delete file
  * @param node The node you want to delete
  */
+function deleteNodeAndFolderItem(node: FolderTreeNode) {
+  if (!node.ref) {
+    $q.notify({
+      type: 'error',
+      message: i18n.t('unknownError'),
+    });
+    return;
+  }
+  const parentNode = node.parent;
+  if (!parentNode) {
+    $q.notify({
+      type: 'error',
+      message: i18n.t('folderViews.cannotDeleteRoot'),
+    });
+    return;
+  }
+  // Move folder item to trash bin
+  trashBin.value.content.push(node.ref);
+  // Get children of parent folder item
+  const targetChildren = parentNode.id
+    ? parentNode.ref?.children
+    : folderView.value.content;
+  const index = targetChildren?.findIndex((child) => child.id === node.id);
+  if (index !== undefined && index >= 0) {
+    targetChildren?.splice(index, 1);
+  }
+  // Delete tree node
+  const nodeIndex = parentNode.children?.findIndex((child) => child.id === node.id);
+  if (nodeIndex !== undefined && nodeIndex >= 0) {
+    parentNode.children?.splice(nodeIndex, 1);
+  }
+  // Push route to parent node page after delete
+  router.push(`/${parentNode.id}`);
+}
+
+/**
+ * On delete context menu clicked
+ * @param node The node you want to delete
+ */
 function onDeleteClicked(node: FolderTreeNode) {
   $q.dialog({
     dark: true,
@@ -275,39 +318,14 @@ function onDeleteClicked(node: FolderTreeNode) {
     cancel: true,
     persistent: true,
   }).onOk(async () => {
-    const appUser = authStore.user;
-    if (!node.ref || !appUser) {
-      $q.notify({
-        type: 'error',
-        message: i18n.t('unknownError'),
-      });
-      return;
-    }
-    trashBin.value.content.push(node.ref);
-    const parentNode = node.parent;
-    if (!parentNode) {
-      $q.notify({
-        type: 'error',
-        message: i18n.t('folderViews.cannotDeleteRoot'),
-      });
-      return;
-    }
-    // Get children of parent folder item
-    const targetChildren = parentNode.id
-      ? parentNode.ref?.children
-      : folderView.value.content;
-    const index = targetChildren?.findIndex((child) => child.id === node.id);
-    if (index !== undefined && index >= 0) {
-      targetChildren?.splice(index, 1);
-    }
-    // Delete tree node
-    const nodeIndex = parentNode.children?.findIndex((child) => child.id === node.id);
-    if (nodeIndex !== undefined && nodeIndex >= 0) {
-      parentNode.children?.splice(nodeIndex, 1);
-    }
+    deleteNodeAndFolderItem(node);
   });
 }
 
+/**
+ * Initialize selected node by route path
+ * @param path Route path
+ */
 function selectedNodeKeyInit(path: string) {
   const pathTokens = path.split('/');
   const itemId = pathTokens[1];
@@ -353,6 +371,9 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+/**
+ * Update folder view to Firestore on value changed
+ */
 watch(folderView, async (newValue, oldValue) => {
   if (oldValue.name) {
     await setFolderView(newValue);
@@ -361,6 +382,9 @@ watch(folderView, async (newValue, oldValue) => {
   deep: true,
 });
 
+/**
+ * Update trash bin to Firestore on value changed
+ */
 watch(trashBin, async (newValue, oldValue) => {
   if (oldValue.name) {
     await setTrashBin(newValue);
@@ -369,6 +393,10 @@ watch(trashBin, async (newValue, oldValue) => {
   deep: true,
 });
 
+/**
+ * Get all the parent nodes
+ * @param node The node you want find all the parent
+ */
 function allParents(node: FolderTreeNode): FolderTreeNode[] {
   const arr: FolderTreeNode[] = [];
   if (!node) {
@@ -381,7 +409,14 @@ function allParents(node: FolderTreeNode): FolderTreeNode[] {
   return arr;
 }
 
+/**
+ * Update all paremt nodes(for breadcrumbs) and push route on selected node change
+ */
 watch(selectedNode, (newValue, oldValue) => {
+  if (!newValue) {
+    router.push('/');
+    return;
+  }
   const parents = allParents(newValue);
   folderTreeStore.selectedNodeParents = parents.reverse();
   folderTreeStore.selectedNodeParents.forEach((p) => expandedKeys.value.push(p.id));
@@ -393,6 +428,9 @@ watch(selectedNode, (newValue, oldValue) => {
   }
 });
 
+/**
+ * Initialize selected node on route update
+ */
 onBeforeRouteUpdate((to) => {
   selectedNodeKeyInit(to.path);
 });

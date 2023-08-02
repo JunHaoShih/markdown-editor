@@ -20,6 +20,7 @@ export default {
     fileNameCannotBeEmpty: 'File name cannot be empty',
     deleteConfirm: 'Are you sure to delete this file and its children?',
     cannotDeleteRoot: 'Cannot delete root folder',
+    selectOneNodeToContinue: 'Please select one node to continue',
   },
   email: 'Email',
   password: 'Password',

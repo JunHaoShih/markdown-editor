@@ -20,6 +20,7 @@ export default {
     fileNameCannotBeEmpty: '檔名不可為空',
     deleteConfirm: '是否刪除該檔案與其子檔案',
     cannotDeleteRoot: '不可刪除根目錄',
+    selectOneNodeToContinue: '請選擇一個節點以繼續',
   },
   email: 'Email',
   password: '密碼',
