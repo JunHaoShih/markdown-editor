@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    v-on:keydown.esc.prevent="cancelMarked"
+    tabindex="-1"
+  >
     <q-btn
       icon="description"
       class="action-btn q-pa-sm"
@@ -24,9 +27,11 @@
       no-selection-unset
     >
       <template v-slot:default-header="prop">
-        <div class="row items-center">
-          <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
-          <div>{{ prop.node.label }}</div>
+        <div :class="prop.node.marked ? 'filter-marked' : ''">
+          <div class="row items-center">
+            <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
+            <div>{{ prop.node.label }}</div>
+          </div>
         </div>
         <q-menu
           touch-position
@@ -68,8 +73,47 @@
             >
               <q-item-section>
                 <div>
-                  <q-icon name="delete" color="primary"/>
+                  <q-icon name="delete" color="red"/>
                   {{ $t('actions.delete') }}
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+              @click="onCutClicked(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="content_cut" color="primary"/>
+                  {{ $t('actions.cut') }}
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="(prop.node as FolderTreeNode).id"
+              @click="onCopyClicked(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="content_copy" color="primary"/>
+                  {{ $t('actions.copy') }}
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              v-if="movedAction != 'none' && pastable(prop.node)"
+              @click="onPasteClicked(prop.node)"
+            >
+              <q-item-section>
+                <div>
+                  <q-icon name="content_paste" color="primary"/>
+                  {{ $t('actions.paste') }}
                 </div>
               </q-item-section>
             </q-item>
@@ -107,7 +151,10 @@ export interface FolderTreeNode extends QTreeNode {
   type: FolderItemType,
   ref?: FolderItem,
   parent?: FolderTreeNode | null,
+  marked?: boolean,
 }
+
+type MoveAction = 'cut' | 'copy' | 'none';
 
 const $q = useQuasar();
 
@@ -123,7 +170,20 @@ const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
 const treeRef = ref<QTree>();
 
+/**
+ * All the node keys that is expanded in the tree
+ */
 const expandedKeys = ref<string[]>([]);
+
+function expandNode(key: string) {
+  if (!expandedKeys.value.find((expandedKey) => expandedKey === key)) {
+    expandedKeys.value.push(key);
+  }
+}
+
+const markedKey = ref<string>();
+
+const movedAction = ref<MoveAction>('none');
 
 const folderView = ref<FolderView>({
   name: '',
@@ -137,6 +197,9 @@ const trashBin = ref<TrashBin>({
   userId: '',
 });
 
+/**
+ * Current selected node's key
+ */
 const selectedNodeKey = ref('');
 
 const selectedNode = computed(
@@ -323,6 +386,177 @@ function onDeleteClicked(node: FolderTreeNode) {
 }
 
 /**
+ * Unmark node and reset markedKey and moveAction
+ */
+function cancelMarked() {
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (markedNode) {
+    markedNode.marked = false;
+    movedAction.value = 'none';
+    markedKey.value = undefined;
+  }
+}
+
+/**
+ * On cut context menu clicked
+ * @param node Target node
+ */
+function onCutClicked(node: FolderTreeNode) {
+  cancelMarked();
+  // Marked the node on the tree
+  node.marked = true;
+  markedKey.value = node.id;
+  movedAction.value = 'cut';
+}
+
+function onCopyClicked(node: FolderTreeNode) {
+  cancelMarked();
+  // We don't need to mark the node on copy, so just set markedKey
+  markedKey.value = node.id;
+  movedAction.value = 'copy';
+}
+
+/**
+ * This method is used when there is duplicate filename in a folder.
+ * It will return available new name
+ * @param names Names that should not be duplicated
+ * @param targetName the name you want to check
+ * @param starter suffix number
+ */
+function getValidName(names: string[], targetName: string, starter: number) {
+  const currentName = `${targetName} (${starter})`;
+  if (names.find((name) => name === currentName)) {
+    return getValidName(names, targetName, starter + 1);
+  }
+  return currentName;
+}
+
+/**
+ * Get all the parent nodes
+ * @param node The node you want find all the parent
+ */
+function allParents(node: FolderTreeNode): FolderTreeNode[] {
+  const arr: FolderTreeNode[] = [];
+  if (!node) {
+    return arr;
+  }
+  arr.push(node);
+  if (node.parent) {
+    return arr.concat(allParents(node.parent));
+  }
+  return arr;
+}
+
+/**
+ * Update breadcrumb to folderTreeStore
+ * @param node current node
+ */
+function updateBreadcrumbs(node: FolderTreeNode) {
+  const parents = allParents(node);
+  folderTreeStore.selectedNodeParents = parents.reverse();
+  folderTreeStore.selectedNodeParents.forEach((p) => expandNode(p.id));
+}
+
+function pasteFromCut(node: FolderTreeNode) {
+  const itemNames = node.children
+    ? node.children.map((child) => child.label ?? '')
+    : [];
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (!markedNode) {
+    return;
+  }
+  const markedNodeName = markedNode.label ?? '';
+  // Get a valid name if duplicate found
+  const newNodeName = itemNames.find((item) => item === markedNodeName)
+    ? getValidName(itemNames, markedNodeName, 1)
+    : markedNodeName;
+  const parentNode = markedNode.parent;
+  if (parentNode) {
+    // Remove folder item from parent
+    const refChildren = parentNode.ref
+      ? parentNode.ref.children
+      : folderView.value.content;
+    const index = refChildren.findIndex((child) => child.id === markedNode.id);
+    const removedFolderItem = refChildren.splice(index, 1)[0];
+    // Rename folder item
+    removedFolderItem.name = newNodeName;
+    // Remove node from parent
+    if (parentNode.children) {
+      const nodeIndex = parentNode.children.findIndex((child) => child.id === markedNode.id);
+      parentNode.children.splice(nodeIndex, 1);
+    }
+    markedNode.label = newNodeName;
+    // Move folder item to target folder item
+    if (node.ref) {
+      node.ref.children.push(removedFolderItem);
+    } else {
+      folderView.value.content.push(removedFolderItem);
+    }
+    // Move marked node to new node
+    if (node.children) {
+      node.children.push(markedNode);
+    } else {
+      node.children = [markedNode];
+    }
+    markedNode.parent = node;
+  } else {
+    $q.notify({
+      type: 'error',
+      message: `${i18n.t('unknownError')}. Canot find parnet of marked node`,
+    });
+  }
+}
+
+function onPasteClicked(node: FolderTreeNode) {
+  if (movedAction.value === 'cut') {
+    pasteFromCut(node);
+  } else if (movedAction.value === 'copy') {
+    // TODO implement copy and paste
+  }
+  // We should always update breadcrumb on paste to prevent breadcrumb desync
+  if (selectedNode.value) {
+    updateBreadcrumbs(selectedNode.value);
+  }
+  expandNode(node.id);
+  cancelMarked();
+}
+
+/**
+ * Get all node childen node and itself's id list
+ * @param node Target node
+ */
+function getChildrenIds(node: FolderTreeNode): string[] {
+  const ids: string[] = [];
+  ids.push(node.id);
+  if (!node.children || node.children.length === 0) {
+    return ids;
+  }
+  const re = node.children.map((child) => getChildrenIds(child as FolderTreeNode));
+  const childrenIds = re.reduce((previousArr, currentArr) => previousArr.concat(currentArr));
+  return ids.concat(childrenIds);
+}
+
+/**
+ * Check is node pastable
+ * @param node Target node
+ */
+function pastable(node: FolderTreeNode) {
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (markedNode && movedAction.value === 'cut') {
+    if (markedNode.parent?.id === node.id) {
+      return false;
+    }
+    const childrenIds = getChildrenIds(markedNode);
+    // Target node cannot be one of marked node and its children
+    return !childrenIds.find((childId) => childId === node.id);
+  }
+  if (markedNode && movedAction.value === 'copy') {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Initialize selected node by route path
  * @param path Route path
  */
@@ -394,22 +628,6 @@ watch(trashBin, async (newValue, oldValue) => {
 });
 
 /**
- * Get all the parent nodes
- * @param node The node you want find all the parent
- */
-function allParents(node: FolderTreeNode): FolderTreeNode[] {
-  const arr: FolderTreeNode[] = [];
-  if (!node) {
-    return arr;
-  }
-  arr.push(node);
-  if (node.parent) {
-    return arr.concat(allParents(node.parent));
-  }
-  return arr;
-}
-
-/**
  * Update all paremt nodes(for breadcrumbs) and push route on selected node change
  */
 watch(selectedNode, (newValue, oldValue) => {
@@ -417,9 +635,7 @@ watch(selectedNode, (newValue, oldValue) => {
     router.push('/');
     return;
   }
-  const parents = allParents(newValue);
-  folderTreeStore.selectedNodeParents = parents.reverse();
-  folderTreeStore.selectedNodeParents.forEach((p) => expandedKeys.value.push(p.id));
+  updateBreadcrumbs(newValue);
   if (!oldValue) {
     return;
   }
@@ -435,3 +651,8 @@ onBeforeRouteUpdate((to) => {
   selectedNodeKeyInit(to.path);
 });
 </script>
+
+<style lang="sass" scoped>
+.filter-marked
+  filter: opacity(50%)
+</style>

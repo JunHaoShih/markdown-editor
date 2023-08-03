@@ -11,6 +11,9 @@ export default {
     confirm: 'Confirm',
     rename: 'Rename',
     delete: 'Delete',
+    cut: 'Cut',
+    copy: 'Copy',
+    paste: 'Paste',
   },
   folderViews: {
     addFolder: 'Add folder',

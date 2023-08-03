@@ -50,7 +50,7 @@
     >
       <q-list>
         <FolderTree
-          class="q-px-sm"
+          class="q-px-sm tree-height"
         ></FolderTree>
       </q-list>
       <!-- drawer resizer -->
@@ -145,4 +145,7 @@ onAuthStateChanged(auth, (user) => {
     transform: translateY(-50%)
     background-color: $accent
     border-radius: 4px
+
+.tree-height
+  height: 100vh
 </style>
