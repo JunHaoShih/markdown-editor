@@ -108,6 +108,7 @@
               clickable
               v-close-popup
               v-if="movedAction != 'none' && pastable(prop.node)"
+              @click="onPasteClicked(prop.node)"
             >
               <q-item-section>
                 <div>
@@ -410,6 +411,110 @@ function onCopyClicked(node: FolderTreeNode) {
 }
 
 /**
+ * This method is used when there is duplicate filename in a folder.
+ * It will return available new name
+ * @param names Names that should not be duplicated
+ * @param targetName the name you want to check
+ * @param starter suffix number
+ */
+function getValidName(names: string[], targetName: string, starter: number) {
+  const currentName = `${targetName} (${starter})`;
+  if (names.find((name) => name === currentName)) {
+    return getValidName(names, targetName, starter + 1);
+  }
+  return currentName;
+}
+
+/**
+ * Get all the parent nodes
+ * @param node The node you want find all the parent
+ */
+function allParents(node: FolderTreeNode): FolderTreeNode[] {
+  const arr: FolderTreeNode[] = [];
+  if (!node) {
+    return arr;
+  }
+  arr.push(node);
+  if (node.parent) {
+    return arr.concat(allParents(node.parent));
+  }
+  return arr;
+}
+
+/**
+ * Update breadcrumb to folderTreeStore
+ * @param node current node
+ */
+function updateBreadcrumbs(node: FolderTreeNode) {
+  const parents = allParents(node);
+  folderTreeStore.selectedNodeParents = parents.reverse();
+  folderTreeStore.selectedNodeParents.forEach((p) => expandedKeys.value.push(p.id));
+}
+
+function pasteFromCut(node: FolderTreeNode) {
+  const itemNames = node.children
+    ? node.children.map((child) => child.label ?? '')
+    : [];
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (!markedNode) {
+    return;
+  }
+  const markedNodeName = markedNode.label ?? '';
+  // Get a valid name if duplicate found
+  const newNodeName = itemNames.find((item) => item === markedNodeName)
+    ? getValidName(itemNames, markedNodeName, 1)
+    : markedNodeName;
+  const parentNode = markedNode.parent;
+  if (parentNode) {
+    // Remove folder item from parent
+    const refChildren = parentNode.ref
+      ? parentNode.ref.children
+      : folderView.value.content;
+    const index = refChildren.findIndex((child) => child.id === markedNode.id);
+    const removedFolderItem = refChildren.splice(index, 1)[0];
+    // Rename folder item
+    removedFolderItem.name = newNodeName;
+    // Remove node from parent
+    if (parentNode.children) {
+      const nodeIndex = parentNode.children.findIndex((child) => child.id === markedNode.id);
+      parentNode.children.splice(nodeIndex, 1);
+    }
+    markedNode.label = newNodeName;
+    // Move folder item to target folder item
+    if (node.ref) {
+      node.ref.children.push(removedFolderItem);
+    } else {
+      folderView.value.content.push(removedFolderItem);
+    }
+    // Move marked node to new node
+    if (node.children) {
+      node.children.push(markedNode);
+    } else {
+      node.children = [markedNode];
+    }
+    markedNode.parent = node;
+  } else {
+    $q.notify({
+      type: 'error',
+      message: `${i18n.t('unknownError')}. Canot find parnet of marked node`,
+    });
+  }
+}
+
+function onPasteClicked(node: FolderTreeNode) {
+  if (movedAction.value === 'cut') {
+    pasteFromCut(node);
+  } else if (movedAction.value === 'copy') {
+    // TODO implement copy and paste
+  }
+  // We should always update breadcrumb on paste to prevent breadcrumb desync
+  if (selectedNode.value) {
+    updateBreadcrumbs(selectedNode.value);
+  }
+  cancelMarked();
+}
+
+/**
  * Get all node childen node and itself's id list
  * @param node Target node
  */
@@ -516,22 +621,6 @@ watch(trashBin, async (newValue, oldValue) => {
 });
 
 /**
- * Get all the parent nodes
- * @param node The node you want find all the parent
- */
-function allParents(node: FolderTreeNode): FolderTreeNode[] {
-  const arr: FolderTreeNode[] = [];
-  if (!node) {
-    return arr;
-  }
-  arr.push(node);
-  if (node.parent) {
-    return arr.concat(allParents(node.parent));
-  }
-  return arr;
-}
-
-/**
  * Update all paremt nodes(for breadcrumbs) and push route on selected node change
  */
 watch(selectedNode, (newValue, oldValue) => {
@@ -539,9 +628,7 @@ watch(selectedNode, (newValue, oldValue) => {
     router.push('/');
     return;
   }
-  const parents = allParents(newValue);
-  folderTreeStore.selectedNodeParents = parents.reverse();
-  folderTreeStore.selectedNodeParents.forEach((p) => expandedKeys.value.push(p.id));
+  updateBreadcrumbs(newValue);
   if (!oldValue) {
     return;
   }
