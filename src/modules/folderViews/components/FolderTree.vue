@@ -175,6 +175,12 @@ const treeRef = ref<QTree>();
  */
 const expandedKeys = ref<string[]>([]);
 
+function expandNode(key: string) {
+  if (!expandedKeys.value.find((expandedKey) => expandedKey === key)) {
+    expandedKeys.value.push(key);
+  }
+}
+
 const markedKey = ref<string>();
 
 const movedAction = ref<MoveAction>('none');
@@ -448,7 +454,7 @@ function allParents(node: FolderTreeNode): FolderTreeNode[] {
 function updateBreadcrumbs(node: FolderTreeNode) {
   const parents = allParents(node);
   folderTreeStore.selectedNodeParents = parents.reverse();
-  folderTreeStore.selectedNodeParents.forEach((p) => expandedKeys.value.push(p.id));
+  folderTreeStore.selectedNodeParents.forEach((p) => expandNode(p.id));
 }
 
 function pasteFromCut(node: FolderTreeNode) {
@@ -511,6 +517,7 @@ function onPasteClicked(node: FolderTreeNode) {
   if (selectedNode.value) {
     updateBreadcrumbs(selectedNode.value);
   }
+  expandNode(node.id);
   cancelMarked();
 }
 
