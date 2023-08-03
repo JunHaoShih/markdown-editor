@@ -640,18 +640,14 @@ watch(trashBin, async (newValue, oldValue) => {
 /**
  * Update all paremt nodes(for breadcrumbs) and push route on selected node change
  */
-watch(selectedNode, (newValue, oldValue) => {
-  if (!newValue) {
+watch(selectedNodeKey, (newValue) => {
+  const targetNode = treeRef.value?.getNodeByKey(newValue);
+  if (!targetNode) {
     router.push('/');
     return;
   }
-  updateBreadcrumbs(newValue);
-  if (!oldValue) {
-    return;
-  }
-  if (newValue) {
-    router.push(`/${newValue.id}`);
-  }
+  updateBreadcrumbs(targetNode);
+  router.push(`/${newValue}`);
 });
 
 function updateEditState(nodes: FolderTreeNode[], ids: string[]) {
@@ -665,6 +661,24 @@ function updateEditState(nodes: FolderTreeNode[], ids: string[]) {
 
 watch(() => markdownsStore.unsavedIds, () => {
   updateEditState(folderTreeNodes.value, markdownsStore.unsavedIds);
+});
+
+function unsavedWarning(event: BeforeUnloadEvent) {
+  event.preventDefault();
+  const message = 'You have unsaved changes. Are you sure you wish to leave?';
+  event.returnValue = message;
+  return message;
+}
+
+/**
+ * Pop warning on leave if there is any unsaved file
+ */
+watch(() => markdownsStore.hasUnsaved, (newValue) => {
+  if (newValue) {
+    window.addEventListener('beforeunload', unsavedWarning);
+  } else {
+    window.removeEventListener('beforeunload', unsavedWarning);
+  }
 });
 
 /**
