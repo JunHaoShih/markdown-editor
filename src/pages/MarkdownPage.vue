@@ -26,30 +26,44 @@
 <script setup lang="ts">
 import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
-import { onBeforeMount, ref } from 'vue';
 import {
-  onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter,
+  computed, onBeforeMount, ref, watch,
+} from 'vue';
+import {
+  useRoute, useRouter,
 } from 'vue-router';
 import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
-import { Markdown } from 'src/modules/markdown/models/markdown';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
+import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 
 const route = useRoute();
 
 const router = useRouter();
 
+const markdownsStore = useMarkdownsStore();
+
 const folderTreeStore = useFolderTreeStore();
 
 const authStore = useAuthStore();
 
-const mdSource = ref<Markdown>({
-  content: '',
-  userId: '',
+const props = defineProps<{
+  id: string,
+}>();
+
+const mdSource = computed({
+  get: () => markdownsStore.targetRepo(props.id)?.source ?? {
+    content: '',
+    userId: '',
+  },
+  set: (value) => markdownsStore.save(value, props.id),
 });
 
-const mdEdit = ref('');
+const mdEdit = computed({
+  get: () => markdownsStore.targetRepo(props.id)?.edit ?? '',
+  set: (value) => markdownsStore.updateEdit(value, props.id),
+});
 
 const saving = ref(false);
 
@@ -59,14 +73,15 @@ function getItemId(path: string) {
   return itemId;
 }
 
-async function markdownInit(path: string) {
-  const itemId = getItemId(path);
-  const md = await getMarkdown(itemId);
-  if (md) {
-    mdSource.value = md;
-    mdEdit.value = md.content;
-  } else {
-    router.push('/');
+async function markdownInit(itemId: string) {
+  // const itemId = getItemId(path);
+  if (!markdownsStore.targetRepo(itemId)) {
+    const md = await getMarkdown(itemId);
+    if (!md) {
+      router.push('/');
+      return;
+    }
+    markdownsStore.insert(md, itemId);
   }
 }
 
@@ -84,19 +99,20 @@ async function onSaveClicked() {
   saving.value = false;
 }
 
-onBeforeRouteLeave(async (_to, from) => {
+/* onBeforeRouteLeave(async (_to, from) => {
   if (mdSource.value.userId) {
     await saveMarkdown(from.path);
   }
-});
+}); */
 
-onBeforeRouteUpdate(async (to, from) => {
-  await saveMarkdown(from.path);
-  await markdownInit(to.path);
+watch(() => props.id, async (newValue) => {
+  if (newValue) {
+    await markdownInit(newValue);
+  }
 });
 
 onBeforeMount(async () => {
-  await markdownInit(route.path);
+  await markdownInit(props.id);
 });
 
 onAuthStateChanged(auth, (user) => {
