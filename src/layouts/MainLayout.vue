@@ -41,6 +41,7 @@
         </q-avatar>
       </q-toolbar>
     </q-header>
+    <q-ajax-bar/>
 
     <q-drawer
       v-model="leftDrawerOpen"

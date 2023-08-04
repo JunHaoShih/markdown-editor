@@ -10,13 +10,31 @@
       />
     </q-breadcrumbs>
     <q-separator color="black" class="q-my-sm"/>
-    <q-btn
-      :disable="mdSource.content === mdEdit"
-      icon="save"
-      class="action-btn"
-      :loading="saving"
-      @click="onSaveClicked"
-    ></q-btn>
+    <div class="q-gutter-sm">
+      <q-btn
+        :disable="mdSource.content === mdEdit"
+        icon="save"
+        class="action-btn q-pa-sm"
+        :loading="saving"
+        @click="onSaveClicked"
+      >
+        <q-tooltip>
+          {{ $t('markdownPage.save') }}
+        </q-tooltip>
+      </q-btn>
+      <q-btn
+        :disable="mdSource.content === mdEdit"
+        icon="cancel"
+        class="action-btn q-pa-sm"
+        text-color="red"
+        :loading="saving"
+        @click="onDiscardClicked"
+      >
+        <q-tooltip>
+          {{ $t('markdownPage.discardChange') }}
+        </q-tooltip>
+      </q-btn>
+    </div>
     <MarkdownEditor
       v-model="mdEdit">
     </MarkdownEditor>
@@ -37,6 +55,12 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+
+const $q = useQuasar();
+
+const i18n = useI18n();
 
 const route = useRoute();
 
@@ -99,11 +123,17 @@ async function onSaveClicked() {
   saving.value = false;
 }
 
-/* onBeforeRouteLeave(async (_to, from) => {
-  if (mdSource.value.userId) {
-    await saveMarkdown(from.path);
-  }
-}); */
+async function onDiscardClicked() {
+  $q.dialog({
+    dark: true,
+    title: i18n.t('markdownPage.discardChange'),
+    message: i18n.t('markdownPage.confirmDiscard'),
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    mdEdit.value = mdSource.value.content;
+  });
+}
 
 watch(() => props.id, async (newValue) => {
   if (newValue) {
