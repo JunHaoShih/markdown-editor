@@ -1,45 +1,46 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar class="bg-dark">
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Markdown Editor
-        </q-toolbar-title>
-
-        <q-avatar size="48px" icon="account_circle">
-          <q-menu>
-            <q-item clickable v-close-popup>
-              <q-item-section avatar>
-                <q-avatar icon="account_circle">
-                </q-avatar>
-              </q-item-section>
-              <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
-            </q-item>
-            <q-separator />
-            <!-- language -->
-            <q-item clickable v-close-popup>
-              <q-item-section @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup>
-              <q-item-section @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
-            </q-item>
-            <q-separator />
-            <!-- logout -->
-            <q-item clickable v-close-popup>
-              <q-item-section @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
-            </q-item>
-          </q-menu>
-        </q-avatar>
-      </q-toolbar>
+      <TitleBar
+        title="Markdown Editor"
+      >
+        <template v-slot:front>
+          <q-btn
+            flat
+            dense
+            round
+            icon="menu"
+            aria-label="Menu"
+            @click="toggleLeftDrawer"
+          />
+        </template>
+        <template v-slot:end>
+          <q-avatar size="48px" icon="account_circle" class="q-electron-drag--exception">
+            <q-menu>
+              <q-item clickable v-close-popup>
+                <q-item-section avatar>
+                  <q-avatar icon="account_circle">
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
+              </q-item>
+              <q-separator />
+              <!-- language -->
+              <q-item clickable v-close-popup>
+                <q-item-section @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup>
+                <q-item-section @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
+              </q-item>
+              <q-separator />
+              <!-- logout -->
+              <q-item clickable v-close-popup>
+                <q-item-section @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
+              </q-item>
+            </q-menu>
+          </q-avatar>
+        </template>
+      </TitleBar>
     </q-header>
     <q-ajax-bar/>
 
@@ -77,6 +78,7 @@ import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { TouchPanValue } from 'quasar';
+import TitleBar from 'src/components/TitleBar.vue';
 
 const i18n = useI18n();
 
@@ -148,5 +150,5 @@ onAuthStateChanged(auth, (user) => {
     border-radius: 4px
 
 .tree-height
-  height: 100vh
+  height: calc( 100vh - 50px )
 </style>

@@ -2,11 +2,8 @@
   <div class="">
     <q-layout view="lHh lpr lFf">
       <q-header elevated>
-        <q-toolbar class="bg-dark">
-          <q-toolbar-title>
-            Markdown Editor
-          </q-toolbar-title>
-        </q-toolbar>
+        <title-bar title="Markdown Editor">
+        </title-bar>
       </q-header>
       <q-page-container>
         <q-page>
@@ -21,6 +18,7 @@
 </template>
 
 <script setup lang="ts">
+import TitleBar from 'src/components/TitleBar.vue';
 import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { ref } from 'vue';
 

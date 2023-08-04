@@ -2,11 +2,8 @@
   <div class="">
     <q-layout view="lHh lpr lFf">
       <q-header elevated>
-        <q-toolbar class="bg-dark">
-          <q-toolbar-title>
-            Markdown Editor
-          </q-toolbar-title>
-        </q-toolbar>
+        <title-bar title="Markdown Editor">
+        </title-bar>
       </q-header>
       <q-page-container>
         <q-page padding class="row justify-center items-center">
@@ -92,6 +89,7 @@
 
 <script setup lang="ts">
 import { auth } from 'src/boot/firebase';
+import TitleBar from 'src/components/TitleBar.vue';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -107,13 +105,13 @@ const password = ref('');
 async function onSubmit() {
   const success = await authStore.login(username.value, password.value);
   if (success) {
-    router.push('/');
+    router.replace('/');
   }
 }
 
 auth.onAuthStateChanged((user) => {
   if (user) {
-    router.push('/');
+    router.replace('/');
   }
 });
 </script>
