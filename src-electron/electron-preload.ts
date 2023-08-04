@@ -27,3 +27,33 @@
  *   }
  * }
  */
+import { contextBridge } from 'electron';
+import { BrowserWindow } from '@electron/remote';
+
+export interface PreloadMethods {
+  minimize: (() => void),
+  toggleMaximize: (() => void),
+  close: (() => void),
+}
+
+const preloadMethods: PreloadMethods = {
+  minimize() {
+    BrowserWindow.getFocusedWindow()?.minimize();
+  },
+
+  toggleMaximize() {
+    const win = BrowserWindow.getFocusedWindow();
+
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
+  },
+
+  close() {
+    BrowserWindow.getFocusedWindow()?.close();
+  },
+};
+
+contextBridge.exposeInMainWorld('windowApi', preloadMethods);

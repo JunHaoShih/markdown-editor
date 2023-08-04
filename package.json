@@ -11,6 +11,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@electron/remote": "^2.0.10",
     "@quasar/extras": "^1.0.0",
     "@types/dompurify": "^3.0.2",
     "@types/markdown-it": "^12.2.3",
