@@ -62,6 +62,19 @@
                     @click="onSubmit"
                   />
                 </q-card-actions>
+                <q-card-section class="text-center q-pa-none text-grey-6">
+                  {{ $t('loginPage.alternative') }}
+                </q-card-section>
+                <q-card-actions class="q-px-md">
+                  <q-btn
+                    push
+                    color="secondary"
+                    size="lg"
+                    class="full-width"
+                    :label="$t('loginPage.useEditorOnly')"
+                    to="/editor"
+                  />
+                </q-card-actions>
                 <q-card-section class="text-center q-pa-none">
                   <p class="text-grey-6">
                     {{ $t('loginPage.registerHint') }}

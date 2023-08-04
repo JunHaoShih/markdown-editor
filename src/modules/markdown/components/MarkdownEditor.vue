@@ -2,7 +2,7 @@
   <div>
     <q-splitter
       v-model="splitterModel"
-      class="main-panel"
+      :class="splitterClass"
     >
       <template v-slot:before>
         <q-input
@@ -10,7 +10,6 @@
           v-model="mdText"
           type="textarea"
           autogrow
-          class="left-panel"
           :label="$t('markdownPage.editHere')"
           v-on:keydown.tab.prevent="onTabPressed"
         />
@@ -36,9 +35,12 @@ const splitterModel = ref(50);
 
 const indentSize = ref(4);
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: string,
-}>();
+  splitterClass: string,
+}>(), {
+  splitterClass: 'main-panel',
+});
 
 type Emit = {
   (e: 'update:modelValue', value: string): void
