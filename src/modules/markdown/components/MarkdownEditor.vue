@@ -37,7 +37,7 @@ const indentSize = ref(4);
 
 const props = withDefaults(defineProps<{
   modelValue: string,
-  splitterClass: string,
+  splitterClass?: string,
 }>(), {
   splitterClass: 'main-panel',
 });
