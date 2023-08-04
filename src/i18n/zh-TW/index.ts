@@ -38,6 +38,9 @@ export default {
   },
   markdownPage: {
     editHere: '在此編輯您的Markdown',
+    save: '儲存檔案',
+    discardChange: '捨棄變更',
+    confirmDiscard: '確定要捨棄未儲存的變更? 捨棄後將無法復原',
   },
   unknownError: '未知錯誤',
 };

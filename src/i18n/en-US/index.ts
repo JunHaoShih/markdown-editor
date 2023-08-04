@@ -38,6 +38,9 @@ export default {
   },
   markdownPage: {
     editHere: 'Edit your markdown here!',
+    save: 'Save file',
+    discardChange: 'Discard change',
+    confirmDiscard: 'Do you want to discard unsaved change? It cannot be reverted',
   },
   unknownError: 'Something went wrong!',
 };

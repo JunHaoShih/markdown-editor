@@ -30,6 +30,12 @@
         <div :class="prop.node.marked ? 'filter-marked' : ''">
           <div class="row items-center">
             <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
+            <q-icon
+              v-if="(prop.node as FolderTreeNode).edited"
+              name="adjust"
+              color="amber"
+              class="q-mr-sm"
+            ></q-icon>
             <div>{{ prop.node.label }}</div>
           </div>
         </div>
@@ -135,6 +141,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { auth } from 'src/boot/firebase';
 import { setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
+import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { onAuthStateChanged } from 'firebase/auth';
 import {
   onBeforeRouteUpdate, useRoute, useRouter,
@@ -152,6 +159,7 @@ export interface FolderTreeNode extends QTreeNode {
   ref?: FolderItem,
   parent?: FolderTreeNode | null,
   marked?: boolean,
+  edited?: boolean,
 }
 
 type MoveAction = 'cut' | 'copy' | 'none';
@@ -165,6 +173,8 @@ const router = useRouter();
 const route = useRoute();
 
 const folderTreeStore = useFolderTreeStore();
+
+const markdownsStore = useMarkdownsStore();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
@@ -630,17 +640,44 @@ watch(trashBin, async (newValue, oldValue) => {
 /**
  * Update all paremt nodes(for breadcrumbs) and push route on selected node change
  */
-watch(selectedNode, (newValue, oldValue) => {
-  if (!newValue) {
+watch(selectedNodeKey, (newValue) => {
+  const targetNode = treeRef.value?.getNodeByKey(newValue);
+  if (!targetNode) {
     router.push('/');
     return;
   }
-  updateBreadcrumbs(newValue);
-  if (!oldValue) {
-    return;
-  }
+  updateBreadcrumbs(targetNode);
+  router.push(`/${newValue}`);
+});
+
+function updateEditState(nodes: FolderTreeNode[], ids: string[]) {
+  nodes.forEach((node) => {
+    node.edited = !!ids.find((id) => id === node.id);
+    if (node.children) {
+      updateEditState(node.children as FolderTreeNode[], ids);
+    }
+  });
+}
+
+watch(() => markdownsStore.unsavedIds, () => {
+  updateEditState(folderTreeNodes.value, markdownsStore.unsavedIds);
+});
+
+function unsavedWarning(event: BeforeUnloadEvent) {
+  event.preventDefault();
+  const message = 'You have unsaved changes. Are you sure you wish to leave?';
+  event.returnValue = message;
+  return message;
+}
+
+/**
+ * Pop warning on leave if there is any unsaved file
+ */
+watch(() => markdownsStore.hasUnsaved, (newValue) => {
   if (newValue) {
-    router.push(`/${newValue.id}`);
+    window.addEventListener('beforeunload', unsavedWarning);
+  } else {
+    window.removeEventListener('beforeunload', unsavedWarning);
   }
 });
 

@@ -10,13 +10,31 @@
       />
     </q-breadcrumbs>
     <q-separator color="black" class="q-my-sm"/>
-    <q-btn
-      :disable="mdSource.content === mdEdit"
-      icon="save"
-      class="action-btn"
-      :loading="saving"
-      @click="onSaveClicked"
-    ></q-btn>
+    <div class="q-gutter-sm">
+      <q-btn
+        :disable="mdSource.content === mdEdit"
+        icon="save"
+        class="action-btn q-pa-sm"
+        :loading="saving"
+        @click="onSaveClicked"
+      >
+        <q-tooltip>
+          {{ $t('markdownPage.save') }}
+        </q-tooltip>
+      </q-btn>
+      <q-btn
+        :disable="mdSource.content === mdEdit"
+        icon="cancel"
+        class="action-btn q-pa-sm"
+        text-color="red"
+        :loading="saving"
+        @click="onDiscardClicked"
+      >
+        <q-tooltip>
+          {{ $t('markdownPage.discardChange') }}
+        </q-tooltip>
+      </q-btn>
+    </div>
     <MarkdownEditor
       v-model="mdEdit">
     </MarkdownEditor>
@@ -26,30 +44,50 @@
 <script setup lang="ts">
 import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
-import { onBeforeMount, ref } from 'vue';
 import {
-  onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter,
+  computed, onBeforeMount, ref, watch,
+} from 'vue';
+import {
+  useRoute, useRouter,
 } from 'vue-router';
 import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
-import { Markdown } from 'src/modules/markdown/models/markdown';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
+import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+
+const $q = useQuasar();
+
+const i18n = useI18n();
 
 const route = useRoute();
 
 const router = useRouter();
 
+const markdownsStore = useMarkdownsStore();
+
 const folderTreeStore = useFolderTreeStore();
 
 const authStore = useAuthStore();
 
-const mdSource = ref<Markdown>({
-  content: '',
-  userId: '',
+const props = defineProps<{
+  id: string,
+}>();
+
+const mdSource = computed({
+  get: () => markdownsStore.targetRepo(props.id)?.source ?? {
+    content: '',
+    userId: '',
+  },
+  set: (value) => markdownsStore.save(value, props.id),
 });
 
-const mdEdit = ref('');
+const mdEdit = computed({
+  get: () => markdownsStore.targetRepo(props.id)?.edit ?? '',
+  set: (value) => markdownsStore.updateEdit(value, props.id),
+});
 
 const saving = ref(false);
 
@@ -59,14 +97,15 @@ function getItemId(path: string) {
   return itemId;
 }
 
-async function markdownInit(path: string) {
-  const itemId = getItemId(path);
-  const md = await getMarkdown(itemId);
-  if (md) {
-    mdSource.value = md;
-    mdEdit.value = md.content;
-  } else {
-    router.push('/');
+async function markdownInit(itemId: string) {
+  // const itemId = getItemId(path);
+  if (!markdownsStore.targetRepo(itemId)) {
+    const md = await getMarkdown(itemId);
+    if (!md) {
+      router.push('/');
+      return;
+    }
+    markdownsStore.insert(md, itemId);
   }
 }
 
@@ -84,19 +123,26 @@ async function onSaveClicked() {
   saving.value = false;
 }
 
-onBeforeRouteLeave(async (_to, from) => {
-  if (mdSource.value.userId) {
-    await saveMarkdown(from.path);
+async function onDiscardClicked() {
+  $q.dialog({
+    dark: true,
+    title: i18n.t('markdownPage.discardChange'),
+    message: i18n.t('markdownPage.confirmDiscard'),
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    mdEdit.value = mdSource.value.content;
+  });
+}
+
+watch(() => props.id, async (newValue) => {
+  if (newValue) {
+    await markdownInit(newValue);
   }
 });
 
-onBeforeRouteUpdate(async (to, from) => {
-  await saveMarkdown(from.path);
-  await markdownInit(to.path);
-});
-
 onBeforeMount(async () => {
-  await markdownInit(route.path);
+  await markdownInit(props.id);
 });
 
 onAuthStateChanged(auth, (user) => {
