@@ -113,7 +113,7 @@
             <q-item
               clickable
               v-close-popup
-              v-if="movedAction != 'none' && pastable(prop.node)"
+              :class="!pastable(prop.node) ? 'hidden' : ''"
               @click="onPasteClicked(prop.node)"
             >
               <q-item-section>
@@ -139,7 +139,7 @@ import { computed, ref, watch } from 'vue';
 import { QTree, QTreeNode, useQuasar } from 'quasar';
 import { v4 as uuidv4 } from 'uuid';
 import { auth } from 'src/boot/firebase';
-import { setMarkdown } from 'src/modules/markdown/services/markdownService';
+import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -244,7 +244,13 @@ function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
  * @param itemName Item name
  * @param type Item type
  */
-async function addNewItem(itemName: string, type: FolderItemType, node: FolderTreeNode) {
+async function addNewItem(
+  itemName: string,
+  type: FolderItemType,
+  node: FolderTreeNode,
+  redirect: boolean,
+  defaultContent?: string,
+) {
   const id = uuidv4();
   // Create new folder item
   const newItem: FolderItem = {
@@ -271,12 +277,15 @@ async function addNewItem(itemName: string, type: FolderItemType, node: FolderTr
   } else {
     folderView.value.content.push(newItem);
   }
+  const newContent = defaultContent ?? `# ${itemName}`;
   // Set markdown document
   await setMarkdown({
-    content: `# ${itemName}`,
+    content: newContent,
     userId: folderView.value.userId,
   }, id);
-  router.push(`/${id}`);
+  if (redirect) {
+    router.push(`/${id}`);
+  }
 }
 
 function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) {
@@ -289,7 +298,7 @@ function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) 
     dialogRef.value.setFileNames(itemNames);
     dialogRef.value.setFileName('');
     dialogRef.value.onConfirm(async (folderName) => {
-      await addNewItem(folderName, type, node);
+      await addNewItem(folderName, type, node, true);
       dialogRef.value?.closeDialog();
     });
     dialogRef.value.promptDialog();
@@ -517,11 +526,40 @@ function pasteFromCut(node: FolderTreeNode) {
   }
 }
 
-function onPasteClicked(node: FolderTreeNode) {
+async function pasteFromCopy(node: FolderTreeNode) {
+  const itemNames = node.children
+    ? node.children.map((child) => child.label ?? '')
+    : [];
+  const markedNode: FolderTreeNode | undefined = treeRef.value?.getNodeByKey(markedKey.value);
+  if (!markedNode || !markedKey.value) {
+    return;
+  }
+  const markedNodeName = markedNode.label ?? '';
+  // Get a valid name if duplicate found
+  const newNodeName = itemNames.find((item) => item === markedNodeName)
+    ? getValidName(itemNames, markedNodeName, 1)
+    : markedNodeName;
+  const parentNode = markedNode.parent;
+  if (parentNode) {
+    const repo = markdownsStore.targetRepo(markedKey.value);
+    const mdContent = !repo
+      ? await getMarkdown(markedKey.value)
+        .then((md) => md?.content)
+      : repo.source.content;
+    await addNewItem(newNodeName, 'article', node, false, mdContent);
+  } else {
+    $q.notify({
+      type: 'error',
+      message: `${i18n.t('unknownError')}. Canot find parnet of marked node`,
+    });
+  }
+}
+
+async function onPasteClicked(node: FolderTreeNode) {
   if (movedAction.value === 'cut') {
     pasteFromCut(node);
   } else if (movedAction.value === 'copy') {
-    // TODO implement copy and paste
+    await pasteFromCopy(node);
   }
   // We should always update breadcrumb on paste to prevent breadcrumb desync
   if (selectedNode.value) {
