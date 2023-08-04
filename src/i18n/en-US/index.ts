@@ -31,6 +31,8 @@ export default {
   loginPage: {
     registerHint: 'Not registered?',
     createAccount: 'Create an account now!',
+    alternative: 'Or',
+    useEditorOnly: 'Use editor only',
   },
   registerPage: {
     loginHint: 'Already has an account?',

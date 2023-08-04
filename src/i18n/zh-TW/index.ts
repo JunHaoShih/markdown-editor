@@ -31,6 +31,8 @@ export default {
   loginPage: {
     registerHint: '尚未註冊?',
     createAccount: '馬上建立帳號!',
+    alternative: '或是',
+    useEditorOnly: '只使用編輯器',
   },
   registerPage: {
     loginHint: '已經擁有帳號?',

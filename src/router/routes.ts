@@ -21,6 +21,10 @@ const routes: RouteRecordRaw[] = [
     path: '/register',
     component: () => import('pages/RegisterPage.vue'),
   },
+  {
+    path: '/editor',
+    component: () => import('pages/EditorPage.vue'),
+  },
 
   // Always leave this as last one,
   // but you can also remove it
