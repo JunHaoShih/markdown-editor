@@ -1,9 +1,15 @@
-import { app, BrowserWindow, nativeTheme } from 'electron';
+import {
+  app, BrowserWindow, dialog, ipcMain, nativeTheme,
+} from 'electron';
 import { initialize, enable } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
 
 initialize();
+
+let unsaved = false;
+
+let hasConfirmedClose = false;
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -61,6 +67,28 @@ function createWindow() {
 
   mainWindow.on('unmaximize', () => {
     mainWindow?.webContents.send('isMaximized', false);
+  });
+
+  mainWindow.on('close', async (event) => {
+    if (!hasConfirmedClose) {
+      if (unsaved && mainWindow) {
+        event.preventDefault();
+        const choice = await dialog.showMessageBox(mainWindow, {
+          type: 'question',
+          buttons: ['Yes', 'No'],
+          title: 'Confirm',
+          message: 'Are you sure you want to quit? Some files are not saved yet.',
+        });
+        if (choice.response === 0) {
+          hasConfirmedClose = true;
+          mainWindow.close();
+        }
+      }
+    }
+  });
+
+  ipcMain.handle('setUnsaveState', (_event, isUnsaved: boolean) => {
+    unsaved = isUnsaved;
   });
 }
 

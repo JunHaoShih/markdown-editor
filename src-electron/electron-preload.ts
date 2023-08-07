@@ -36,7 +36,8 @@ export interface PreloadMethods {
   close: (() => void),
   handleIsMaximized: (
     (isMaximized: (event: IpcRendererEvent, isMaximized: boolean) => void) => void
-  )
+  ),
+  setUnsaveState: ((isUnsaved: boolean) => void),
 }
 
 const preloadMethods: PreloadMethods = {
@@ -59,6 +60,10 @@ const preloadMethods: PreloadMethods = {
   },
 
   handleIsMaximized: (isMaximized: (event: IpcRendererEvent, isMaximized: boolean) => void) => ipcRenderer.on('isMaximized', isMaximized),
+
+  setUnsaveState: (isUnsaved: boolean): void => {
+    ipcRenderer.invoke('setUnsaveState', isUnsaved);
+  },
 };
 
 contextBridge.exposeInMainWorld('windowApi', preloadMethods);

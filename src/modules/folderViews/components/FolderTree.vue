@@ -535,12 +535,12 @@ function unsavedWarning(event: BeforeUnloadEvent) {
  * Pop warning on leave if there is any unsaved file
  */
 watch(() => markdownsStore.hasUnsaved, (newValue) => {
-  if (process.env.MODE !== 'electron') {
-    if (newValue) {
-      window.addEventListener('beforeunload', unsavedWarning);
-    } else {
-      window.removeEventListener('beforeunload', unsavedWarning);
-    }
+  if (process.env.MODE === 'electron') {
+    window.windowApi.setUnsaveState(newValue);
+  } else if (newValue) {
+    window.addEventListener('beforeunload', unsavedWarning);
+  } else {
+    window.removeEventListener('beforeunload', unsavedWarning);
   }
 });
 
