@@ -27,13 +27,16 @@
  *   }
  * }
  */
-import { contextBridge } from 'electron';
+import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 import { BrowserWindow } from '@electron/remote';
 
 export interface PreloadMethods {
   minimize: (() => void),
   toggleMaximize: (() => void),
   close: (() => void),
+  handleIsMaximized: (
+    (isMaximized: (event: IpcRendererEvent, isMaximized: boolean) => void) => void
+  )
 }
 
 const preloadMethods: PreloadMethods = {
@@ -54,6 +57,8 @@ const preloadMethods: PreloadMethods = {
   close() {
     BrowserWindow.getFocusedWindow()?.close();
   },
+
+  handleIsMaximized: (isMaximized: (event: IpcRendererEvent, isMaximized: boolean) => void) => ipcRenderer.on('isMaximized', isMaximized),
 };
 
 contextBridge.exposeInMainWorld('windowApi', preloadMethods);

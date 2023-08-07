@@ -54,6 +54,14 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
+
+  mainWindow.on('maximize', () => {
+    mainWindow?.webContents.send('isMaximized', true);
+  });
+
+  mainWindow.on('unmaximize', () => {
+    mainWindow?.webContents.send('isMaximized', false);
+  });
 }
 
 app.whenReady().then(createWindow);
