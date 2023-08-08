@@ -113,6 +113,12 @@ const essentialLinks = computed(
       icon: 'workspaces',
       to: '/workspace',
     },
+    {
+      title: i18n.t('trashBinPage.trashBin'),
+      caption: i18n.t('trashBinPage.caption'),
+      icon: 'delete',
+      to: '/trashBin',
+    },
   ],
 );
 

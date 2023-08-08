@@ -214,65 +214,6 @@ onBeforeMount(() => {
   selectedNodeKey.value = props.id;
 });
 
-function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
-  const children = folderItems.map((item):FolderTreeNode => ({
-    label: item.name,
-    icon: item.type,
-    id: item.id,
-    type: item.type,
-    ref: item,
-    children: toFolderTreeNodes(item.children),
-  }));
-  children.forEach((child) => {
-    child.children?.forEach((subChild) => {
-      subChild.parent = child;
-    });
-  });
-  return children;
-}
-
-function folderViewInit(initView: FolderView) {
-  folderView.value = initView;
-  const rootNode: FolderTreeNode = {
-    label: initView.name,
-    icon: 'home',
-    id: '',
-    type: 'article',
-    children: toFolderTreeNodes(initView.content),
-  };
-  rootNode.children?.forEach((child) => {
-    child.parent = rootNode;
-  });
-  treeNodes.value = [rootNode];
-}
-
-/**
- * Initialize folder tree on user authed
- */
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // Use userId to get folder view
-    let reload = false;
-    const markdownFolderView = await getMarkdownFolderView(user.uid);
-    if (markdownFolderView) {
-      folderViewInit(markdownFolderView);
-    } else {
-      await setDefaultFolderView(user.uid);
-      reload = true;
-    }
-    const trashBinDoc = await getTrashBin(user.uid);
-    if (trashBinDoc) {
-      trashBinView.value = trashBinDoc;
-    } else {
-      await setDefaultTrashBin(user.uid);
-      reload = true;
-    }
-    if (reload) {
-      window.location.reload();
-    }
-  }
-});
-
 function allParents(node: FolderTreeNode): FolderTreeNode[] {
   const arr: FolderTreeNode[] = [];
   if (!node) {
@@ -712,6 +653,66 @@ watch(() => markdownsStore.hasUnsaved, (newValue) => {
     window.addEventListener('beforeunload', unsavedWarning);
   } else {
     window.removeEventListener('beforeunload', unsavedWarning);
+  }
+});
+
+function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
+  const children = folderItems.map((item):FolderTreeNode => ({
+    label: item.name,
+    icon: item.type,
+    id: item.id,
+    type: item.type,
+    ref: item,
+    children: toFolderTreeNodes(item.children),
+  }));
+  children.forEach((child) => {
+    child.children?.forEach((subChild) => {
+      subChild.parent = child;
+    });
+  });
+  return children;
+}
+
+function folderViewInit(initView: FolderView) {
+  folderView.value = initView;
+  const rootNode: FolderTreeNode = {
+    label: initView.name,
+    icon: 'home',
+    id: '',
+    type: 'article',
+    children: toFolderTreeNodes(initView.content),
+  };
+  rootNode.children?.forEach((child) => {
+    child.parent = rootNode;
+  });
+  treeNodes.value = [rootNode];
+}
+
+/**
+ * Initialize folder tree on user authed
+ */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // Use userId to get folder view
+    let reload = false;
+    const markdownFolderView = await getMarkdownFolderView(user.uid);
+    if (markdownFolderView) {
+      folderViewInit(markdownFolderView);
+    } else {
+      await setDefaultFolderView(user.uid);
+      reload = true;
+    }
+    const trashBinDoc = await getTrashBin(user.uid);
+    if (trashBinDoc) {
+      trashBinView.value = trashBinDoc;
+    } else {
+      await setDefaultTrashBin(user.uid);
+      reload = true;
+    }
+    if (reload) {
+      window.location.reload();
+    }
+    updateEditState(treeNodes.value, markdownsStore.unsavedIds);
   }
 });
 </script>

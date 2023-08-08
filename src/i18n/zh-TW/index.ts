@@ -48,6 +48,10 @@ export default {
     workspace: '工作區',
     caption: '您的Markdown工作區',
   },
+  trashBinPage: {
+    trashBin: '垃圾桶',
+    caption: '刪除檔案放置處',
+  },
   unknownError: '未知錯誤',
   menu: '清單',
 };

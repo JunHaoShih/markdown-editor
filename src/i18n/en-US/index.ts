@@ -48,6 +48,10 @@ export default {
     workspace: 'Workspace',
     caption: 'Your markdown workspace',
   },
+  trashBinPage: {
+    trashBin: 'Trash bin',
+    caption: 'Deleted files',
+  },
   unknownError: 'Something went wrong!',
   menu: 'Menu',
 };
