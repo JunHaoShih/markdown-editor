@@ -48,12 +48,6 @@ function close() {
   }
 }
 
-window.windowApi.handleIsMaximized((_event, isMaximized) => {
-  maximizeState.value = isMaximized
-    ? 'filter_none'
-    : 'crop_square';
-});
-
 onBeforeMount(() => {
   if (process.env.MODE === 'electron') {
     window.windowApi.handleIsMaximized((_event, isMaximized) => {
