@@ -637,10 +637,13 @@ watch(() => markdownsStore.unsavedIds, () => {
 });
 
 function unsavedWarning(event: BeforeUnloadEvent) {
-  event.preventDefault();
-  const message = 'You have unsaved changes. Are you sure you wish to leave?';
-  event.returnValue = message;
-  return message;
+  if (markdownsStore.hasUnsaved) {
+    event.preventDefault();
+    const message = 'You have unsaved changes. Are you sure you wish to leave?';
+    event.returnValue = message;
+    return message;
+  }
+  return '';
 }
 
 /**

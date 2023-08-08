@@ -24,7 +24,7 @@ import { ref } from 'vue';
 
 const splitterModel = ref(350);
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   id?: string,
 }>(), {
   id: '',
