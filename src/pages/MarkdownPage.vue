@@ -6,7 +6,7 @@
         :key="breadCrumb.id"
         :label="breadCrumb.label"
         :icon="breadCrumb.icon"
-        :to="`/${breadCrumb.id}`"
+        :to="`/workspace/${breadCrumb.id}`"
       />
     </q-breadcrumbs>
     <q-separator color="black" class="q-my-sm"/>
@@ -57,6 +57,8 @@ import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { Markdown } from 'src/modules/markdown/models/markdown';
+import { Timestamp } from '@firebase/firestore';
 
 const $q = useQuasar();
 
@@ -77,9 +79,12 @@ const props = defineProps<{
 }>();
 
 const mdSource = computed({
-  get: () => markdownsStore.targetRepo(props.id)?.source ?? {
+  get: (): Markdown => markdownsStore.targetRepo(props.id)?.source ?? {
     content: '',
     userId: '',
+    isDeleted: false,
+    createAt: new Timestamp(0, 0),
+    updateAt: new Timestamp(0, 0),
   },
   set: (value) => markdownsStore.save(value, props.id),
 });

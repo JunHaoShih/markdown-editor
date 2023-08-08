@@ -48,13 +48,24 @@
       v-model="leftDrawerOpen"
       :width="drawerWidth"
       show-if-above
+      mini-to-overlay
       bordered
+      :mini="true"
     >
-      <q-list>
-        <FolderTree
-          class="q-px-sm tree-height"
-        ></FolderTree>
-      </q-list>
+      <q-scroll-area style="width: inherit; height: calc(100vh - 55px);">
+        <q-list>
+          <q-item-label
+            header
+          >
+          {{ $t('menu') }}
+          </q-item-label>
+          <NavItem
+            v-for="link in essentialLinks"
+            :key="link.title"
+            :navNode="link"
+          />
+        </q-list>
+      </q-scroll-area>
       <!-- drawer resizer -->
       <!-- https://github.com/quasarframework/quasar/issues/7099 -->
       <div
@@ -70,8 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import FolderTree from 'src/modules/folderViews/components/FolderTree.vue';
+import { computed, ref } from 'vue';
 import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
@@ -79,6 +89,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { TouchPanValue } from 'quasar';
 import TitleBar from 'src/components/TitleBar.vue';
+import NavItem, { NavNode } from 'src/components/NavItem.vue';
 
 const i18n = useI18n();
 
@@ -93,6 +104,17 @@ const drawerMaxWidth = 600;
 const drawerWidth = ref(300);
 
 const leftDrawerOpen = ref(false);
+
+const essentialLinks = computed(
+  (): NavNode[] => [
+    {
+      title: i18n.t('workspacePage.workspace'),
+      caption: i18n.t('workspacePage.caption'),
+      icon: 'workspaces',
+      to: '/workspace',
+    },
+  ],
+);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;

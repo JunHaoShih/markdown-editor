@@ -44,5 +44,10 @@ export default {
     discardChange: '捨棄變更',
     confirmDiscard: '確定要捨棄未儲存的變更? 捨棄後將無法復原',
   },
+  workspacePage: {
+    workspace: '工作區',
+    caption: '您的Markdown工作區',
+  },
   unknownError: '未知錯誤',
+  menu: '清單',
 };

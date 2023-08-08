@@ -44,5 +44,10 @@ export default {
     discardChange: 'Discard change',
     confirmDiscard: 'Do you want to discard unsaved change? It cannot be reverted',
   },
+  workspacePage: {
+    workspace: 'Workspace',
+    caption: 'Your markdown workspace',
+  },
   unknownError: 'Something went wrong!',
+  menu: 'Menu',
 };

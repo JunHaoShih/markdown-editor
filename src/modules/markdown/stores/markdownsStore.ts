@@ -56,5 +56,11 @@ export const useMarkdownsStore = defineStore('markdownCache', {
         target.edit = newValue;
       }
     },
+    setDelete(isDeleted: boolean, id: string) {
+      const target = this.repos.find((repo) => repo.id === id);
+      if (target) {
+        target.source.isDeleted = isDeleted;
+      }
+    },
   },
 });

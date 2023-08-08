@@ -18,10 +18,10 @@
     <q-tree
       dense
       ref="treeRef"
-      :nodes="folderTreeStore.folderTreeNodes"
+      :nodes="treeNodes"
       node-key="id"
-      v-model:selected="folderTreeStore.selectedNodeKey"
-      v-model:expanded="folderTreeStore.expandedKeys"
+      v-model:selected="selectedNodeKey"
+      v-model:expanded="expandedKeys"
       selected-color="primary"
       :duration="0"
       no-selection-unset
@@ -134,22 +134,24 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import { computed, ref, watch } from 'vue';
-import { QTree, QTreeNode, useQuasar } from 'quasar';
-import { auth } from 'src/boot/firebase';
-import { getMarkdown } from 'src/modules/markdown/services/markdownService';
-import { setDefaultFolderView } from 'src/modules/folderViews/services/folderViewService';
-import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
-import { onAuthStateChanged } from 'firebase/auth';
 import {
-  onBeforeRouteUpdate, useRoute, useRouter,
-} from 'vue-router';
-import { FolderItemType, FolderItem } from '../models/folderView';
-import { getMarkdownFolderView, setFolderView } from '../services/folderViewService';
+  computed, onBeforeMount, ref, watch,
+} from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { QTree, QTreeNode, useQuasar } from 'quasar';
+import { v4 as uuidv4 } from 'uuid';
+import { onAuthStateChanged } from 'firebase/auth';
+import { Timestamp } from 'firebase/firestore';
+import { auth } from 'src/boot/firebase';
+import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
+import { getMarkdown, setMarkdown, updateDelete } from 'src/modules/markdown/services/markdownService';
 import NewFileDialog from './NewFileDialog.vue';
-import { useFolderTreeStore } from '../stores/folderTreeStore';
-import { getTrashBin, setDefaultTrashBin, setTrashBin } from '../services/trashBinService';
+import { getMarkdownFolderView, setDefaultFolderView } from '../services/folderViewService';
+import { FolderItem, FolderItemType, FolderView } from '../models/folderView';
+import { getTrashBin, setDefaultTrashBin } from '../services/trashBinService';
+import { TrashBin } from '../models/trashBin';
+import { MoveAction, useFolderTreeStore } from '../stores/folderTreeStore';
 
 export interface FolderTreeNode extends QTreeNode {
   id: string,
@@ -166,47 +168,221 @@ const i18n = useI18n();
 
 const router = useRouter();
 
-const route = useRoute();
+const markdownsStore = useMarkdownsStore();
 
 const folderTreeStore = useFolderTreeStore();
 
-const markdownsStore = useMarkdownsStore();
-
-const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
+const treeNodes = ref<FolderTreeNode[]>([]);
 
 const treeRef = ref<QTree>();
 
+const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
+
+const expandedKeys = ref<string[]>([]);
+
+const selectedNodeKey = ref('');
+
+const markedKey = ref<string>();
+
+const movedAction = ref<MoveAction>('none');
+
 const selectedNode = computed(
-  (): FolderTreeNode | null => treeRef.value?.getNodeByKey(folderTreeStore.selectedNodeKey),
+  (): FolderTreeNode | null => treeRef.value?.getNodeByKey(selectedNodeKey.value),
 );
+
+const folderView = ref<FolderView>({
+  name: '',
+  content: [],
+  userId: '',
+});
+
+const trashBinView = ref<TrashBin>({
+  name: '',
+  content: [],
+  userId: '',
+});
+
+const props = defineProps<{
+  id: string,
+}>();
+
+watch(() => props.id, (newValue) => {
+  selectedNodeKey.value = newValue;
+});
+
+onBeforeMount(() => {
+  selectedNodeKey.value = props.id;
+});
+
+function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
+  const children = folderItems.map((item):FolderTreeNode => ({
+    label: item.name,
+    icon: item.type,
+    id: item.id,
+    type: item.type,
+    ref: item,
+    children: toFolderTreeNodes(item.children),
+  }));
+  children.forEach((child) => {
+    child.children?.forEach((subChild) => {
+      subChild.parent = child;
+    });
+  });
+  return children;
+}
+
+function folderViewInit(initView: FolderView) {
+  folderView.value = initView;
+  const rootNode: FolderTreeNode = {
+    label: initView.name,
+    icon: 'home',
+    id: '',
+    type: 'article',
+    children: toFolderTreeNodes(initView.content),
+  };
+  rootNode.children?.forEach((child) => {
+    child.parent = rootNode;
+  });
+  treeNodes.value = [rootNode];
+}
+
+/**
+ * Initialize folder tree on user authed
+ */
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // Use userId to get folder view
+    let reload = false;
+    const markdownFolderView = await getMarkdownFolderView(user.uid);
+    if (markdownFolderView) {
+      folderViewInit(markdownFolderView);
+    } else {
+      await setDefaultFolderView(user.uid);
+      reload = true;
+    }
+    const trashBinDoc = await getTrashBin(user.uid);
+    if (trashBinDoc) {
+      trashBinView.value = trashBinDoc;
+    } else {
+      await setDefaultTrashBin(user.uid);
+      reload = true;
+    }
+    if (reload) {
+      window.location.reload();
+    }
+  }
+});
+
+function allParents(node: FolderTreeNode): FolderTreeNode[] {
+  const arr: FolderTreeNode[] = [];
+  if (!node) {
+    return arr;
+  }
+  arr.push(node);
+  if (node.parent) {
+    return arr.concat(allParents(node.parent));
+  }
+  return arr;
+}
+
+function expandNode(key: string) {
+  if (!expandedKeys.value.find((expandedKey) => expandedKey === key)) {
+    expandedKeys.value.push(key);
+  }
+}
+
+function updateBreadcrumbs(node: FolderTreeNode) {
+  const parents = allParents(node);
+  folderTreeStore.selectedNodeParents = parents.reverse();
+  folderTreeStore.selectedNodeParents.forEach(
+    (p) => expandNode(p.id),
+  );
+}
+
+watch(selectedNodeKey, (newValue) => {
+  router.push(`/workspace/${newValue}`);
+});
+
+watch(() => selectedNode.value, (newValue, oldValue) => {
+  if (oldValue === null && newValue === null) {
+    router.push('/workspace');
+    return;
+  }
+  if (newValue) {
+    updateBreadcrumbs(newValue);
+  }
+}, {
+  deep: true,
+});
+
+/**
+ * Add new folder item and markdown file
+ * @param itemName File name
+ * @param type File type
+ * @param node Target node
+ * @param defaultContent Default markdown content if necessary
+ * @returns Id of markdown file
+ */
+async function addNewItem(
+  itemName: string,
+  type: FolderItemType,
+  node: FolderTreeNode,
+  defaultContent?: string,
+): Promise<string> {
+  const id = uuidv4();
+  // Create new folder item
+  const newItem: FolderItem = {
+    id,
+    name: itemName,
+    type,
+    children: [],
+  };
+  // Add new tree node and set reference
+  node.children?.push({
+    label: itemName,
+    icon: type,
+    id,
+    type,
+    ref: newItem,
+    parent: node,
+    children: [],
+  } as FolderTreeNode);
+  // We expand folder node here so user don't need to expand again
+  expandNode(node.id);
+  // Update folder view
+  if (node.ref) {
+    node.ref.children.push(newItem);
+  } else {
+    folderView.value.content.push(newItem);
+  }
+  const newContent = defaultContent ?? `# ${itemName}`;
+  // Set markdown document
+  await setMarkdown({
+    content: newContent,
+    userId: folderView.value.userId,
+    isDeleted: false,
+    createAt: new Timestamp(0, 0),
+    updateAt: new Timestamp(0, 0),
+  }, id);
+  return id;
+}
 
 function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) {
   // Get children item names in order to check if filename already exist
   const itemNames = node.ref
     ? node.ref.children.map((item) => item.name)
-    : folderTreeStore.folderView.content.map((item) => item.name);
+    : folderView.value.content.map((item) => item.name);
   if (dialogRef.value) {
     dialogRef.value.setTitle(title);
     dialogRef.value.setFileNames(itemNames);
     dialogRef.value.setFileName('');
     dialogRef.value.onConfirm(async (folderName) => {
-      const newFileId = folderTreeStore.addNewItem(folderName, type, node);
-      router.push(`/${newFileId}`);
+      const newFileId = await addNewItem(folderName, type, node);
+      router.push(`/workspace/${newFileId}`);
       dialogRef.value?.closeDialog();
     });
     dialogRef.value.promptDialog();
   }
-}
-
-function addFile() {
-  if (!selectedNode.value) {
-    $q.notify({
-      type: 'error',
-      message: i18n.t('folderViews.selectOneNodeToContinue'),
-    });
-    return;
-  }
-  setupDialog(i18n.t('folderViews.addFile'), 'article', selectedNode.value);
 }
 
 function addFileByRightClick(node: FolderTreeNode) {
@@ -242,6 +418,24 @@ function setRenameDialog(title: string, node: FolderTreeNode) {
   }
 }
 
+function addFile() {
+  if (!selectedNode.value) {
+    $q.notify({
+      type: 'error',
+      message: i18n.t('folderViews.selectOneNodeToContinue'),
+    });
+    return;
+  }
+  setupDialog(i18n.t('folderViews.addFile'), 'article', selectedNode.value);
+}
+
+function markAllChildrenFileAsDelete(children: FolderItem[] | undefined) {
+  children?.forEach(async (child) => {
+    await updateDelete(true, child.id);
+    markAllChildrenFileAsDelete(child.children);
+  });
+}
+
 /**
  * Delete file
  * @param node The node you want to delete
@@ -263,11 +457,12 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
     return;
   }
   // Move folder item to trash bin
-  folderTreeStore.trashBin.content.push(node.ref);
+  trashBinView.value.content.push(node.ref);
   // Get children of parent folder item
   const targetChildren = parentNode.id
     ? parentNode.ref?.children
-    : folderTreeStore.folderView.content;
+    : folderView.value.content;
+  markAllChildrenFileAsDelete(targetChildren);
   const index = targetChildren?.findIndex((child) => child.id === node.id);
   if (index !== undefined && index >= 0) {
     targetChildren?.splice(index, 1);
@@ -302,11 +497,11 @@ function onDeleteClicked(node: FolderTreeNode) {
  */
 function cancelMarked() {
   const markedNode: FolderTreeNode | undefined = treeRef
-    .value?.getNodeByKey(folderTreeStore.markedKey);
+    .value?.getNodeByKey(markedKey.value);
   if (markedNode) {
     markedNode.marked = false;
-    folderTreeStore.markedKey = undefined;
-    folderTreeStore.movedAction = 'none';
+    markedKey.value = undefined;
+    movedAction.value = 'none';
   }
 }
 
@@ -318,15 +513,15 @@ function onCutClicked(node: FolderTreeNode) {
   cancelMarked();
   // Marked the node on the tree
   node.marked = true;
-  folderTreeStore.markedKey = node.id;
-  folderTreeStore.movedAction = 'cut';
+  markedKey.value = node.id;
+  movedAction.value = 'cut';
 }
 
 function onCopyClicked(node: FolderTreeNode) {
   cancelMarked();
   // We don't need to mark the node on copy, so just set markedKey
-  folderTreeStore.markedKey = node.id;
-  folderTreeStore.movedAction = 'copy';
+  markedKey.value = node.id;
+  movedAction.value = 'copy';
 }
 
 /**
@@ -344,12 +539,47 @@ function getValidName(names: string[], targetName: string, starter: number) {
   return currentName;
 }
 
+function cutAndPaste(
+  targetNode: FolderTreeNode,
+  parentNode: FolderTreeNode,
+  markedNode: FolderTreeNode,
+  newNodeName: string,
+) {
+  // Remove folder item from parent
+  const refChildren = parentNode.ref
+    ? parentNode.ref.children
+    : folderView.value.content;
+  const index = refChildren.findIndex((child) => child.id === markedNode.id);
+  const removedFolderItem = refChildren.splice(index, 1)[0];
+  // Rename folder item
+  removedFolderItem.name = newNodeName;
+  // Remove node from parent
+  if (parentNode.children) {
+    const nodeIndex = parentNode.children.findIndex((child) => child.id === markedNode.id);
+    parentNode.children.splice(nodeIndex, 1);
+  }
+  markedNode.label = newNodeName;
+  // Move folder item to target folder item
+  if (targetNode.ref) {
+    targetNode.ref.children.push(removedFolderItem);
+  } else {
+    folderView.value.content.push(removedFolderItem);
+  }
+  // Move marked node to new node
+  if (targetNode.children) {
+    targetNode.children.push(markedNode);
+  } else {
+    targetNode.children = [markedNode];
+  }
+  markedNode.parent = targetNode;
+}
+
 function pasteFromCut(node: FolderTreeNode) {
   const itemNames = node.children
     ? node.children.map((child) => child.label ?? '')
     : [];
   const markedNode: FolderTreeNode | undefined = treeRef
-    .value?.getNodeByKey(folderTreeStore.markedKey);
+    .value?.getNodeByKey(markedKey.value);
   if (!markedNode) {
     return;
   }
@@ -360,7 +590,7 @@ function pasteFromCut(node: FolderTreeNode) {
     : markedNodeName;
   const parentNode = markedNode.parent;
   if (parentNode) {
-    folderTreeStore.cutAndPaste(node, parentNode, markedNode, newNodeName);
+    cutAndPaste(node, parentNode, markedNode, newNodeName);
   } else {
     $q.notify({
       type: 'error',
@@ -374,8 +604,8 @@ async function pasteFromCopy(node: FolderTreeNode) {
     ? node.children.map((child) => child.label ?? '')
     : [];
   const markedNode: FolderTreeNode | undefined = treeRef
-    .value?.getNodeByKey(folderTreeStore.markedKey);
-  if (!markedNode || !folderTreeStore.markedKey) {
+    .value?.getNodeByKey(markedKey.value);
+  if (!markedNode || !markedKey.value) {
     return;
   }
   const markedNodeName = markedNode.label ?? '';
@@ -385,12 +615,12 @@ async function pasteFromCopy(node: FolderTreeNode) {
     : markedNodeName;
   const parentNode = markedNode.parent;
   if (parentNode) {
-    const repo = markdownsStore.targetRepo(folderTreeStore.markedKey);
+    const repo = markdownsStore.targetRepo(markedKey.value);
     const mdContent = !repo
-      ? await getMarkdown(folderTreeStore.markedKey)
+      ? await getMarkdown(markedKey.value)
         .then((md) => md?.content)
       : repo.source.content;
-    await folderTreeStore.addNewItem(newNodeName, 'article', node, mdContent);
+    await addNewItem(newNodeName, 'article', node, mdContent);
   } else {
     $q.notify({
       type: 'error',
@@ -400,16 +630,16 @@ async function pasteFromCopy(node: FolderTreeNode) {
 }
 
 async function onPasteClicked(node: FolderTreeNode) {
-  if (folderTreeStore.movedAction === 'cut') {
+  if (movedAction.value === 'cut') {
     pasteFromCut(node);
-  } else if (folderTreeStore.movedAction === 'copy') {
+  } else if (movedAction.value === 'copy') {
     await pasteFromCopy(node);
   }
   // We should always update breadcrumb on paste to prevent breadcrumb desync
   if (selectedNode.value) {
-    folderTreeStore.updateBreadcrumbs(selectedNode.value);
+    updateBreadcrumbs(selectedNode.value);
   }
-  folderTreeStore.expandNode(node.id);
+  expandNode(node.id);
   cancelMarked();
 }
 
@@ -434,8 +664,8 @@ function getChildrenIds(node: FolderTreeNode): string[] {
  */
 function pastable(node: FolderTreeNode) {
   const markedNode: FolderTreeNode | undefined = treeRef
-    .value?.getNodeByKey(folderTreeStore.markedKey);
-  if (markedNode && folderTreeStore.movedAction === 'cut') {
+    .value?.getNodeByKey(markedKey.value);
+  if (markedNode && movedAction.value === 'cut') {
     if (markedNode.parent?.id === node.id) {
       return false;
     }
@@ -443,85 +673,26 @@ function pastable(node: FolderTreeNode) {
     // Target node cannot be one of marked node and its children
     return !childrenIds.find((childId) => childId === node.id);
   }
-  if (markedNode && folderTreeStore.movedAction === 'copy') {
+  if (markedNode && movedAction.value === 'copy') {
     return true;
   }
   return false;
 }
 
-/**
- * Initialize folder tree on user authed
- */
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    /**
-     * End initialize if store has data
-     */
-    if (folderTreeStore.folderView.userId) {
-      return;
+function updateEditState(nodes: FolderTreeNode[], ids: string[]) {
+  nodes.forEach((node) => {
+    node.edited = !!ids.find((id) => id === node.id);
+    if (node.children) {
+      updateEditState(node.children as FolderTreeNode[], ids);
     }
-    // Use userId to get folder view
-    let reload = false;
-    const markdownFolderView = await getMarkdownFolderView(user.uid);
-    if (markdownFolderView) {
-      folderTreeStore.folderViewInit(markdownFolderView, route.path);
-    } else {
-      await setDefaultFolderView(user.uid);
-      reload = true;
-    }
-    const trashBinDoc = await getTrashBin(user.uid);
-    if (trashBinDoc) {
-      folderTreeStore.trashBinInit(trashBinDoc);
-    } else {
-      await setDefaultTrashBin(user.uid);
-      reload = true;
-    }
-    if (reload) {
-      window.location.reload();
-    }
-  }
-});
-
-/**
- * Update folder view to Firestore on value changed
- */
-watch(() => folderTreeStore.folderView, async (newValue, oldValue) => {
-  if (oldValue.name) {
-    await setFolderView(newValue);
-  }
-}, {
-  deep: true,
-});
-
-/**
- * Update trash bin to Firestore on value changed
- */
-watch(() => folderTreeStore.trashBin, async (newValue, oldValue) => {
-  if (oldValue.name) {
-    await setTrashBin(newValue);
-  }
-}, {
-  deep: true,
-});
-
-/**
- * Update all paremt nodes(for breadcrumbs) and push route on selected node change
- */
-watch(() => folderTreeStore.selectedNodeKey, (newValue) => {
-  const targetNode = treeRef.value?.getNodeByKey(newValue);
-  if (!targetNode) {
-    router.push('/');
-    return;
-  }
-  folderTreeStore.updateBreadcrumbs(targetNode);
-  router.push(`/${newValue}`);
-});
+  });
+}
 
 /**
  * Update folder tree node edit state when unsavedIds changed
  */
 watch(() => markdownsStore.unsavedIds, () => {
-  folderTreeStore.updateEditState(folderTreeStore.folderTreeNodes, markdownsStore.unsavedIds);
+  updateEditState(treeNodes.value, markdownsStore.unsavedIds);
 });
 
 function unsavedWarning(event: BeforeUnloadEvent) {
@@ -542,13 +713,6 @@ watch(() => markdownsStore.hasUnsaved, (newValue) => {
   } else {
     window.removeEventListener('beforeunload', unsavedWarning);
   }
-});
-
-/**
- * Initialize selected node on route update
- */
-onBeforeRouteUpdate((to) => {
-  folderTreeStore.selectedNodeKeyInit(to.path);
 });
 </script>
 
