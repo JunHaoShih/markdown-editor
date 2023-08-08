@@ -1,6 +1,8 @@
 # Markdown editor (makrdown-editor)
 
-Simple markdown editor
+Simple markdown editor  
+Hosted on Firebase  
+[Click here](https://markdown-editor-da01c.web.app/) to try it
 
 ## Install the dependencies
 ```bash
