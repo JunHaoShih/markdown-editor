@@ -10,7 +10,7 @@
       />
     </q-breadcrumbs>
     <q-separator color="black" class="q-my-sm"/>
-    <div class="q-gutter-sm">
+    <div class="q-gutter-sm row">
       <q-btn
         :disable="mdSource.content === mdEdit"
         icon="save"
@@ -34,15 +34,33 @@
           {{ $t('markdownPage.discardChange') }}
         </q-tooltip>
       </q-btn>
+      <q-space/>
+      <q-btn
+        icon="edit"
+        class="action-btn q-pa-sm"
+        @click="editorType = 'edit'"
+      ></q-btn>
+      <q-btn
+        icon="horizontal_distribute"
+        class="action-btn q-pa-sm"
+        @click="editorType = 'split'"
+      ></q-btn>
+      <q-btn
+        icon="visibility"
+        class="action-btn q-pa-sm"
+        @click="editorType = 'view'"
+      ></q-btn>
     </div>
     <MarkdownEditor
-      v-model="mdEdit">
+      v-model="mdEdit"
+      :type="editorType"
+    >
     </MarkdownEditor>
   </div>
 </template>
 
 <script setup lang="ts">
-import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
+import MarkdownEditor, { EditorType } from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
 import {
   computed, onBeforeMount, ref, watch,
@@ -69,6 +87,8 @@ const markdownsStore = useMarkdownsStore();
 const folderTreeStore = useFolderTreeStore();
 
 const authStore = useAuthStore();
+
+const editorType = ref<EditorType>('split');
 
 const props = defineProps<{
   id: string,

@@ -2,7 +2,8 @@
   <div>
     <q-splitter
       v-model="splitterModel"
-      :class="splitterClass"
+      class="main-panel"
+      :limits="limits"
     >
       <template v-slot:before>
         <q-input
@@ -25,9 +26,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { QInput } from 'quasar';
+import { computed, ref, watch } from 'vue';
+import { QInput, QSplitter } from 'quasar';
 import MarkdownViewer from './MarkdownViewer.vue';
+
+export type EditorType = 'edit' | 'view' | 'split';
 
 const inputRef = ref<QInput>();
 
@@ -35,12 +38,12 @@ const splitterModel = ref(50);
 
 const indentSize = ref(4);
 
+const limits = ref<QSplitter['limits']>([0, Infinity]);
+
 const props = withDefaults(defineProps<{
   modelValue: string,
-  splitterClass?: string,
-}>(), {
-  splitterClass: 'main-panel',
-});
+  type: EditorType,
+}>(), {});
 
 type Emit = {
   (e: 'update:modelValue', value: string): void
@@ -59,6 +62,16 @@ function onTabPressed() {
     document.execCommand('insertText', false, indent);
   }
 }
+
+watch(() => props.type, (newValue) => {
+  if (newValue === 'edit') {
+    splitterModel.value = 100;
+  } else if (newValue === 'view') {
+    splitterModel.value = 0;
+  } else {
+    splitterModel.value = 50;
+  }
+});
 </script>
 
 <style lang="sass" scoped>
