@@ -15,30 +15,37 @@
           />
         </template>
         <template v-slot:end>
-          <q-avatar size="48px" icon="account_circle" class="q-electron-drag--exception">
-            <q-menu>
-              <q-item clickable v-close-popup>
-                <q-item-section avatar>
-                  <q-avatar icon="account_circle">
-                  </q-avatar>
-                </q-item-section>
-                <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
-              </q-item>
-              <q-separator />
-              <!-- language -->
-              <q-item clickable v-close-popup>
-                <q-item-section @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup>
-                <q-item-section @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
-              </q-item>
-              <q-separator />
-              <!-- logout -->
-              <q-item clickable v-close-popup>
-                <q-item-section @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
-              </q-item>
-            </q-menu>
-          </q-avatar>
+          <q-btn round>
+            <template v-slot:default>
+              <q-avatar icon="account_circle" class="q-electron-drag--exception">
+                <q-menu>
+                  <q-item clickable v-close-popup>
+                    <q-item-section avatar>
+                      <q-avatar icon="account_circle">
+                      </q-avatar>
+                    </q-item-section>
+                    <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <!-- language -->
+                  <q-item clickable v-close-popup>
+                    <q-item-section
+                      @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup>
+                    <q-item-section
+                      @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <!-- logout -->
+                  <q-item clickable v-close-popup>
+                    <q-item-section
+                      @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
+                  </q-item>
+                </q-menu>
+              </q-avatar>
+            </template>
+          </q-btn>
         </template>
       </TitleBar>
     </q-header>
