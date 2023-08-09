@@ -3,6 +3,7 @@ export default {
     zhTW: '繁體中文',
     enUS: 'English(英文)',
   },
+  action: '動作',
   actions: {
     login: '登入',
     logout: '登出',
@@ -14,6 +15,7 @@ export default {
     cut: '剪下',
     copy: '複製',
     paste: '貼上',
+    undo: '還原',
   },
   folderViews: {
     addFolder: '新增資料夾',
@@ -21,9 +23,14 @@ export default {
     rename: '重新命名',
     fileNameExist: '檔名已存在',
     fileNameCannotBeEmpty: '檔名不可為空',
+    fileNameHasInvalidChars: '檔名不可含有非法字元',
     deleteConfirm: '是否刪除該檔案與其子檔案',
     cannotDeleteRoot: '不可刪除根目錄',
     selectOneNodeToContinue: '請選擇一個節點以繼續',
+    cannotLongerThan40: '檔名長度不可超過40',
+  },
+  folderItems: {
+    name: '名稱',
   },
   email: 'Email',
   password: '密碼',
@@ -44,5 +51,24 @@ export default {
     discardChange: '捨棄變更',
     confirmDiscard: '確定要捨棄未儲存的變更? 捨棄後將無法復原',
   },
+  workspacePage: {
+    workspace: '工作區',
+    caption: '您的Markdown工作區',
+  },
+  trashBinPage: {
+    trashBin: '垃圾桶',
+    caption: '刪除檔案放置處',
+    moveToWorkspaceRoot: '是否將檔案復原到工作區根目錄?',
+    permanentDelete: '永久刪除',
+    wantToPermanentDelete: '確定永久刪除該檔案?',
+    fileMissing: '檔案不存在',
+    deleteSuccess: '刪除成功',
+  },
+  base: {
+    createAt: '建立日期',
+    updateAt: '修改日期',
+    deleteAt: '刪除日期',
+  },
   unknownError: '未知錯誤',
+  menu: '清單',
 };

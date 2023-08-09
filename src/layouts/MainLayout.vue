@@ -15,30 +15,37 @@
           />
         </template>
         <template v-slot:end>
-          <q-avatar size="48px" icon="account_circle" class="q-electron-drag--exception">
-            <q-menu>
-              <q-item clickable v-close-popup>
-                <q-item-section avatar>
-                  <q-avatar icon="account_circle">
-                  </q-avatar>
-                </q-item-section>
-                <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
-              </q-item>
-              <q-separator />
-              <!-- language -->
-              <q-item clickable v-close-popup>
-                <q-item-section @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup>
-                <q-item-section @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
-              </q-item>
-              <q-separator />
-              <!-- logout -->
-              <q-item clickable v-close-popup>
-                <q-item-section @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
-              </q-item>
-            </q-menu>
-          </q-avatar>
+          <q-btn round>
+            <template v-slot:default>
+              <q-avatar icon="account_circle" class="q-electron-drag--exception">
+                <q-menu>
+                  <q-item clickable v-close-popup>
+                    <q-item-section avatar>
+                      <q-avatar icon="account_circle">
+                      </q-avatar>
+                    </q-item-section>
+                    <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <!-- language -->
+                  <q-item clickable v-close-popup>
+                    <q-item-section
+                      @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup>
+                    <q-item-section
+                      @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <!-- logout -->
+                  <q-item clickable v-close-popup>
+                    <q-item-section
+                      @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
+                  </q-item>
+                </q-menu>
+              </q-avatar>
+            </template>
+          </q-btn>
         </template>
       </TitleBar>
     </q-header>
@@ -48,13 +55,24 @@
       v-model="leftDrawerOpen"
       :width="drawerWidth"
       show-if-above
+      mini-to-overlay
       bordered
+      :mini="true"
     >
-      <q-list>
-        <FolderTree
-          class="q-px-sm tree-height"
-        ></FolderTree>
-      </q-list>
+      <q-scroll-area style="width: inherit; height: calc(100vh - 55px);">
+        <q-list>
+          <q-item-label
+            header
+          >
+          {{ $t('menu') }}
+          </q-item-label>
+          <NavItem
+            v-for="link in essentialLinks"
+            :key="link.title"
+            :navNode="link"
+          />
+        </q-list>
+      </q-scroll-area>
       <!-- drawer resizer -->
       <!-- https://github.com/quasarframework/quasar/issues/7099 -->
       <div
@@ -70,8 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import FolderTree from 'src/modules/folderViews/components/FolderTree.vue';
+import { computed, ref } from 'vue';
 import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
@@ -79,6 +96,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { TouchPanValue } from 'quasar';
 import TitleBar from 'src/components/TitleBar.vue';
+import NavItem, { NavNode } from 'src/components/NavItem.vue';
 
 const i18n = useI18n();
 
@@ -93,6 +111,23 @@ const drawerMaxWidth = 600;
 const drawerWidth = ref(300);
 
 const leftDrawerOpen = ref(false);
+
+const essentialLinks = computed(
+  (): NavNode[] => [
+    {
+      title: i18n.t('workspacePage.workspace'),
+      caption: i18n.t('workspacePage.caption'),
+      icon: 'workspaces',
+      to: '/workspace',
+    },
+    {
+      title: i18n.t('trashBinPage.trashBin'),
+      caption: i18n.t('trashBinPage.caption'),
+      icon: 'delete',
+      to: '/trashBin',
+    },
+  ],
+);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;

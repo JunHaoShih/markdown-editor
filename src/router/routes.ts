@@ -9,7 +9,22 @@ const routes: RouteRecordRaw[] = [
         path: '', component: () => import('pages/IndexPage.vue'),
       },
       {
-        path: ':id', component: () => import('pages/MarkdownPage.vue'), props: true,
+        path: 'workspace',
+        component: () => import('pages/WorkspacePage.vue'),
+        props: true,
+        children: [
+          {
+            path: '', component: () => import('pages/IndexPage.vue'),
+          },
+          {
+            path: ':id', component: () => import('pages/workspace/MarkdownPage.vue'), props: true,
+          },
+        ],
+      },
+      {
+        path: 'trashBin',
+        component: () => import('pages/trashBin/TrashBinPage.vue'),
+        props: true,
       },
     ],
   },

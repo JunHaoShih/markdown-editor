@@ -6,11 +6,11 @@
         :key="breadCrumb.id"
         :label="breadCrumb.label"
         :icon="breadCrumb.icon"
-        :to="`/${breadCrumb.id}`"
+        :to="`/workspace/${breadCrumb.id}`"
       />
     </q-breadcrumbs>
     <q-separator color="black" class="q-my-sm"/>
-    <div class="q-gutter-sm">
+    <div class="q-gutter-sm row">
       <q-btn
         :disable="mdSource.content === mdEdit"
         icon="save"
@@ -34,22 +34,38 @@
           {{ $t('markdownPage.discardChange') }}
         </q-tooltip>
       </q-btn>
+      <q-space/>
+      <q-btn
+        icon="edit"
+        class="action-btn q-pa-sm"
+        @click="editorType = 'edit'"
+      ></q-btn>
+      <q-btn
+        icon="horizontal_distribute"
+        class="action-btn q-pa-sm"
+        @click="editorType = 'split'"
+      ></q-btn>
+      <q-btn
+        icon="visibility"
+        class="action-btn q-pa-sm"
+        @click="editorType = 'view'"
+      ></q-btn>
     </div>
     <MarkdownEditor
-      v-model="mdEdit">
+      v-model="mdEdit"
+      :type="editorType"
+    >
     </MarkdownEditor>
   </div>
 </template>
 
 <script setup lang="ts">
-import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
+import MarkdownEditor, { EditorType } from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
 import {
   computed, onBeforeMount, ref, watch,
 } from 'vue';
-import {
-  useRoute, useRouter,
-} from 'vue-router';
+import { useRouter } from 'vue-router';
 import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from 'src/boot/firebase';
@@ -57,12 +73,12 @@ import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { Markdown } from 'src/modules/markdown/models/markdown';
+import { Timestamp } from '@firebase/firestore';
 
 const $q = useQuasar();
 
 const i18n = useI18n();
-
-const route = useRoute();
 
 const router = useRouter();
 
@@ -72,14 +88,19 @@ const folderTreeStore = useFolderTreeStore();
 
 const authStore = useAuthStore();
 
+const editorType = ref<EditorType>('split');
+
 const props = defineProps<{
   id: string,
 }>();
 
 const mdSource = computed({
-  get: () => markdownsStore.targetRepo(props.id)?.source ?? {
+  get: (): Markdown => markdownsStore.targetRepo(props.id)?.source ?? {
     content: '',
     userId: '',
+    isDeleted: false,
+    createAt: new Timestamp(0, 0),
+    updateAt: new Timestamp(0, 0),
   },
   set: (value) => markdownsStore.save(value, props.id),
 });
@@ -90,12 +111,6 @@ const mdEdit = computed({
 });
 
 const saving = ref(false);
-
-function getItemId(path: string) {
-  const pathTokens = path.split('/');
-  const itemId = pathTokens[1];
-  return itemId;
-}
 
 async function markdownInit(itemId: string) {
   // const itemId = getItemId(path);
@@ -109,17 +124,16 @@ async function markdownInit(itemId: string) {
   }
 }
 
-async function saveMarkdown(path: string) {
+async function saveMarkdown() {
   if (mdSource.value.content !== mdEdit.value) {
     mdSource.value.content = mdEdit.value;
-    const itemId = getItemId(path);
-    await setMarkdown(mdSource.value, itemId);
+    await setMarkdown(mdSource.value, props.id);
   }
 }
 
 async function onSaveClicked() {
   saving.value = true;
-  await saveMarkdown(route.path);
+  await saveMarkdown();
   saving.value = false;
 }
 

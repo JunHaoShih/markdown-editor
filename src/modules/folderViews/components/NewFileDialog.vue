@@ -33,8 +33,10 @@
             filled
             type="text"
             :rules="[
-              val => isFileNameValid || $t('folderViews.fileNameExist'),
-              val => !!inputFileName || $t('folderViews.fileNameCannotBeEmpty')
+              val => !isFileNameDuplicated || $t('folderViews.fileNameExist'),
+              val => !!inputFileName || $t('folderViews.fileNameCannotBeEmpty'),
+              val => noInvalidChars || $t('folderViews.fileNameHasInvalidChars'),
+              val => !exceedMaxLength || $t('folderViews.cannotLongerThan40'),
             ]"
             hide-bottom-space
           />
@@ -49,7 +51,7 @@
             flat
             :label="$t('actions.confirm')"
             type="submit"
-            :disable="!isFileNameValid || !inputFileName"
+            :disable="isFileNameDuplicated || !inputFileName || !noInvalidChars || exceedMaxLength"
           />
         </q-card-actions>
       </q-form>
@@ -70,8 +72,16 @@ const fileNames = ref<string[]>([]);
 
 const confirmFunction = ref<(fileName: string) => void>();
 
-const isFileNameValid = computed(
-  () => !fileNames.value.find((fileName) => fileName === inputFileName.value),
+const isFileNameDuplicated = computed(
+  () => !!fileNames.value.find((fileName) => fileName === inputFileName.value),
+);
+
+const noInvalidChars = computed(
+  () => /^[^\\/:*?"<>|]+$/.test(String(inputFileName.value)),
+);
+
+const exceedMaxLength = computed(
+  () => inputFileName.value.length > 40,
 );
 
 function submit() {
