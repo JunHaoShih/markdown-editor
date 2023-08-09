@@ -25,6 +25,7 @@
       selected-color="primary"
       :duration="0"
       no-selection-unset
+      style="width: max-content;"
     >
       <template v-slot:default-header="prop">
         <div :class="prop.node.marked ? 'filter-marked' : ''">

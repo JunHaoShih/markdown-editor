@@ -27,6 +27,7 @@ export default {
     deleteConfirm: '是否刪除該檔案與其子檔案',
     cannotDeleteRoot: '不可刪除根目錄',
     selectOneNodeToContinue: '請選擇一個節點以繼續',
+    cannotLongerThan40: '檔名長度不可超過40',
   },
   folderItems: {
     name: '名稱',
@@ -58,6 +59,10 @@ export default {
     trashBin: '垃圾桶',
     caption: '刪除檔案放置處',
     moveToWorkspaceRoot: '是否將檔案復原到工作區根目錄?',
+    permanentDelete: '永久刪除',
+    wantToPermanentDelete: '確定永久刪除該檔案?',
+    fileMissing: '檔案不存在',
+    deleteSuccess: '刪除成功',
   },
   base: {
     createAt: '建立日期',

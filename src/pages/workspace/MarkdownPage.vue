@@ -96,12 +96,6 @@ const mdEdit = computed({
 
 const saving = ref(false);
 
-function getItemId(path: string) {
-  const pathTokens = path.split('/');
-  const itemId = pathTokens[1];
-  return itemId;
-}
-
 async function markdownInit(itemId: string) {
   // const itemId = getItemId(path);
   if (!markdownsStore.targetRepo(itemId)) {
@@ -117,8 +111,7 @@ async function markdownInit(itemId: string) {
 async function saveMarkdown(path: string) {
   if (mdSource.value.content !== mdEdit.value) {
     mdSource.value.content = mdEdit.value;
-    const itemId = getItemId(path);
-    await setMarkdown(mdSource.value, itemId);
+    await setMarkdown(mdSource.value, props.id);
   }
 }
 

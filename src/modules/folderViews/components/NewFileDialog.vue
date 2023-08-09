@@ -36,6 +36,7 @@
               val => !isFileNameDuplicated || $t('folderViews.fileNameExist'),
               val => !!inputFileName || $t('folderViews.fileNameCannotBeEmpty'),
               val => noInvalidChars || $t('folderViews.fileNameHasInvalidChars'),
+              val => !exceedMaxLength || $t('folderViews.cannotLongerThan40'),
             ]"
             hide-bottom-space
           />
@@ -50,7 +51,7 @@
             flat
             :label="$t('actions.confirm')"
             type="submit"
-            :disable="isFileNameDuplicated || !inputFileName || !noInvalidChars"
+            :disable="isFileNameDuplicated || !inputFileName || !noInvalidChars || exceedMaxLength"
           />
         </q-card-actions>
       </q-form>
@@ -77,6 +78,10 @@ const isFileNameDuplicated = computed(
 
 const noInvalidChars = computed(
   () => /^[^\\/:*?"<>|]+$/.test(String(inputFileName.value)),
+);
+
+const exceedMaxLength = computed(
+  () => inputFileName.value.length > 40,
 );
 
 function submit() {

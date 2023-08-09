@@ -2,6 +2,7 @@ import {
   QueryDocumentSnapshot,
   QuerySnapshot,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -65,4 +66,8 @@ export async function getDeletedMarkdowns(userId: string)
 
   const querySnapshot = await getDocs(q);
   return querySnapshot;
+}
+
+export async function deleteMarkdown(id: string) {
+  await deleteDoc(doc(db, collectionName, id));
 }

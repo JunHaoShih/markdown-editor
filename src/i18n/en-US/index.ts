@@ -27,6 +27,7 @@ export default {
     deleteConfirm: 'Are you sure to delete this file and its children?',
     cannotDeleteRoot: 'Cannot delete root folder',
     selectOneNodeToContinue: 'Please select one node to continue',
+    cannotLongerThan40: 'File name cannot longer than 40',
   },
   folderItems: {
     name: 'Name',
@@ -58,6 +59,10 @@ export default {
     trashBin: 'Trash bin',
     caption: 'Deleted files',
     moveToWorkspaceRoot: 'Do you want to recover back to Workspace root folder?',
+    permanentDelete: 'Permanent delete',
+    wantToPermanentDelete: 'Do you want to delete it permanently?',
+    fileMissing: 'File does not exist',
+    deleteSuccess: 'Delete success',
   },
   base: {
     createAt: 'Create date',

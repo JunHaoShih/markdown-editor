@@ -78,9 +78,8 @@
 </template>
 
 <script setup lang="ts">
-import { aw } from 'app/dist/electron/UnPackaged/assets/index.b1584e8e';
 import { onAuthStateChanged } from 'firebase/auth';
-import { QuerySnapshot } from 'firebase/firestore';
+import { FirestoreError, QuerySnapshot } from 'firebase/firestore';
 import { QTableProps, useQuasar } from 'quasar';
 import { auth } from 'src/boot/firebase';
 import { FolderItem, FolderView } from 'src/modules/folderViews/models/folderView';
@@ -88,7 +87,7 @@ import { TrashBin } from 'src/modules/folderViews/models/trashBin';
 import { getMarkdownFolderView, setDefaultFolderView, setFolderView } from 'src/modules/folderViews/services/folderViewService';
 import { getTrashBin, setDefaultTrashBin, setTrashBin } from 'src/modules/folderViews/services/trashBinService';
 import { Markdown } from 'src/modules/markdown/models/markdown';
-import { getDeletedMarkdowns } from 'src/modules/markdown/services/markdownService';
+import { deleteMarkdown, getDeletedMarkdowns } from 'src/modules/markdown/services/markdownService';
 import { getValidName } from 'src/services/fileNameService';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -133,8 +132,60 @@ function onUndoClicked(folderItem: FolderItem) {
   });
 }
 
+function getAllChildren(folderItem: FolderItem): FolderItem[] {
+  const items: FolderItem[] = [];
+  items.push(folderItem);
+  const allChildren = folderItem.children
+    .map((child) => getAllChildren(child))
+    .reduce((previous, current) => previous.concat(current), items);
+  return allChildren;
+}
+
 function onDeleteClicked(folderItem: FolderItem) {
   // TODO implement delete machanics
+  $q.dialog({
+    dark: true,
+    title: i18n.t('trashBinPage.permanentDelete'),
+    message: i18n.t('trashBinPage.wantToPermanentDelete'),
+    cancel: true,
+    persistent: true,
+  }).onOk(async () => {
+    const children = getAllChildren(folderItem);
+    const missingFiles: FolderItem[] = [];
+    children.forEach((child) => {
+      const targetDoc = deletedMarkdowns.value?.docs.find((docRef) => docRef.id === child.id);
+      if (!targetDoc) {
+        missingFiles.push(child);
+      }
+    });
+    if (missingFiles.length > 0) {
+      missingFiles.forEach((mf) => {
+        $q.notify({
+          type: 'error',
+          message: `${mf.id}: ${mf.name}. ${i18n.t('trashBinPage.fileMissing')}`,
+        });
+      });
+      return;
+    }
+    const promises = children.map((child) => deleteMarkdown(child.id));
+    const result = await Promise.all(promises)
+      .then(() => true)
+      .catch((error) => error.message);
+    if (result !== true) {
+      $q.notify({
+        type: 'error',
+        message: `${result}`,
+      });
+      return;
+    }
+    // Remove from trash bin
+    const index = trashBinView.value.content.findIndex((child) => child.id === folderItem.id);
+    trashBinView.value.content.splice(index, 1);
+    $q.notify({
+      type: 'success',
+      message: i18n.t('trashBinPage.deleteSuccess'),
+    });
+  });
 }
 
 function getMatchedMarkdown(fileId: string) {
