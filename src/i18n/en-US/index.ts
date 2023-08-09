@@ -3,6 +3,7 @@ export default {
     zhTW: '繁體中文(Traditional Chinese)',
     enUS: 'English',
   },
+  action: 'Action',
   actions: {
     login: 'Login',
     logout: 'Logout',
@@ -14,6 +15,7 @@ export default {
     cut: 'Cut',
     copy: 'Copy',
     paste: 'Paste',
+    undo: 'Undo',
   },
   folderViews: {
     addFolder: 'Add folder',
@@ -21,9 +23,13 @@ export default {
     rename: 'Rename',
     fileNameExist: 'File name already exist',
     fileNameCannotBeEmpty: 'File name cannot be empty',
+    fileNameHasInvalidChars: 'File name contains invalid characters',
     deleteConfirm: 'Are you sure to delete this file and its children?',
     cannotDeleteRoot: 'Cannot delete root folder',
     selectOneNodeToContinue: 'Please select one node to continue',
+  },
+  folderItems: {
+    name: 'Name',
   },
   email: 'Email',
   password: 'Password',
@@ -51,6 +57,12 @@ export default {
   trashBinPage: {
     trashBin: 'Trash bin',
     caption: 'Deleted files',
+    moveToWorkspaceRoot: 'Do you want to recover back to Workspace root folder?',
+  },
+  base: {
+    createAt: 'Create date',
+    updateAt: 'Modified date',
+    deleteAt: 'Delete date',
   },
   unknownError: 'Something went wrong!',
   menu: 'Menu',

@@ -146,10 +146,11 @@ import { Timestamp } from 'firebase/firestore';
 import { auth } from 'src/boot/firebase';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { getMarkdown, setMarkdown, updateDelete } from 'src/modules/markdown/services/markdownService';
+import { getValidName } from 'src/services/fileNameService';
 import NewFileDialog from './NewFileDialog.vue';
-import { getMarkdownFolderView, setDefaultFolderView } from '../services/folderViewService';
+import { getMarkdownFolderView, setDefaultFolderView, setFolderView } from '../services/folderViewService';
 import { FolderItem, FolderItemType, FolderView } from '../models/folderView';
-import { getTrashBin, setDefaultTrashBin } from '../services/trashBinService';
+import { getTrashBin, setDefaultTrashBin, setTrashBin } from '../services/trashBinService';
 import { TrashBin } from '../models/trashBin';
 import { MoveAction, useFolderTreeStore } from '../stores/folderTreeStore';
 
@@ -414,7 +415,7 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
     parentNode.children?.splice(nodeIndex, 1);
   }
   // Push route to parent node page after delete
-  router.push(`/${parentNode.id}`);
+  router.push(`/workspace/${parentNode.id}`);
 }
 
 /**
@@ -463,21 +464,6 @@ function onCopyClicked(node: FolderTreeNode) {
   // We don't need to mark the node on copy, so just set markedKey
   markedKey.value = node.id;
   movedAction.value = 'copy';
-}
-
-/**
- * This method is used when there is duplicate filename in a folder.
- * It will return available new name
- * @param names Names that should not be duplicated
- * @param targetName the name you want to check
- * @param starter suffix number
- */
-function getValidName(names: string[], targetName: string, starter: number) {
-  const currentName = `${targetName} (${starter})`;
-  if (names.find((name) => name === currentName)) {
-    return getValidName(names, targetName, starter + 1);
-  }
-  return currentName;
 }
 
 function cutAndPaste(
@@ -717,6 +703,28 @@ onAuthStateChanged(auth, async (user) => {
     }
     updateEditState(treeNodes.value, markdownsStore.unsavedIds);
   }
+});
+
+/**
+ * Update folder view to Firestore on value changed
+ */
+watch(folderView, async (newValue, oldValue) => {
+  if (oldValue.name) {
+    await setFolderView(newValue);
+  }
+}, {
+  deep: true,
+});
+
+/**
+ * Update trash bin to Firestore on value changed
+ */
+watch(trashBinView, async (newValue, oldValue) => {
+  if (oldValue.name) {
+    await setTrashBin(newValue);
+  }
+}, {
+  deep: true,
 });
 </script>
 

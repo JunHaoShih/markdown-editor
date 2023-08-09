@@ -1,5 +1,15 @@
 import {
-  QueryDocumentSnapshot, doc, getDoc, serverTimestamp, setDoc, updateDoc,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
 } from 'firebase/firestore';
 import { db } from 'src/boot/firebase';
 import { Markdown } from '../models/markdown';
@@ -43,4 +53,16 @@ export async function setMarkdown(markdown: Markdown, id: string) {
       updateAt: serverTimestamp(),
     });
   }
+}
+
+export async function getDeletedMarkdowns(userId: string)
+: Promise<QuerySnapshot<Markdown, Markdown>> {
+  const q = query(
+    collection(db, collectionName),
+    where('userId', '==', userId),
+    where('isDeleted', '==', true),
+  ).withConverter(converter);
+
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
 }
