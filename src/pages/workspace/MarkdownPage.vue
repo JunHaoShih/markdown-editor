@@ -47,9 +47,7 @@ import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeSto
 import {
   computed, onBeforeMount, ref, watch,
 } from 'vue';
-import {
-  useRoute, useRouter,
-} from 'vue-router';
+import { useRouter } from 'vue-router';
 import { getMarkdown, setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from 'src/boot/firebase';
@@ -63,8 +61,6 @@ import { Timestamp } from '@firebase/firestore';
 const $q = useQuasar();
 
 const i18n = useI18n();
-
-const route = useRoute();
 
 const router = useRouter();
 
@@ -108,7 +104,7 @@ async function markdownInit(itemId: string) {
   }
 }
 
-async function saveMarkdown(path: string) {
+async function saveMarkdown() {
   if (mdSource.value.content !== mdEdit.value) {
     mdSource.value.content = mdEdit.value;
     await setMarkdown(mdSource.value, props.id);
@@ -117,7 +113,7 @@ async function saveMarkdown(path: string) {
 
 async function onSaveClicked() {
   saving.value = true;
-  await saveMarkdown(route.path);
+  await saveMarkdown();
   saving.value = false;
 }
 
