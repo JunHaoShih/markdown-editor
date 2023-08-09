@@ -115,7 +115,6 @@ const trashBinView = ref<TrashBin>({
 const deletedMarkdowns = ref<QuerySnapshot<Markdown, Markdown>>();
 
 function onUndoClicked(folderItem: FolderItem) {
-  // TODO implement undo machanics
   $q.dialog({
     dark: true,
     title: i18n.t('actions.undo'),
@@ -126,7 +125,7 @@ function onUndoClicked(folderItem: FolderItem) {
     const index = trashBinView.value.content.findIndex((child) => child.id === folderItem.id);
     const removedFolderItem = trashBinView.value.content.splice(index, 1)[0];
     const itemNames = folderView.value.content.map((child) => child.name);
-    const newName = getValidName(itemNames, removedFolderItem.name, 1);
+    const newName = getValidName(itemNames, removedFolderItem.name);
     removedFolderItem.name = newName;
     folderView.value.content.push(removedFolderItem);
     await setFolderView(folderView.value);

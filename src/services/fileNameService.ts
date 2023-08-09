@@ -4,7 +4,7 @@
  * @param targetName the name you want to check
  * @param starter suffix number
  */
-export function getValidName(names: string[], targetName: string, starter: number) {
+export function getValidName(names: string[], targetName: string, starter = 1) {
   if (!names.find((name) => name === targetName)) {
     return targetName;
   }

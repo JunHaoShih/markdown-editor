@@ -513,7 +513,7 @@ function pasteFromCut(node: FolderTreeNode) {
   const markedNodeName = markedNode.label ?? '';
   // Get a valid name if duplicate found
   const newNodeName = itemNames.find((item) => item === markedNodeName)
-    ? getValidName(itemNames, markedNodeName, 1)
+    ? getValidName(itemNames, markedNodeName)
     : markedNodeName;
   const parentNode = markedNode.parent;
   if (parentNode) {
@@ -538,7 +538,7 @@ async function pasteFromCopy(node: FolderTreeNode) {
   const markedNodeName = markedNode.label ?? '';
   // Get a valid name if duplicate found
   const newNodeName = itemNames.find((item) => item === markedNodeName)
-    ? getValidName(itemNames, markedNodeName, 1)
+    ? getValidName(itemNames, markedNodeName)
     : markedNodeName;
   const parentNode = markedNode.parent;
   if (parentNode) {
