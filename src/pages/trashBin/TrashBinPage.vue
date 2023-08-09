@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { onAuthStateChanged } from 'firebase/auth';
-import { FirestoreError, QuerySnapshot } from 'firebase/firestore';
+import { QuerySnapshot } from 'firebase/firestore';
 import { QTableProps, useQuasar } from 'quasar';
 import { auth } from 'src/boot/firebase';
 import { FolderItem, FolderView } from 'src/modules/folderViews/models/folderView';
