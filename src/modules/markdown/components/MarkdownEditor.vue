@@ -6,14 +6,10 @@
       :limits="limits"
     >
       <template v-slot:before>
-        <q-input
-          ref="inputRef"
+        <MonacoEditor
           v-model="mdText"
-          type="textarea"
-          autogrow
-          :label="$t('markdownPage.editHere')"
-          v-on:keydown.tab.prevent="onTabPressed"
-        />
+          class="main-panel"
+        ></MonacoEditor>
       </template>
       <template v-slot:after>
         <markdown-viewer
@@ -26,17 +22,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { QInput, QSplitter } from 'quasar';
+import {
+  computed, ref, watch,
+} from 'vue';
+import { QSplitter } from 'quasar';
+import MonacoEditor from 'src/components/MonacoEditor.vue';
 import MarkdownViewer from './MarkdownViewer.vue';
 
 export type EditorType = 'edit' | 'view' | 'split';
 
-const inputRef = ref<QInput>();
-
 const splitterModel = ref(50);
-
-const indentSize = ref(4);
 
 const limits = ref<QSplitter['limits']>([0, Infinity]);
 
@@ -54,14 +49,6 @@ const mdText = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 });
-
-function onTabPressed() {
-  const nativeInput = inputRef.value?.getNativeElement();
-  if (nativeInput) {
-    const indent = ' '.repeat(indentSize.value);
-    document.execCommand('insertText', false, indent);
-  }
-}
 
 watch(() => props.type, (newValue) => {
   if (newValue === 'edit') {
