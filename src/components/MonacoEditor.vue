@@ -58,6 +58,10 @@ onMounted(() => {
       minimap: {
         enabled: false,
       },
+      scrollbar: {
+        verticalScrollbarSize: 10,
+        horizontalSliderSize: 10,
+      },
     });
 
     editor.onDidChangeModelContent(() => {
