@@ -8,7 +8,7 @@
       <template v-slot:before>
         <MonacoEditor
           v-model="mdText"
-          class="main-panel"
+          class="main-panel q-pt-xs q-pr-sm"
         ></MonacoEditor>
       </template>
       <template v-slot:after>
