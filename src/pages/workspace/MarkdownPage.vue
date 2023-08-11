@@ -116,7 +116,6 @@ const mdEdit = computed({
 const saving = ref(false);
 
 async function markdownInit(itemId: string) {
-  // const itemId = getItemId(path);
   if (!markdownsStore.targetRepo(itemId)) {
     const md = await getMarkdown(itemId);
     if (!md) {
@@ -152,8 +151,8 @@ async function onDiscardClicked() {
   });
 }
 
-watch(() => props.id, async (newValue) => {
-  if (newValue) {
+watch(() => props.id, async (newValue, oldValue) => {
+  if (newValue !== oldValue) {
     await markdownInit(newValue);
   }
 });
