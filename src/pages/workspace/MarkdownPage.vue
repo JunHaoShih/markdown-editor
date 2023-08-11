@@ -51,11 +51,14 @@
         @click="editorType = 'view'"
       ></q-btn>
     </div>
-    <MarkdownEditor
-      v-model="mdEdit"
-      :type="editorType"
-    >
-    </MarkdownEditor>
+    <div v-for="repo in markdownsStore.repos" :key="repo.id">
+      <MarkdownEditor
+        :style="repo.id === id ? '' : 'display: none'"
+        v-model="repo.edit"
+        :type="editorType"
+      >
+      </MarkdownEditor>
+    </div>
   </div>
 </template>
 
