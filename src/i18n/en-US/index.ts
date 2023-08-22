@@ -16,6 +16,7 @@ export default {
     copy: 'Copy',
     paste: 'Paste',
     undo: 'Undo',
+    copyToClipboard: 'Copied to clipboard!',
   },
   folderViews: {
     addFolder: 'Add folder',
