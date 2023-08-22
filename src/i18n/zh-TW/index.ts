@@ -16,6 +16,7 @@ export default {
     copy: '複製',
     paste: '貼上',
     undo: '還原',
+    copyToClipboard: '複製到剪貼簿!',
   },
   folderViews: {
     addFolder: '新增資料夾',

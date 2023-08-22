@@ -5,9 +5,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import {
+  computed, onMounted, onUpdated,
+} from 'vue';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+
+const $q = useQuasar();
+
+const i18n = useI18n();
 
 const props = defineProps<{
   modelValue: string,
@@ -27,7 +35,7 @@ const md: MarkdownIt = new MarkdownIt({
   highlight: (str, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+        return `<pre class="hljs"><button class="action-btn">Copy</button><code>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
       } catch (__) { /* empty */ }
     }
 
@@ -38,6 +46,39 @@ const md: MarkdownIt = new MarkdownIt({
 const markdown = computed(
   () => md.render(mdText.value),
 );
+
+function addCopyEvent() {
+  const highlights = document.querySelectorAll('pre.hljs');
+  highlights.forEach((div) => {
+    const btn = div.querySelector('button');
+    btn?.addEventListener('click', () => {
+      if (div.children.length !== 2) {
+        $q.notify({
+          type: 'error',
+          message: i18n.t('unknownError'),
+        });
+        return;
+      }
+
+      const text = div.children[1].textContent;
+      if (text) {
+        navigator.clipboard.writeText(text);
+        $q.notify({
+          type: 'success',
+          message: i18n.t('actions.copyToClipboard'),
+        });
+      }
+    });
+  });
+}
+
+onUpdated(() => {
+  addCopyEvent();
+});
+
+onMounted(() => {
+  addCopyEvent();
+});
 </script>
 
 <style lang="sass" scoped>
@@ -130,4 +171,13 @@ const markdown = computed(
 :deep(h6)
   font-size: 0.67em
   font-weight: bold
+
+:deep(pre.hljs button)
+  transition: 0.2s ease-out
+  cursor: pointer
+  position: absolute
+  margin-right: 12px
+  margin-top: -2px
+  opacity: 0.5
+  right: 0
 </style>
