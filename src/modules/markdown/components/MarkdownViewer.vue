@@ -57,6 +57,7 @@ function addCopyEvent() {
           type: 'error',
           message: i18n.t('unknownError'),
         });
+        return;
       }
 
       const text = div.children[1].textContent;
