@@ -181,6 +181,7 @@ function onDeleteClicked(folderItem: FolderItem) {
     // Remove from trash bin
     const index = trashBinView.value.content.findIndex((child) => child.id === folderItem.id);
     trashBinView.value.content.splice(index, 1);
+    await setTrashBin(trashBinView.value);
     $q.notify({
       type: 'success',
       message: i18n.t('trashBinPage.deleteSuccess'),
