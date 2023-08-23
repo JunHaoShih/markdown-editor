@@ -17,6 +17,8 @@ const $q = useQuasar();
 
 const i18n = useI18n();
 
+const copyIcon = '<i class="q-icon notranslate material-icons" aria-hidden="true" role="img">content_copy</i>';
+
 const props = defineProps<{
   modelValue: string,
 }>();
@@ -35,11 +37,11 @@ const md: MarkdownIt = new MarkdownIt({
   highlight: (str, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return `<pre class="hljs"><button class="action-btn">Copy</button><code>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+        return `<pre class="hljs"><button class="action-btn">${copyIcon}</button><code>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
       } catch (__) { /* empty */ }
     }
 
-    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
+    return `<pre class="hljs"><button class="action-btn">${copyIcon}</button><code>${md.utils.escapeHtml(str)}</code></pre>`;
   },
 });
 
