@@ -18,7 +18,7 @@
     "@types/uuid": "^9.0.2",
     "axios": "^1.2.1",
     "dompurify": "^3.0.5",
-    "firebase": "^10.1.0",
+    "firebase": "^10.3.0",
     "highlight.js": "^11.8.0",
     "markdown-it": "^13.0.1",
     "monaco-editor": "^0.41.0",
