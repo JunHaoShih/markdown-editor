@@ -49,7 +49,6 @@
         </template>
       </TitleBar>
     </q-header>
-    <q-ajax-bar/>
 
     <q-drawer
       v-model="leftDrawerOpen"
