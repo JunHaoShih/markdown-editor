@@ -316,15 +316,17 @@ function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) 
     ? node.ref.children.map((item) => item.name)
     : folderView.value.content.map((item) => item.name);
   if (dialogRef.value) {
-    dialogRef.value.setTitle(title);
-    dialogRef.value.setFileNames(itemNames);
-    dialogRef.value.setFileName('');
-    dialogRef.value.onConfirm(async (folderName) => {
-      const newFileId = await addNewItem(folderName, type, node);
-      router.push(`/workspace/${newFileId}`);
-      dialogRef.value?.closeDialog();
-    });
-    dialogRef.value.promptDialog();
+    const dialogController = dialogRef.value.dialogBuilder()
+      .withTitle(title)
+      .withFileNames(itemNames)
+      .withFileName('')
+      .onConfirm(async (folderName, dialog) => {
+        const newFileId = await addNewItem(folderName, type, node);
+        router.push(`/workspace/${newFileId}`);
+        dialog.closeDialog();
+      })
+      .build();
+    dialogController.promptDialog();
   }
 }
 
@@ -346,18 +348,20 @@ function setRenameDialog(title: string, node: FolderTreeNode) {
       .filter((itemName) => itemName !== node.label)
     : [];
   if (dialogRef.value) {
-    dialogRef.value.setTitle(title);
-    dialogRef.value.setFileNames(itemNames);
-    dialogRef.value.setFileName(node.label ?? '');
-    dialogRef.value.onConfirm(async (folderName) => {
-      // Rename here
-      node.label = folderName;
-      if (node.ref) {
-        node.ref.name = folderName;
-      }
-      dialogRef.value?.closeDialog();
-    });
-    dialogRef.value.promptDialog();
+    const dialogController = dialogRef.value.dialogBuilder()
+      .withTitle(title)
+      .withFileNames(itemNames)
+      .withFileName(node.label ?? '')
+      .onConfirm(async (folderName, dialog) => {
+        // Rename here
+        node.label = folderName;
+        if (node.ref) {
+          node.ref.name = folderName;
+        }
+        dialog.closeDialog();
+      })
+      .build();
+    dialogController.promptDialog();
   }
 }
 
