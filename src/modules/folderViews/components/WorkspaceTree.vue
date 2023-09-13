@@ -315,19 +315,22 @@ function setupDialog(title: string, type: FolderItemType, node: FolderTreeNode) 
   const itemNames = node.ref
     ? node.ref.children.map((item) => item.name)
     : folderView.value.content.map((item) => item.name);
-  if (dialogRef.value) {
-    const dialogController = dialogRef.value.dialogBuilder()
-      .withTitle(title)
-      .withFileNames(itemNames)
-      .withFileName('')
-      .onConfirm(async (folderName, dialog) => {
-        const newFileId = await addNewItem(folderName, type, node);
-        router.push(`/workspace/${newFileId}`);
-        dialog.closeDialog();
-      })
-      .build();
-    dialogController.promptDialog();
+  if (!dialogRef.value) {
+    // Something went wrong
+    return;
   }
+
+  const dialogController = dialogRef.value.dialogBuilder()
+    .withTitle(title)
+    .withFileNames(itemNames)
+    .withFileName('')
+    .onConfirm(async (folderName, dialog) => {
+      const newFileId = await addNewItem(folderName, type, node);
+      router.push(`/workspace/${newFileId}`);
+      dialog.closeDialog();
+    })
+    .build();
+  dialogController.promptDialog();
 }
 
 function addFileByRightClick(node: FolderTreeNode) {
@@ -347,22 +350,25 @@ function setRenameDialog(title: string, node: FolderTreeNode) {
       .filter((itemName): itemName is string => !!itemName)
       .filter((itemName) => itemName !== node.label)
     : [];
-  if (dialogRef.value) {
-    const dialogController = dialogRef.value.dialogBuilder()
-      .withTitle(title)
-      .withFileNames(itemNames)
-      .withFileName(node.label ?? '')
-      .onConfirm(async (folderName, dialog) => {
-        // Rename here
-        node.label = folderName;
-        if (node.ref) {
-          node.ref.name = folderName;
-        }
-        dialog.closeDialog();
-      })
-      .build();
-    dialogController.promptDialog();
+  if (!dialogRef.value) {
+    // Something went wrong
+    return;
   }
+
+  const dialogController = dialogRef.value.dialogBuilder()
+    .withTitle(title)
+    .withFileNames(itemNames)
+    .withFileName(node.label ?? '')
+    .onConfirm(async (folderName, dialog) => {
+      // Rename here
+      node.label = folderName;
+      if (node.ref) {
+        node.ref.name = folderName;
+      }
+      dialog.closeDialog();
+    })
+    .build();
+  dialogController.promptDialog();
 }
 
 function addFile() {
