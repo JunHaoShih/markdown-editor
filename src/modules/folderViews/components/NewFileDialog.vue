@@ -114,14 +114,45 @@ function submit() {
   }
 }
 
-interface DialogData {
-  fileNames: string[],
-  title: string,
-  inputFileName: string,
-  onConfirm?: (fileName: string, dialog: DialogControl) => void,
+interface DialogBuilder {
+  /**
+   * Setup filenames that is not allowed
+   * @param inputFileNames Filenames that is not allowed
+   */
+  withFileNames: (inputFileNames: string[]) => DialogBuilder,
+
+  /**
+   * Setup dialog title
+   * @param inputTitle Dialog title
+   */
+  withTitle: (inputTitle: string) => DialogBuilder,
+
+  /**
+   * Setup filename inside input
+   * @param fileName Filename inside input
+   */
+  withFileName: (fileName: string) => DialogBuilder,
+
+  /**
+   * Setup callback after confirm button clicked
+   * @param func Callback function on confirm clicked
+   */
+  onConfirm: (func: (fileName: string, dialog: DialogControl) => void) => DialogBuilder,
+
+  /**
+   * Build dialog controller
+   */
+  build: () => DialogControl,
 }
 
-function dialogBuilder() {
+function dialogBuilder(): DialogBuilder {
+  interface DialogData {
+    fileNames: string[],
+    title: string,
+    inputFileName: string,
+    onConfirm?: (fileName: string, dialog: DialogControl) => void,
+  }
+
   const dialogData: DialogData = {
     fileNames: [],
     title: '',
