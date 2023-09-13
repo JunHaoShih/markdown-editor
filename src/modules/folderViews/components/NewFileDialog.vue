@@ -70,8 +70,6 @@ const title = ref('');
 
 const fileNames = ref<string[]>([]);
 
-const confirmFunction = ref<(fileName: string) => void>();
-
 const isFileNameDuplicated = computed(
   () => !!fileNames.value.find((fileName) => fileName === inputFileName.value),
 );
@@ -84,42 +82,115 @@ const exceedMaxLength = computed(
   () => inputFileName.value.length > 40,
 );
 
+interface DialogControl {
+  /**
+   * Show dialog
+   */
+  promptDialog: () => void,
+
+  /**
+   * Close dialog
+   */
+  closeDialog: () => void,
+}
+
+function dialogControl(): DialogControl {
+  return {
+    promptDialog() {
+      prompt.value = true;
+    },
+
+    closeDialog() {
+      prompt.value = false;
+    },
+  };
+}
+
+const confirmFunction = ref<(fileName: string, dialog: DialogControl) => void>();
+
 function submit() {
   if (confirmFunction.value) {
-    confirmFunction.value(inputFileName.value);
+    confirmFunction.value(inputFileName.value, dialogControl());
   }
 }
 
-function setFileNames(inputFileNames: string[]) {
-  fileNames.value = inputFileNames;
+interface DialogBuilder {
+  /**
+   * Setup filenames that is not allowed
+   * @param inputFileNames Filenames that is not allowed
+   */
+  withFileNames: (inputFileNames: string[]) => DialogBuilder,
+
+  /**
+   * Setup dialog title
+   * @param inputTitle Dialog title
+   */
+  withTitle: (inputTitle: string) => DialogBuilder,
+
+  /**
+   * Setup filename inside input
+   * @param fileName Filename inside input
+   */
+  withFileName: (fileName: string) => DialogBuilder,
+
+  /**
+   * Setup callback after confirm button clicked
+   * @param func Callback function on confirm clicked
+   */
+  onConfirm: (func: (fileName: string, dialog: DialogControl) => void) => DialogBuilder,
+
+  /**
+   * Build dialog controller
+   */
+  build: () => DialogControl,
 }
 
-function setTitle(inputTitle: string) {
-  title.value = inputTitle;
-}
+function dialogBuilder(): DialogBuilder {
+  interface DialogData {
+    fileNames: string[],
+    title: string,
+    inputFileName: string,
+    onConfirm?: (fileName: string, dialog: DialogControl) => void,
+  }
 
-function setFileName(fileName: string) {
-  inputFileName.value = fileName;
-}
+  const dialogData: DialogData = {
+    fileNames: [],
+    title: '',
+    inputFileName: '',
+  };
 
-function promptDialog() {
-  prompt.value = true;
-}
+  return {
+    withFileNames(inputFileNames: string[]) {
+      dialogData.fileNames = inputFileNames;
+      return this;
+    },
 
-function closeDialog() {
-  prompt.value = false;
-}
+    withTitle(inputTitle: string) {
+      dialogData.title = inputTitle;
+      return this;
+    },
 
-function onConfirm(func: (fileName: string) => void) {
-  confirmFunction.value = func;
+    withFileName(fileName: string) {
+      dialogData.inputFileName = fileName;
+      return this;
+    },
+
+    onConfirm(func: (fileName: string, dialog: DialogControl) => void) {
+      dialogData.onConfirm = func;
+      return this;
+    },
+
+    build() {
+      fileNames.value = dialogData.fileNames;
+      title.value = dialogData.title;
+      inputFileName.value = dialogData.inputFileName;
+      confirmFunction.value = dialogData.onConfirm;
+      return dialogControl();
+    },
+  };
 }
 
 defineExpose({
-  setFileNames,
-  setTitle,
-  setFileName,
-  promptDialog,
-  closeDialog,
-  onConfirm,
+  dialogBuilder,
 });
 </script>
