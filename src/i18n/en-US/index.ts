@@ -65,6 +65,10 @@ export default {
     fileMissing: 'File does not exist',
     deleteSuccess: 'Delete success',
   },
+  diagramPage: {
+    diagram: 'Diagram',
+    caption: 'Draw your diagrams',
+  },
   base: {
     createAt: 'Create date',
     updateAt: 'Modified date',

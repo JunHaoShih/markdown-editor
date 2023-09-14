@@ -65,6 +65,10 @@ export default {
     fileMissing: '檔案不存在',
     deleteSuccess: '刪除成功',
   },
+  diagramPage: {
+    diagram: '圖表',
+    caption: '繪製圖表',
+  },
   base: {
     createAt: '建立日期',
     updateAt: '修改日期',

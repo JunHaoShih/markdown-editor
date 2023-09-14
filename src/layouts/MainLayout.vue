@@ -124,6 +124,12 @@ const essentialLinks = computed(
       icon: 'delete',
       to: '/trashBin',
     },
+    {
+      title: i18n.t('diagramPage.diagram'),
+      caption: i18n.t('diagramPage.caption'),
+      icon: 'insert_chart',
+      to: '/diagram',
+    },
   ],
 );
 
