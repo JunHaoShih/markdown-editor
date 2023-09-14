@@ -1,32 +1,36 @@
 <template>
   <svg>
-    <circle
-      :cx="x" :cy="y" r="40" stroke="green" stroke-width="4" fill="yellow"
-      v-touch-pan.prevent.mouse="handleDrag"
-    />
+    <EntitySvg
+      v-for="shape in shapes"
+      v-bind:key="shape.id"
+      :x="shape.point.x"
+      :y="shape.point.y"
+      :name="shape.title"
+    ></EntitySvg>
   </svg>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import EntitySvg, { Point } from 'src/modules/diagrams/components/EntitySvg.vue';
+import { onBeforeMount, ref } from 'vue';
 
-const x = ref(50);
-
-const y = ref(50);
-
-function handleDrag(details: {
-  delta?: {
-    x?: number,
-    y?: number,
-  },
-}) {
-  if (details.delta?.x) {
-    x.value += details.delta.x;
-  }
-  if (details.delta?.y) {
-    y.value += details.delta.y;
-  }
+interface Shape {
+  id: number,
+  point: Point,
+  title: string,
 }
+
+const shapes: Shape[] = [];
+
+onBeforeMount(() => {
+  for (let i = 0; i < 20; i += 1) {
+    shapes.push({
+      id: i,
+      point: { x: 50, y: 50 },
+      title: `Title-${i}`,
+    });
+  }
+});
 </script>
 
 <style lang="scss" scoped>
