@@ -75,7 +75,7 @@
       <!-- drawer resizer -->
       <!-- https://github.com/quasarframework/quasar/issues/7099 -->
       <div
-        v-touch-pan.preserveCursor.prevent.mouse.horizontal="resizeDrawer as TouchPanValue"
+        v-touch-pan.preserveCursor.prevent.mouse.horizontal="resizeDrawer"
         class="q-drawer__resizer"
       ></div>
     </q-drawer>
@@ -93,7 +93,6 @@ import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { TouchPanValue } from 'quasar';
 import TitleBar from 'src/components/TitleBar.vue';
 import NavItem, { NavNode } from 'src/components/NavItem.vue';
 
@@ -141,16 +140,18 @@ async function onLogoutClicked(): Promise<void> {
 }
 
 function resizeDrawer(details: {
-  isFirst: boolean,
-  offset: {
-    x: number,
-    y: number,
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
   },
 }) {
   if (details.isFirst) {
     initialDrawerWidth = drawerWidth.value;
   }
-  drawerWidth.value = Math.min(initialDrawerWidth + details.offset.x, drawerMaxWidth);
+  if (details.offset?.x) {
+    drawerWidth.value = Math.min(initialDrawerWidth + details.offset.x, drawerMaxWidth);
+  }
 }
 
 onAuthStateChanged(auth, (user) => {
