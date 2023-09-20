@@ -1,12 +1,12 @@
 <template>
   <g
-    v-touch-pan.prevent.mouse="handleDrag"
   >
     <circle
       :cx="point.x" :cy="point.y" r="40" stroke="green" stroke-width="2" fill="yellow"
     />
     <g
       @dblclick="displayTitle = true"
+      v-touch-pan.prevent.mouse="handleDrag"
     >
       <path
         :d="titlePath"
@@ -52,28 +52,71 @@
         fill="transparent"
       />
       <text
-        v-if="!row.isEditing"
-        :x="point.x + 5"
-        :y="getRowStartY(index) + 20"
+        :x="getNameX() + 10"
+        :y="getRowStartY(index) - 10"
+        font-weight="bold"
+        text-anchor="left"
       >
-        {{ row.name }} ({{ row.type }})
+        {{ row.name }}
       </text>
-      <foreignObject
-        v-if="row.isEditing"
-        :x="point.x"
-        :y="getRowStartY(index)"
-        :width="width"
-        :height="height"
-        fill="transparent">
-        <q-input
-          v-model="row.name"
-          autofocus
-          dense
-          type="text"
-          @blur="row.isEditing = false"
-          v-on:keyup.prevent.enter="row.isEditing = false"
-        ></q-input>
-      </foreignObject>
+      <line :x1="point.x" :y1="getRowStartY(index - 1)"
+        :x2="point.x" :y2="getRowStartY(rows.length - 1)"
+        stroke="black"
+        stroke-width="1"
+      />
+      <line :x1="getNameX()" :y1="getRowStartY(index - 1)"
+        :x2="getNameX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="black"
+        stroke-width="1"
+      />
+      <line :x1="getNameX()" :y1="getRowStartY(index - 1)"
+        :x2="getNameX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="black"
+        stroke-width="1"
+      />
+      <line :x1="getNameX()" :y1="getRowStartY(index - 1)"
+        :x2="getNameX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="transparent"
+        stroke-width="10"
+        v-touch-pan.mouse.horizontal="resizeIconRow"
+        style="cursor: col-resize;"
+      />
+      <line :x1="getTypeX()" :y1="getRowStartY(index - 1)"
+        :x2="getTypeX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="black"
+        stroke-width="1"
+      />
+      <line :x1="getTypeX()" :y1="getRowStartY(index - 1)"
+        :x2="getTypeX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="transparent"
+        stroke-width="10"
+        v-touch-pan.mouse.horizontal="resizeNameRow"
+        style="cursor: col-resize;"
+      />
+      <line :x1="getLabelX()" :y1="getRowStartY(index - 1)"
+        :x2="getLabelX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="black"
+        stroke-width="1"
+      />
+      <line :x1="getLabelX()" :y1="getRowStartY(index - 1)"
+        :x2="getLabelX()" :y2="getRowStartY(rows.length - 1)"
+        stroke="transparent"
+        stroke-width="10"
+        v-touch-pan.mouse.horizontal="resizeTypeRow"
+        style="cursor: col-resize;"
+      />
+      <line :x1="point.x + width" :y1="getRowStartY(index - 1)"
+        :x2="point.x + width" :y2="getRowStartY(rows.length - 1)"
+        stroke="black"
+        stroke-width="1"
+      />
+      <line :x1="point.x + width" :y1="getRowStartY(index - 1)"
+        :x2="point.x + width" :y2="getRowStartY(rows.length - 1)"
+        stroke="transparent"
+        stroke-width="10"
+        v-touch-pan.mouse.horizontal="resizeAllRow"
+        style="cursor: col-resize;"
+      />
     </g>
   </g>
 </template>
@@ -93,13 +136,71 @@ const point = ref<Point>({
   y: 0,
 });
 
+const height = ref(30);
+
+function getRowStartY(index: number) {
+  return point.value.y + (height.value * (index + 2));
+}
+
+const minIconWidth = 30;
+
+const iconWidth = ref(minIconWidth);
+
+function getIconGridPath(index: number) {
+  const startX = point.value.x;
+  const startY = getRowStartY(index);
+  return `M ${startX} ${startY} H ${startX + iconWidth.value}`;
+}
+
+const minNameWidth = 90;
+
+const nameWidth = ref(90);
+
+function getNameX() {
+  return point.value.x + iconWidth.value;
+}
+
+function getNameGridPath(index: number) {
+  const startX = getNameX();
+  const startY = getRowStartY(index);
+  return `M ${startX} ${startY} H ${startX + nameWidth.value}`;
+}
+
+const minTypeWidth = 50;
+
+const typeWidth = ref(minTypeWidth);
+
+function getTypeX() {
+  return getNameX() + nameWidth.value;
+}
+
+function getTypeGridPath(index: number) {
+  const startX = getTypeX();
+  const startY = getRowStartY(index);
+  return `M ${startX} ${startY} H ${startX + typeWidth.value}`;
+}
+
+const minLabelWidth = 30;
+
+const labelWidth = ref(minLabelWidth);
+
+function getLabelX() {
+  return getTypeX() + typeWidth.value;
+}
+
+function getLabelGridPath(index: number) {
+  const startX = getLabelX();
+  const startY = getRowStartY(index);
+  return `M ${startX} ${startY} H ${startX + labelWidth.value}`;
+}
+
 const title = ref('');
 
 const displayTitle = ref(false);
 
-const height = ref(30);
-
-const width = ref(200);
+const width = computed(
+  () => iconWidth.value + nameWidth.value + typeWidth.value + labelWidth.value,
+);
 
 const titlePath = computed(
   () => `M ${point.value.x} ${point.value.y} H ${point.value.x + width.value} V ${point.value.y + height.value} \
@@ -149,15 +250,79 @@ const rows = ref<TableRow[]>([
   },
 ]);
 
-function getRowStartY(index: number) {
-  return point.value.y + (height.value * (index + 1));
-}
-
 function getRowPath(index: number) {
   const startX = point.value.x;
   const startY = getRowStartY(index);
-  return `M ${startX} ${startY} V ${startY + height.value} H ${startX + width.value} \
+  return `M ${startX} ${startY} H ${startX + width.value} \
   V ${startY}`;
+}
+
+let initialIconRowWidth = 0;
+
+function resizeIconRow(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (details.isFirst) {
+    initialIconRowWidth = iconWidth.value;
+  }
+  if (details.offset && details.offset.x) {
+    iconWidth.value = Math.max(initialIconRowWidth + details.offset.x, minIconWidth);
+  }
+}
+
+let initialNameColWidth = 0;
+
+function resizeNameRow(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (details.isFirst) {
+    initialNameColWidth = nameWidth.value;
+  }
+  if (details.offset && details.offset.x) {
+    nameWidth.value = Math.max(initialNameColWidth + details.offset.x, minNameWidth);
+  }
+}
+
+let initialTypeColWidth = 0;
+
+function resizeTypeRow(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (details.isFirst) {
+    initialTypeColWidth = typeWidth.value;
+  }
+  if (details.offset && details.offset.x) {
+    typeWidth.value = Math.max(initialTypeColWidth + details.offset.x, minTypeWidth);
+  }
+}
+
+let initialLabelColWidth = 0;
+
+function resizeAllRow(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (details.isFirst) {
+    initialLabelColWidth = labelWidth.value;
+  }
+  if (details.offset && details.offset.x) {
+    labelWidth.value = Math.max(initialLabelColWidth + details.offset.x, minLabelWidth);
+  }
 }
 
 onBeforeMount(() => {
