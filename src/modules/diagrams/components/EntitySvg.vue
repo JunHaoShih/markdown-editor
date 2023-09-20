@@ -54,7 +54,6 @@
       <text
         :x="getNameX() + 10"
         :y="getRowStartY(index) - 10"
-        font-weight="bold"
         text-anchor="left"
       >
         {{ row.name }}
@@ -62,7 +61,6 @@
       <text
         :x="getTypeX() + 10"
         :y="getRowStartY(index) - 10"
-        font-weight="bold"
         text-anchor="left"
       >
         {{ row.type }}
