@@ -59,6 +59,14 @@
       >
         {{ row.name }}
       </text>
+      <text
+        :x="getTypeX() + 10"
+        :y="getRowStartY(index) - 10"
+        font-weight="bold"
+        text-anchor="left"
+      >
+        {{ row.type }}
+      </text>
       <line :x1="point.x" :y1="getRowStartY(index - 1)"
         :x2="point.x" :y2="getRowStartY(rows.length - 1)"
         stroke="black"
