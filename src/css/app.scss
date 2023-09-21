@@ -150,6 +150,12 @@
   border-radius: 15px;
 }
 
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
 /* scroll bar */
 // Thanks to hawkeye64
 // https://github.com/quasarframework/quasar/issues/10825#issuecomment-936256646
