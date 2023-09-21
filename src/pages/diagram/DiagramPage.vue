@@ -23,7 +23,7 @@ interface Shape {
 const shapes: Shape[] = [];
 
 onBeforeMount(() => {
-  for (let i = 0; i < 20; i += 1) {
+  for (let i = 0; i < 3; i += 1) {
     shapes.push({
       id: i,
       point: { x: 50, y: 50 },

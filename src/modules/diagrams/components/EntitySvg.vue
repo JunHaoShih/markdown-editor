@@ -1,12 +1,16 @@
 <template>
-  <g
-  >
-    <circle
-      :cx="point.x" :cy="point.y" r="40" stroke="green" stroke-width="2" fill="yellow"
+  <g class="prevent-select"
+      v-touch-pan.prevent.mouse="handleDrag">
+    // drag area
+    <path
+      :d="dragPath"
+      stroke="transparent"
+      stroke-width="1"
+      fill="transparent"
     />
+    // title area
     <g
       @dblclick="displayTitle = true"
-      v-touch-pan.prevent.mouse="handleDrag"
     >
       <path
         :d="titlePath"
@@ -35,18 +39,20 @@
         v-model="title"
         autofocus
         dense
+        filled
         type="text"
         @blur="displayTitle = false"
         v-on:keyup.prevent.enter="displayTitle = false"
       ></q-input>
     </foreignObject>
+    // rows area
     <g
       v-for="(row, index) in rows"
       v-bind:key="row.name"
       @dblclick="row.isEditing = true"
     >
       <path
-        :d="getRowPath(index)"
+        :d="getRowBottomPath(index)"
         stroke="black"
         stroke-width="1"
         fill="transparent"
@@ -152,24 +158,12 @@ const minIconWidth = 30;
 
 const iconWidth = ref(minIconWidth);
 
-function getIconGridPath(index: number) {
-  const startX = point.value.x;
-  const startY = getRowStartY(index);
-  return `M ${startX} ${startY} H ${startX + iconWidth.value}`;
-}
-
 const minNameWidth = 90;
 
 const nameWidth = ref(90);
 
 function getNameX() {
   return point.value.x + iconWidth.value;
-}
-
-function getNameGridPath(index: number) {
-  const startX = getNameX();
-  const startY = getRowStartY(index);
-  return `M ${startX} ${startY} H ${startX + nameWidth.value}`;
 }
 
 const minTypeWidth = 50;
@@ -180,24 +174,12 @@ function getTypeX() {
   return getNameX() + nameWidth.value;
 }
 
-function getTypeGridPath(index: number) {
-  const startX = getTypeX();
-  const startY = getRowStartY(index);
-  return `M ${startX} ${startY} H ${startX + typeWidth.value}`;
-}
-
 const minLabelWidth = 30;
 
 const labelWidth = ref(minLabelWidth);
 
 function getLabelX() {
   return getTypeX() + typeWidth.value;
-}
-
-function getLabelGridPath(index: number) {
-  const startX = getLabelX();
-  const startY = getRowStartY(index);
-  return `M ${startX} ${startY} H ${startX + labelWidth.value}`;
 }
 
 const title = ref('');
@@ -254,14 +236,28 @@ const rows = ref<TableRow[]>([
     type: 'int',
     uniqueKeys: [],
   },
+  {
+    name: 'ggg',
+    isPrimary: true,
+    type: 'int',
+    uniqueKeys: [],
+  },
 ]);
 
-function getRowPath(index: number) {
+function getRowBottomPath(index: number) {
   const startX = point.value.x;
   const startY = getRowStartY(index);
   return `M ${startX} ${startY} H ${startX + width.value} \
   V ${startY}`;
 }
+
+const dragPath = computed(
+  () => {
+    const currentHeight = (rows.value.length + 1) * height.value;
+    return `M ${point.value.x} ${point.value.y} H ${point.value.x + width.value} V ${point.value.y + currentHeight} \
+    H ${point.value.x} V ${point.value.y}`;
+  },
+);
 
 let initialIconRowWidth = 0;
 
@@ -339,4 +335,9 @@ onBeforeMount(() => {
 </script>
 
 <style lang="scss" scoped>
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 </style>
