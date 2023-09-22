@@ -4,7 +4,7 @@
     @dblclick="isEdit = true"
   >
     <path
-      :d="titlePath"
+      :d="clickPath"
       stroke="transparent"
       stroke-width="1"
       fill="transparent"
@@ -59,7 +59,7 @@ const inputText = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const titlePath = computed(
+const clickPath = computed(
   () => `M ${props.x} ${props.y} \
   H ${props.x + props.width} \
   V ${props.y + props.height} \
