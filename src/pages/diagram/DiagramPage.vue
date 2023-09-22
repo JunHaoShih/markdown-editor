@@ -1,34 +1,31 @@
 <template>
   <svg>
-    <EntitySvg
-      v-for="shape in shapes"
-      v-bind:key="shape.id"
-      :x="shape.point.x"
-      :y="shape.point.y"
-      :name="shape.title"
-    ></EntitySvg>
+    <DbTableSvg
+      v-for="(item, index) in shapes"
+      v-bind:key="item.id"
+      v-model="shapes[index]"
+      v-model:data="dbTables[item.id]"
+    ></DbTableSvg>
   </svg>
 </template>
 
 <script setup lang="ts">
-import EntitySvg, { Point } from 'src/modules/diagrams/components/EntitySvg.vue';
+import { Shape, createShape } from 'src/modules/diagrams/Shape';
+import { DbTable, createDbTable } from 'src/modules/diagrams/components/DbTable/DbTable';
+import DbTableSvg from 'src/modules/diagrams/components/DbTable/DbTableSvg.vue';
 import { onBeforeMount, ref } from 'vue';
 
-interface Shape {
-  id: number,
-  point: Point,
-  title: string,
-}
+const shapes = ref<Shape[]>([]);
 
-const shapes: Shape[] = [];
+const dbTables = ref<Record<string, DbTable>>({});
 
 onBeforeMount(() => {
   for (let i = 0; i < 3; i += 1) {
-    shapes.push({
-      id: i,
-      point: { x: 50, y: 50 },
-      title: `Title-${i}`,
-    });
+    const shape = createShape(50, 50);
+    if (!dbTables.value[shape.id]) {
+      dbTables.value[shape.id] = createDbTable();
+    }
+    shapes.value.push(shape);
   }
 });
 </script>

@@ -1,0 +1,137 @@
+<template>
+  <g
+    class="prevent-select"
+    v-touch-pan.prevent.mouse="handleDrag"
+  >
+    // title area
+    <g
+      @dblclick="displayTitle = true"
+    >
+      <path
+        :d="titlePath"
+        stroke="black"
+        stroke-width="1"
+        fill="transparent"
+      />
+      <text
+        v-if="!displayTitle"
+        :x="shape.position.x + (width / 2)"
+        :y="shape.position.y + 20"
+        font-weight="bold"
+        text-anchor="middle"
+      >
+        {{ data.title }}
+      </text>
+      <foreignObject
+      v-if="displayTitle"
+        :x="shape.position.x"
+        :y="shape.position.y"
+        :width="width"
+        :height="height"
+        fill="transparent">
+        <q-input
+          v-model="data.title"
+          autofocus
+          dense
+          filled
+          type="text"
+          @blur="displayTitle = false"
+          v-on:keyup.prevent.enter="displayTitle = false"
+        ></q-input>
+      </foreignObject>
+    </g>
+    <g
+      v-for="(col, index) in data.columns"
+      v-bind:key="col.id"
+    >
+      <DbColumnSvg
+        v-model="data.columns[index]"
+        v-model:icon-width="data.iconWidth"
+        v-model:name-width="data.nameWidth"
+        v-model:type-width="data.typeWidth"
+        v-model:label-width="data.labelWidth"
+        :x="shape.position.x"
+        :y="getRowStartY(index)"
+        :width="width"
+      ></DbColumnSvg>
+    </g>
+  </g>
+</template>
+
+<script setup lang="ts">
+import { computed, onBeforeMount, ref } from 'vue';
+import { Shape } from '../../Shape';
+import { DbTable, createDbTableColumn } from './DbTable';
+import DbColumnSvg from './DbColumnSvg.vue';
+
+const displayTitle = ref(false);
+
+const height = ref(30);
+
+const props = defineProps<{
+  modelValue: Shape,
+  data: DbTable,
+}>();
+
+type Emit = {
+  (e: 'update:modelValue', value: Shape): void
+  (e: 'update:data', value: DbTable): void
+}
+const emit = defineEmits<Emit>();
+
+const shape = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+});
+
+const data = computed({
+  get: () => props.data,
+  set: (value) => emit('update:data', value),
+});
+
+const width = computed(
+  () => data.value.iconWidth
+    + data.value.nameWidth
+    + data.value.typeWidth
+    + data.value.labelWidth,
+);
+
+function handleDrag(details: {
+  delta?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (details.delta?.x) {
+    shape.value.position.x += details.delta.x;
+  }
+  if (details.delta?.y) {
+    shape.value.position.y += details.delta.y;
+  }
+}
+
+const titlePath = computed(
+  () => `M ${shape.value.position.x} ${shape.value.position.y} \
+  H ${shape.value.position.x + width.value} \
+  V ${shape.value.position.y + height.value} \
+  H ${shape.value.position.x} V ${shape.value.position.y}`,
+);
+
+function getRowStartY(index: number) {
+  return shape.value.position.y
+    + height.value
+    + data.value.columns
+      .map((col) => col.height)
+      .reduce((accumulator, current, currentIndex) => {
+        if (currentIndex >= index) {
+          return accumulator;
+        }
+        return accumulator + current;
+      }, 0);
+}
+
+onBeforeMount(() => {
+  data.value.columns.push(createDbTableColumn());
+  data.value.columns.push(createDbTableColumn());
+});
+</script>
