@@ -1,8 +1,20 @@
 <template>
   <g
-    class="prevent-select"
+    class="prevent-select no-focus-ring"
     v-touch-pan.prevent.mouse="handleDrag"
+    @click="shape.isSelected = true"
+    @blur="shape.isSelected = false"
   >
+    <SelectedSvg
+      v-if="shape.isSelected"
+      :margin="2"
+      :width="width"
+      :height="height"
+      :x="shape.position.x"
+      :y="shape.position.y"
+      stroke="red"
+      stroke-width="1"
+    />
     // title area
     <g
       @dblclick="displayTitle = true"
@@ -27,7 +39,7 @@
         :x="shape.position.x"
         :y="shape.position.y"
         :width="width"
-        :height="height"
+        :height="titleHeight"
         fill="transparent">
         <q-input
           v-model="data.title"
@@ -63,10 +75,11 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
 import DbColumnSvg from './DbColumnSvg.vue';
+import SelectedSvg from '../SelectedSvg.vue';
 
 const displayTitle = ref(false);
 
-const height = ref(30);
+const titleHeight = ref(30);
 
 const props = defineProps<{
   modelValue: Shape,
@@ -96,6 +109,13 @@ const width = computed(
     + data.value.labelWidth,
 );
 
+const height = computed(
+  () => titleHeight.value
+    + data.value.columns
+      .map((col) => col.height)
+      .reduce((accumulator, current) => accumulator + current, 0),
+);
+
 function handleDrag(details: {
   delta?: {
     x?: number,
@@ -113,13 +133,13 @@ function handleDrag(details: {
 const titlePath = computed(
   () => `M ${shape.value.position.x} ${shape.value.position.y} \
   H ${shape.value.position.x + width.value} \
-  V ${shape.value.position.y + height.value} \
+  V ${shape.value.position.y + titleHeight.value} \
   H ${shape.value.position.x} V ${shape.value.position.y}`,
 );
 
 function getRowStartY(index: number) {
   return shape.value.position.y
-    + height.value
+    + titleHeight.value
     + data.value.columns
       .map((col) => col.height)
       .reduce((accumulator, current, currentIndex) => {
@@ -135,3 +155,9 @@ onBeforeMount(() => {
   data.value.columns.push(createDbTableColumn());
 });
 </script>
+
+<style lang="scss" scoped>
+.no-focus-ring {
+  outline: none;
+}
+</style>
