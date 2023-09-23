@@ -45,17 +45,33 @@ export interface DbTable {
    */
   iconWidth: number,
   /**
+   * Minimum width of icon grid
+   */
+  minIconWidth: number,
+  /**
    * Width of table name grid
    */
   nameWidth: number,
+  /**
+   * Minimum width of name grid
+   */
+  minNameWidth: number,
   /**
    * Width of type grid
    */
   typeWidth: number,
   /**
+   * Minimum width of type grid
+   */
+  minTypeWidth: number,
+  /**
    * Width of constraint grid
    */
   labelWidth: number,
+  /**
+   * Minimum width of label grid
+   */
+  minLabelWidth: number,
 }
 
 export function createDbTable(): DbTable {
@@ -63,9 +79,13 @@ export function createDbTable(): DbTable {
     title: 'TableName',
     columns: [],
     iconWidth: 30,
+    minIconWidth: 30,
     nameWidth: 90,
+    minNameWidth: 90,
     typeWidth: 50,
+    minTypeWidth: 50,
     labelWidth: 30,
+    minLabelWidth: 30,
   };
 }
 

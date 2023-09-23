@@ -14,6 +14,7 @@
       :y="shape.position.y"
       stroke="red"
       stroke-width="1"
+      @on-resize="onResize"
     />
     // title area
     <g
@@ -62,6 +63,10 @@
         v-model:name-width="data.nameWidth"
         v-model:type-width="data.typeWidth"
         v-model:label-width="data.labelWidth"
+        :min-icon-width="data.minIconWidth"
+        :min-name-width="data.minNameWidth"
+        v-bind:min-type-width="data.minTypeWidth"
+        :min-label-width="data.minLabelWidth"
         :x="shape.position.x"
         :y="getRowStartY(index)"
         :width="width"
@@ -72,7 +77,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue';
-import { Shape } from '../../Shape';
+import { Point, Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
 import DbColumnSvg from './DbColumnSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
@@ -148,6 +153,29 @@ function getRowStartY(index: number) {
         }
         return accumulator + current;
       }, 0);
+}
+
+let originalX = 0;
+
+let originalY = 0;
+
+function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number, newHeight?: number) {
+  if (isFirst) {
+    originalX = shape.value.position.x;
+    originalY = shape.value.position.y;
+    return;
+  }
+  if (newWidth && newPosition) {
+    data.value.nameWidth = Math.max(
+      data.value.nameWidth + newWidth - width.value,
+      data.value.minNameWidth,
+    );
+    if (data.value.nameWidth > data.value.minNameWidth) {
+      shape.value.position.x = newPosition.x;
+    } else {
+      shape.value.position.x = originalX;
+    }
+  }
 }
 
 onBeforeMount(() => {

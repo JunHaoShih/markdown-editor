@@ -100,26 +100,22 @@
   />
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { DbTableColumn } from './DbTable';
 import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
 import BooleanSvg from '../BooleanSvg.vue';
 
-const minIconWidth = 30;
-
-const minNameWidth = 90;
-
-const minTypeWidth = 50;
-
-const minLabelWidth = 30;
-
 const props = defineProps<{
   modelValue: DbTableColumn,
   iconWidth: number,
+  minIconWidth: number,
   nameWidth: number,
+  minNameWidth: number,
   typeWidth: number,
+  minTypeWidth: number,
   labelWidth: number,
+  minLabelWidth: number,
   x: number,
   y: number,
   width: number,
