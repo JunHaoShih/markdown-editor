@@ -78,7 +78,7 @@
       v-if="shape.isSelected"
     >
       <rect
-        :x="shape.position.x + width + 6"
+        :x="shape.position.x + width + actionPanelOffset"
         :y="shape.position.y"
         width="24" height="24" rx="3"
         stroke="black"
@@ -88,7 +88,7 @@
       />
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        :x="shape.position.x + width + 6"
+        :x="shape.position.x + width + actionPanelOffset"
         :y="shape.position.y"
         height="24"
         viewBox="0 -960 960 960"
@@ -114,6 +114,8 @@ import SelectedSvg from '../SelectedSvg.vue';
 const displayTitle = ref(false);
 
 const titleHeight = ref(30);
+
+const actionPanelOffset = 15;
 
 const props = defineProps<{
   modelValue: Shape,
