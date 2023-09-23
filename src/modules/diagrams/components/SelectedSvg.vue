@@ -5,22 +5,42 @@
     :stroke-width="strokeWidth"
     fill="transparent"
   />
-  <line
-    :x1="topLeft.x" :y1="topLeft.y"
-    :x2="bottomLeft.x" :y2="bottomLeft.y"
-    stroke="transparent"
-    stroke-width="10"
-    v-touch-pan.mouse.horizontal="resizeLeft"
+  <g
+    v-if="leftResizable"
     style="cursor: col-resize;"
-  />
-  <line
-    :x1="topRight.x" :y1="topRight.y"
-    :x2="bottomRight.x" :y2="bottomRight.y"
-    stroke="transparent"
-    stroke-width="10"
+    v-touch-pan.mouse.horizontal="resizeLeft"
+  >
+    <circle
+      :cx="x - (margin * 4)"
+      :cy="(topLeft.y + bottomLeft.y) / 2"
+      r="5"
+      fill="#29b6f2"
+    />
+    <line
+      :x1="topLeft.x" :y1="topLeft.y"
+      :x2="bottomLeft.x" :y2="bottomLeft.y"
+      stroke="transparent"
+      stroke-width="10"
+    />
+  </g>
+  <g
+    v-if="rightResizable"
     v-touch-pan.mouse.horizontal="resizeRight"
     style="cursor: col-resize;"
-  />
+  >
+    <circle
+      :cx="x + width + (margin * 4)"
+      :cy="(topRight.y + bottomRight.y) / 2"
+      r="5"
+      fill="#29b6f2"
+    />
+    <line
+      :x1="topRight.x" :y1="topRight.y"
+      :x2="bottomRight.x" :y2="bottomRight.y"
+      stroke="transparent"
+      stroke-width="10"
+    />
+  </g>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
@@ -34,10 +54,14 @@ const props = withDefaults(defineProps<{
   width: number,
   stroke: string,
   strokeWidth: string,
-  resizable?: boolean,
+  leftResizable?: boolean,
+  rightResizable?: boolean,
 }>(), {
   margin: 0,
-  resizable: true,
+  stroke: 'black',
+  strokeWidth: '2',
+  leftResizable: false,
+  rightResizable: false,
 });
 
 type Emit = {
@@ -94,7 +118,7 @@ function resizeLeft(details: {
     y?: number,
   },
 }) {
-  if (!props.resizable) {
+  if (!props.leftResizable) {
     return;
   }
   if (details.isFirst) {
@@ -120,7 +144,7 @@ function resizeRight(details: {
     y?: number,
   },
 }) {
-  if (!props.resizable) {
+  if (!props.rightResizable) {
     return;
   }
   if (details.isFirst) {
