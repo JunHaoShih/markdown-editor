@@ -13,8 +13,10 @@
       :x="shape.position.x"
       :y="shape.position.y"
       stroke="red"
-      stroke-width="1"
+      stroke-width="2"
       @on-resize="onResize"
+      :left-resizable="true"
+      :right-resizable="true"
     />
     // title area
     <g
@@ -157,12 +159,9 @@ function getRowStartY(index: number) {
 
 let originalX = 0;
 
-let originalY = 0;
-
-function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number, newHeight?: number) {
+function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
   if (isFirst) {
     originalX = shape.value.position.x;
-    originalY = shape.value.position.y;
     return;
   }
   if (newWidth && newPosition) {
