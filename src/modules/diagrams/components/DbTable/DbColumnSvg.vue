@@ -100,7 +100,7 @@
   />
 </template>
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { DbTableColumn } from './DbTable';
 import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
