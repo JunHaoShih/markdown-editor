@@ -74,11 +74,38 @@
         :width="width"
       ></DbColumnSvg>
     </g>
+    <g
+      v-if="shape.isSelected"
+    >
+      <rect
+        :x="shape.position.x + width + 6"
+        :y="shape.position.y"
+        width="24" height="24" rx="3"
+        stroke="black"
+        stroke-width="0.5"
+        fill="transparent"
+        @click="addNewRow"
+      />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        :x="shape.position.x + width + 6"
+        :y="shape.position.y"
+        height="24"
+        viewBox="0 -960 960 960"
+        width="24"
+      >
+        <path
+          d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
+          fill="#29b6f2"
+          @click="addNewRow"
+        />
+      </svg>
+    </g>
   </g>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Point, Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
 import DbColumnSvg from './DbColumnSvg.vue';
@@ -177,10 +204,9 @@ function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
   }
 }
 
-onBeforeMount(() => {
+function addNewRow() {
   data.value.columns.push(createDbTableColumn());
-  data.value.columns.push(createDbTableColumn());
-});
+}
 </script>
 
 <style lang="scss" scoped>
