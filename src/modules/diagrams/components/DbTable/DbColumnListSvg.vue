@@ -88,6 +88,7 @@ function unselectAll() {
   data.value.columns.forEach((col) => {
     selectedMap.value[col.id] = false;
   });
+  selectedIdsComp.value.length = 0;
 }
 
 defineExpose({
