@@ -4,7 +4,7 @@
   >
     <SelectedSvg
       v-if="isSelected"
-      :margin="-1"
+      :margin="-3"
       :width="width"
       :height="modelValue.height"
       :x="x"

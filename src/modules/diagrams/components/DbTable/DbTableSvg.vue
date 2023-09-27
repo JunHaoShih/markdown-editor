@@ -6,7 +6,7 @@
   >
     <SelectedSvg
       v-if="shape.isSelected"
-      :margin="2"
+      :margin="5"
       :width="width"
       :height="height"
       :x="shape.position.x"
@@ -137,7 +137,7 @@ const displayTitle = ref(false);
 
 const titleHeight = ref(30);
 
-const actionPanelOffset = 15;
+const actionPanelOffset = 25;
 
 const actionBtnSideLength = 24;
 

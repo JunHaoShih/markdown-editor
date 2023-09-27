@@ -4,6 +4,8 @@
     :stroke="stroke"
     :stroke-width="strokeWidth"
     fill="transparent"
+    stroke-linecap="round"
+    stroke-dasharray="5,5"
   />
   <g
     v-if="leftResizable"
