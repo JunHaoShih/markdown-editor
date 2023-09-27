@@ -25,10 +25,6 @@ export interface DbTableColumn {
    * Row height(Because db column is displayed as row, so it's row height)
    */
   height: number,
-  /**
-   * Is editing
-   */
-  isEditing?: boolean,
 }
 
 export interface DbTable {

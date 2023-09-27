@@ -1,0 +1,85 @@
+<template>
+  <g
+    v-for="(col, index) in data.columns"
+    v-bind:key="col.id"
+  >
+    <DbColumnSvg
+      v-model="data.columns[index]"
+      v-model:icon-width="data.iconWidth"
+      v-model:name-width="data.nameWidth"
+      v-model:type-width="data.typeWidth"
+      v-model:label-width="data.labelWidth"
+      :min-icon-width="data.minIconWidth"
+      :min-name-width="data.minNameWidth"
+      v-bind:min-type-width="data.minTypeWidth"
+      :min-label-width="data.minLabelWidth"
+      :x="x"
+      :y="getRowStartY(index)"
+      :width="width"
+      v-model:is-selected="selectedMap[data.columns[index].id]"
+      @on-selected-change="onSelectedChange"
+    ></DbColumnSvg>
+  </g>
+</template>
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { DbTable } from './DbTable';
+import DbColumnSvg from './DbColumnSvg.vue';
+
+const selectedMap = ref<Record<string, boolean>>({});
+
+const props = defineProps<{
+  modelValue: DbTable,
+  x: number,
+  y: number,
+}>();
+
+type Emit = {
+  (e: 'update:modelValue', value: DbTable): void
+}
+const emit = defineEmits<Emit>();
+
+const data = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+});
+
+const width = computed(
+  () => data.value.iconWidth
+    + data.value.nameWidth
+    + data.value.typeWidth
+    + data.value.labelWidth,
+);
+
+function getRowStartY(index: number) {
+  return props.y
+    + data.value.columns
+      .map((col) => col.height)
+      .reduce((accumulator, current, currentIndex) => {
+        if (currentIndex >= index) {
+          return accumulator;
+        }
+        return accumulator + current;
+      }, 0);
+}
+
+function onSelectedChange(id: string, isSelected: boolean) {
+  if (isSelected) {
+    data.value.columns.forEach((col) => {
+      if (col.id !== id) {
+        selectedMap.value[col.id] = false;
+      }
+    });
+  }
+}
+
+function unselectAll() {
+  data.value.columns.forEach((col) => {
+    selectedMap.value[col.id] = false;
+  });
+}
+
+defineExpose({
+  unselectAll,
+});
+</script>

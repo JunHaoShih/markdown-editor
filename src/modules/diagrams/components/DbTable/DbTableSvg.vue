@@ -3,7 +3,7 @@
     class="prevent-select no-focus-ring"
     v-touch-pan.prevent.mouse="handleDrag"
     @click="shape.isSelected = true"
-    @blur="shape.isSelected = false"
+    @blur="unselectAll"
   >
     <SelectedSvg
       v-if="shape.isSelected"
@@ -38,7 +38,7 @@
         {{ data.title }}
       </text>
       <foreignObject
-      v-if="displayTitle"
+        v-if="displayTitle"
         :x="shape.position.x"
         :y="shape.position.y"
         :width="width"
@@ -55,25 +55,12 @@
         ></q-input>
       </foreignObject>
     </g>
-    <g
-      v-for="(col, index) in data.columns"
-      v-bind:key="col.id"
-    >
-      <DbColumnSvg
-        v-model="data.columns[index]"
-        v-model:icon-width="data.iconWidth"
-        v-model:name-width="data.nameWidth"
-        v-model:type-width="data.typeWidth"
-        v-model:label-width="data.labelWidth"
-        :min-icon-width="data.minIconWidth"
-        :min-name-width="data.minNameWidth"
-        v-bind:min-type-width="data.minTypeWidth"
-        :min-label-width="data.minLabelWidth"
-        :x="shape.position.x"
-        :y="getRowStartY(index)"
-        :width="width"
-      ></DbColumnSvg>
-    </g>
+    <DbColumnList
+      ref="dbColumnSvgs"
+      v-model="data"
+      :x="shape.position.x"
+      :y="shape.position.y + titleHeight"
+    ></DbColumnList>
     <g
       v-if="shape.isSelected"
     >
@@ -108,8 +95,10 @@
 import { computed, ref } from 'vue';
 import { Point, Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
-import DbColumnSvg from './DbColumnSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
+import DbColumnList from './DbColumnListSvg.vue';
+
+const dbColumnSvgs = ref<InstanceType<typeof DbColumnList>>();
 
 const displayTitle = ref(false);
 
@@ -173,19 +162,6 @@ const titlePath = computed(
   H ${shape.value.position.x} V ${shape.value.position.y}`,
 );
 
-function getRowStartY(index: number) {
-  return shape.value.position.y
-    + titleHeight.value
-    + data.value.columns
-      .map((col) => col.height)
-      .reduce((accumulator, current, currentIndex) => {
-        if (currentIndex >= index) {
-          return accumulator;
-        }
-        return accumulator + current;
-      }, 0);
-}
-
 let originalX = 0;
 
 function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
@@ -208,6 +184,11 @@ function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
 
 function addNewRow() {
   data.value.columns.push(createDbTableColumn());
+}
+
+function unselectAll() {
+  shape.value.isSelected = false;
+  dbColumnSvgs.value?.unselectAll();
 }
 </script>
 
