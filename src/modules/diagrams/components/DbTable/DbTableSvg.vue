@@ -1,7 +1,6 @@
 <template>
   <g
     class="prevent-select no-focus-ring"
-    v-touch-pan.prevent.mouse="handleDrag"
     @click="shape.isSelected = true"
     @blur="unselectAll"
   >
@@ -18,85 +17,119 @@
       :left-resizable="true"
       :right-resizable="true"
     />
-    // title area
     <g
-      @dblclick="displayTitle = true"
+      v-touch-pan.prevent.mouse="handleDrag"
     >
-      <path
-        :d="titlePath"
-        stroke="black"
-        stroke-width="1"
-        fill="transparent"
-      />
-      <text
-        v-if="!displayTitle"
-        :x="shape.position.x + (width / 2)"
-        :y="shape.position.y + 20"
-        font-weight="bold"
-        text-anchor="middle"
+      // title area
+      <g
+        @dblclick="displayTitle = true"
       >
-        {{ data.title }}
-      </text>
-      <foreignObject
-        v-if="displayTitle"
+        <path
+          :d="titlePath"
+          stroke="black"
+          stroke-width="1"
+          fill="transparent"
+        />
+        <text
+          v-if="!displayTitle"
+          :x="shape.position.x + (width / 2)"
+          :y="shape.position.y + 20"
+          font-weight="bold"
+          text-anchor="middle"
+        >
+          {{ data.title }}
+        </text>
+        <foreignObject
+          v-if="displayTitle"
+          :x="shape.position.x"
+          :y="shape.position.y"
+          :width="width"
+          :height="titleHeight"
+          fill="transparent">
+          <q-input
+            v-model="data.title"
+            autofocus
+            dense
+            filled
+            type="text"
+            @blur="displayTitle = false"
+            v-on:keyup.prevent.enter="displayTitle = false"
+          ></q-input>
+        </foreignObject>
+      </g>
+      <DbColumnList
+        ref="dbColumnSvgs"
+        v-model="data"
         :x="shape.position.x"
-        :y="shape.position.y"
-        :width="width"
-        :height="titleHeight"
-        fill="transparent">
-        <q-input
-          v-model="data.title"
-          autofocus
-          dense
-          filled
-          type="text"
-          @blur="displayTitle = false"
-          v-on:keyup.prevent.enter="displayTitle = false"
-        ></q-input>
-      </foreignObject>
+        :y="shape.position.y + titleHeight"
+        v-model:selected-ids="selectedIds"
+      ></DbColumnList>
     </g>
-    <DbColumnList
-      ref="dbColumnSvgs"
-      v-model="data"
-      :x="shape.position.x"
-      :y="shape.position.y + titleHeight"
-    ></DbColumnList>
+    // Action panel
     <g
       v-if="shape.isSelected"
     >
-      <rect
-        :x="shape.position.x + width + actionPanelOffset"
-        :y="shape.position.y"
-        width="24" height="24" rx="3"
-        stroke="black"
-        stroke-width="0.5"
-        fill="transparent"
+      <g
         @click="addNewRow"
-      />
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        :x="shape.position.x + width + actionPanelOffset"
-        :y="shape.position.y"
-        height="24"
-        viewBox="0 -960 960 960"
-        width="24"
+        :transform="`translate(${actionPanelX}, ${shape.position.y})`"
       >
-        <path
-          d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
-          fill="#29b6f2"
-          @click="addNewRow"
+        <rect
+          :width="actionBtnSideLength" :height="actionBtnSideLength" :rx="actionBtnRx"
+          stroke="black"
+          stroke-width="0.5"
+          fill="transparent"
         />
-      </svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          :height="actionBtnSideLength"
+          viewBox="0 -960 960 960"
+          :width="actionBtnSideLength"
+        >
+          <path
+            d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
+            fill="#29b6f2"
+          />
+        </svg>
+      </g>
+      <g
+        v-if="selectedIds.length > 0"
+        :transform="`translate(${actionPanelX}, ${removeBtnY})`"
+        @click="deleteRow"
+      >
+        <rect
+          :width="actionBtnSideLength" :height="actionBtnSideLength" :rx="actionBtnRx"
+          stroke="black"
+          stroke-width="0.5"
+          fill="transparent"
+        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          :height="actionBtnSideLength"
+          viewBox="0 -960 960 960"
+          :width="actionBtnSideLength"
+        >
+          <path
+            d="M200-440v-80h560v80H200Z"
+            fill="red"
+          />
+        </svg>
+      </g>
     </g>
   </g>
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Point, Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
 import SelectedSvg from '../SelectedSvg.vue';
 import DbColumnList from './DbColumnListSvg.vue';
+
+const $q = useQuasar();
+
+const i18n = useI18n();
 
 const dbColumnSvgs = ref<InstanceType<typeof DbColumnList>>();
 
@@ -105,6 +138,14 @@ const displayTitle = ref(false);
 const titleHeight = ref(30);
 
 const actionPanelOffset = 15;
+
+const actionBtnSideLength = 24;
+
+const actionBtnRx = 3;
+
+const actionBtnOffset = 5;
+
+const selectedIds = ref<string[]>([]);
 
 const props = defineProps<{
   modelValue: Shape,
@@ -155,11 +196,25 @@ function handleDrag(details: {
   }
 }
 
+/**
+ * Path of erd table grid
+ */
 const titlePath = computed(
   () => `M ${shape.value.position.x} ${shape.value.position.y} \
   H ${shape.value.position.x + width.value} \
   V ${shape.value.position.y + titleHeight.value} \
   H ${shape.value.position.x} V ${shape.value.position.y}`,
+);
+
+/**
+ * Starting point(x) of action panel
+ */
+const actionPanelX = computed(
+  () => shape.value.position.x + width.value + actionPanelOffset,
+);
+
+const removeBtnY = computed(
+  () => shape.value.position.y + actionBtnSideLength + actionBtnOffset,
 );
 
 let originalX = 0;
@@ -189,6 +244,22 @@ function addNewRow() {
 function unselectAll() {
   shape.value.isSelected = false;
   dbColumnSvgs.value?.unselectAll();
+}
+
+function deleteRow() {
+  let index = 0;
+  selectedIds.value.forEach((colId) => {
+    index = data.value.columns.findIndex((col) => col.id === colId);
+    if (index === -1) {
+      $q.notify({
+        type: 'error',
+        message: i18n.t('unknownError'),
+      });
+      return;
+    }
+    data.value.columns.splice(index, 1);
+  });
+  selectedIds.value.length = 0;
 }
 </script>
 

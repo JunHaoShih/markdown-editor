@@ -30,18 +30,25 @@ const selectedMap = ref<Record<string, boolean>>({});
 
 const props = defineProps<{
   modelValue: DbTable,
+  selectedIds: string[],
   x: number,
   y: number,
 }>();
 
 type Emit = {
   (e: 'update:modelValue', value: DbTable): void
+  (e: 'update:selectedIds', value: string[]): void
 }
 const emit = defineEmits<Emit>();
 
 const data = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
+});
+
+const selectedIdsComp = computed({
+  get: () => props.selectedIds,
+  set: (value) => emit('update:selectedIds', value),
 });
 
 const width = computed(
@@ -70,6 +77,10 @@ function onSelectedChange(id: string, isSelected: boolean) {
         selectedMap.value[col.id] = false;
       }
     });
+    selectedIdsComp.value.length = 0;
+    if (!selectedIdsComp.value.find((colId) => colId === id)) {
+      selectedIdsComp.value.push(id);
+    }
   }
 }
 
