@@ -1,6 +1,6 @@
 <template>
   <g
-    @click="isSelectedComp = true"
+    @click="onSelected"
   >
     <SelectedSvg
       v-if="isSelected"
@@ -116,7 +116,7 @@
   </g>
 </template>
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { DbTableColumn } from './DbTable';
 import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
@@ -136,7 +136,7 @@ const props = defineProps<{
   x: number,
   y: number,
   width: number,
-  isSelected?: boolean,
+  selectedIds: string[],
 }>();
 
 type Emit = {
@@ -146,7 +146,7 @@ type Emit = {
   (e: 'update:typeWidth', value: number): void
   (e: 'update:labelWidth', value: number): void
   (e: 'update:isSelected', value: boolean): void
-  (e: 'onSelectedChange', id: string, isSelected: boolean): void
+  (e: 'onSelected', id: string): void
 }
 const emit = defineEmits<Emit>();
 
@@ -175,10 +175,9 @@ const labelWidthComp = computed({
   set: (value) => emit('update:labelWidth', value),
 });
 
-const isSelectedComp = computed({
-  get: () => props.isSelected,
-  set: (value) => emit('update:isSelected', value),
-});
+const isSelected = computed(
+  (): boolean => !!props.selectedIds.find((id) => id === props.modelValue.id),
+);
 
 function getNameX() {
   return props.x + iconWidthComp.value;
@@ -202,7 +201,7 @@ function getRowBottomPath() {
   return `M ${startX} ${startY} H ${startX + props.width}`;
 }
 
-watch(isSelectedComp, (newValue) => {
-  emit('onSelectedChange', dbColumn.value.id, newValue);
-});
+function onSelected() {
+  emit('onSelected', dbColumn.value.id);
+}
 </script>

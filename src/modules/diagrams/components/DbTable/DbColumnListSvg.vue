@@ -16,17 +16,15 @@
       :x="x"
       :y="getRowStartY(index)"
       :width="width"
-      v-model:is-selected="selectedMap[data.columns[index].id]"
-      @on-selected-change="onSelectedChange"
+      :selected-ids="selectedIds"
+      @on-selected="onSelectedChange"
     ></DbColumnSvg>
   </g>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { DbTable } from './DbTable';
 import DbColumnSvg from './DbColumnSvg.vue';
-
-const selectedMap = ref<Record<string, boolean>>({});
 
 const props = defineProps<{
   modelValue: DbTable,
@@ -70,24 +68,14 @@ function getRowStartY(index: number) {
       }, 0);
 }
 
-function onSelectedChange(id: string, isSelected: boolean) {
-  if (isSelected) {
-    data.value.columns.forEach((col) => {
-      if (col.id !== id) {
-        selectedMap.value[col.id] = false;
-      }
-    });
-    selectedIdsComp.value.length = 0;
-    if (!selectedIdsComp.value.find((colId) => colId === id)) {
-      selectedIdsComp.value.push(id);
-    }
+function onSelectedChange(id: string) {
+  selectedIdsComp.value.length = 0;
+  if (!selectedIdsComp.value.find((colId) => colId === id)) {
+    selectedIdsComp.value.push(id);
   }
 }
 
 function unselectAll() {
-  data.value.columns.forEach((col) => {
-    selectedMap.value[col.id] = false;
-  });
   selectedIdsComp.value.length = 0;
 }
 

@@ -247,9 +247,14 @@ function unselectAll() {
 }
 
 function deleteRow() {
-  let index = 0;
+  if (selectedIds.value.length <= 0) {
+    return;
+  }
+  let firstIndex = -1;
+
+  // Delete rows
   selectedIds.value.forEach((colId) => {
-    index = data.value.columns.findIndex((col) => col.id === colId);
+    const index = data.value.columns.findIndex((col) => col.id === colId);
     if (index === -1) {
       $q.notify({
         type: 'error',
@@ -257,9 +262,23 @@ function deleteRow() {
       });
       return;
     }
+    // Get first index
+    if (firstIndex === -1) {
+      firstIndex = index;
+    }
     data.value.columns.splice(index, 1);
   });
+  // Clear selected ids
   selectedIds.value.length = 0;
+
+  if (firstIndex === -1 || data.value.columns.length === 0) {
+    return;
+  }
+  if (firstIndex >= data.value.columns.length) {
+    selectedIds.value.push(data.value.columns[data.value.columns.length - 1].id);
+  } else {
+    selectedIds.value.push(data.value.columns[firstIndex].id);
+  }
 }
 </script>
 
