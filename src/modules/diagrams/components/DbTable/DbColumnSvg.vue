@@ -126,11 +126,11 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { DbTableColumn } from './DbTable';
 import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
 import BooleanSvg from '../BooleanSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
+import { DbTableColumn } from './DbTable';
 
 const props = defineProps<{
   modelValue: DbTableColumn,

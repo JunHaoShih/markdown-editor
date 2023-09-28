@@ -1,11 +1,11 @@
 <template>
   <g
     class="prevent-select no-focus-ring"
-    @click="shape.isSelected = true"
+    @click="isSelected = true"
     @blur="unselectAll"
   >
     <SelectedSvg
-      v-if="shape.isSelected"
+      v-if="isSelected"
       :margin="5"
       :width="width"
       :height="height"
@@ -73,7 +73,7 @@
     </g>
     // Action panel
     <g
-      v-if="shape.isSelected"
+      v-if="isSelected"
     >
       <ActionBtnSvgVue
         v-for="(btnInfo, index) in actionBtns"
@@ -100,6 +100,8 @@ import { DbTable, createDbTableColumn } from './DbTable';
 import SelectedSvg from '../SelectedSvg.vue';
 import DbColumnList from './DbColumnListSvg.vue';
 import ActionBtnSvgVue from '../ActionBtnSvg.vue';
+
+const isSelected = ref(false);
 
 const $q = useQuasar();
 
@@ -216,7 +218,7 @@ function addNewRow() {
 }
 
 function unselectAll() {
-  shape.value.isSelected = false;
+  isSelected.value = false;
   dbColumnSvgs.value?.unselectAll();
 }
 

@@ -23,8 +23,8 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { DbTable } from './DbTable';
 import DbColumnSvg from './DbColumnSvg.vue';
+import { DbTable } from './DbTable';
 
 const props = defineProps<{
   modelValue: DbTable,

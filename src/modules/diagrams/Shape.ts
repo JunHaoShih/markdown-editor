@@ -11,7 +11,6 @@ export interface Shape {
   id: string,
   type: ShapeType,
   position: Point,
-  isSelected: boolean,
 }
 
 /**
@@ -28,6 +27,5 @@ export function createShape(x: number, y: number): Shape {
       x,
       y,
     },
-    isSelected: false,
   };
 }
