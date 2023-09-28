@@ -20,7 +20,7 @@ export interface DbTableColumn {
   /**
    * Unique constraints
    */
-  uniqueKeys: string[],
+  uniqueKeys: string,
   /**
    * Row height(Because db column is displayed as row, so it's row height)
    */
@@ -91,7 +91,7 @@ export function createDbTableColumn(): DbTableColumn {
     name: 'column',
     isPrimary: true,
     type: 'int',
-    uniqueKeys: [],
+    uniqueKeys: '',
     height: 30,
   };
 }

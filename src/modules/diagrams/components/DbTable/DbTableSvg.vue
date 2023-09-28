@@ -11,7 +11,7 @@
       :height="height"
       :x="shape.position.x"
       :y="shape.position.y"
-      stroke="red"
+      stroke="grey"
       stroke-width="2"
       @on-resize="onResize"
       :left-resizable="true"
@@ -64,6 +64,12 @@
         :y="shape.position.y + titleHeight"
         v-model:selected-ids="selectedIds"
       ></DbColumnList>
+      <line
+        :x1="shape.position.x" :y1="shape.position.y + height"
+        :x2="shape.position.x + width" :y2="shape.position.y + height"
+        stroke="black"
+        stroke-width="1"
+      />
     </g>
     // Action panel
     <g

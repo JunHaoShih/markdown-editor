@@ -49,6 +49,7 @@
       stroke="black"
       stroke-width="1"
       fill="transparent"
+      stroke-dasharray="5,5"
     />
     // Table name
     <TextSvg
@@ -64,6 +65,14 @@
       :x="getTypeX()"
       :y="y"
       :width="typeWidth"
+      :height="dbColumn.height"
+    />
+    // label name
+    <TextSvg
+      v-model="dbColumn.uniqueKeys"
+      :x="getLabelX()"
+      :y="y"
+      :width="labelWidth"
       :height="dbColumn.height"
     />
     // Left line
