@@ -69,51 +69,18 @@
     <g
       v-if="shape.isSelected"
     >
-      <g
-        @click="addNewRow"
-        :transform="`translate(${actionPanelX}, ${shape.position.y})`"
-      >
-        <rect
-          :width="actionBtnSideLength" :height="actionBtnSideLength" :rx="actionBtnRx"
-          stroke="black"
-          stroke-width="0.5"
-          fill="transparent"
-        />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          :height="actionBtnSideLength"
-          viewBox="0 -960 960 960"
-          :width="actionBtnSideLength"
-        >
-          <path
-            d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"
-            fill="#29b6f2"
-          />
-        </svg>
-      </g>
-      <g
-        v-if="selectedIds.length > 0"
-        :transform="`translate(${actionPanelX}, ${removeBtnY})`"
-        @click="deleteRow"
-      >
-        <rect
-          :width="actionBtnSideLength" :height="actionBtnSideLength" :rx="actionBtnRx"
-          stroke="black"
-          stroke-width="0.5"
-          fill="transparent"
-        />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          :height="actionBtnSideLength"
-          viewBox="0 -960 960 960"
-          :width="actionBtnSideLength"
-        >
-          <path
-            d="M200-440v-80h560v80H200Z"
-            fill="red"
-          />
-        </svg>
-      </g>
+      <ActionBtnSvgVue
+        v-for="(btnInfo, index) in actionBtns"
+        v-bind:key="btnInfo.name"
+        :x="actionPanelX"
+        :y="getActionBtnY(index)"
+        :rx="actionBtnRx"
+        :width="actionBtnSideLength"
+        :height="actionBtnSideLength"
+        :path="btnInfo.path"
+        :fill="btnInfo.fill"
+        @click="btnInfo.onClick"
+      ></ActionBtnSvgVue>
     </g>
   </g>
 </template>
@@ -126,6 +93,7 @@ import { Point, Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
 import SelectedSvg from '../SelectedSvg.vue';
 import DbColumnList from './DbColumnListSvg.vue';
+import ActionBtnSvgVue from '../ActionBtnSvg.vue';
 
 const $q = useQuasar();
 
@@ -213,9 +181,9 @@ const actionPanelX = computed(
   () => shape.value.position.x + width.value + actionPanelOffset,
 );
 
-const removeBtnY = computed(
-  () => shape.value.position.y + actionBtnSideLength + actionBtnOffset,
-);
+function getActionBtnY(index: number) {
+  return shape.value.position.y + index * (actionBtnSideLength + actionBtnOffset);
+}
 
 let originalX = 0;
 
@@ -246,6 +214,9 @@ function unselectAll() {
   dbColumnSvgs.value?.unselectAll();
 }
 
+/**
+ * Delete rows and select adjacent row
+ */
 function deleteRow() {
   if (selectedIds.value.length <= 0) {
     return;
@@ -274,12 +245,117 @@ function deleteRow() {
   if (firstIndex === -1 || data.value.columns.length === 0) {
     return;
   }
+  // select adjacent row
   if (firstIndex >= data.value.columns.length) {
     selectedIds.value.push(data.value.columns[data.value.columns.length - 1].id);
   } else {
     selectedIds.value.push(data.value.columns[firstIndex].id);
   }
 }
+
+function addNewFrontRow() {
+  if (selectedIds.value.length <= 0) {
+    return;
+  }
+  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  if (index === -1) {
+    return;
+  }
+  data.value.columns.splice(index, 0, createDbTableColumn());
+}
+
+function addNewEndRow() {
+  if (selectedIds.value.length <= 0) {
+    return;
+  }
+  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  if (index === -1) {
+    return;
+  }
+  data.value.columns.splice(index + 1, 0, createDbTableColumn());
+}
+
+function moveUp() {
+  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  if (index < 1) {
+    return;
+  }
+  const temp = data.value.columns[index];
+  data.value.columns[index] = data.value.columns[index - 1];
+  data.value.columns[index - 1] = temp;
+}
+
+function moveDown() {
+  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  if (index >= data.value.columns.length - 1) {
+    return;
+  }
+  const temp = data.value.columns[index];
+  data.value.columns[index] = data.value.columns[index + 1];
+  data.value.columns[index + 1] = temp;
+}
+
+interface BtnInfo {
+  name: string,
+  path: string,
+  fill: string,
+  display: boolean,
+  onClick: (() => void),
+}
+
+const actionBtns = computed(
+  (): BtnInfo[] => {
+    const infos: BtnInfo[] = [
+      {
+        name: 'Add',
+        path: 'M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z',
+        fill: '#29b6f2',
+        display: true,
+        onClick: addNewRow,
+      },
+      {
+        name: 'Remove',
+        path: 'M200-440v-80h560v80H200Z',
+        fill: 'red',
+        display: selectedIds.value.length > 0,
+        onClick: deleteRow,
+      },
+      {
+        name: 'Insert front',
+        path: 'M744-160 280-624v264h-80v-400h400v80H336l464 464-56 56Z',
+        fill: '#29b6f2',
+        display: selectedIds.value.length > 0,
+        onClick: addNewFrontRow,
+      },
+      {
+        name: 'Insert end',
+        path: 'M200-200v-400h80v264l464-464 56 56-464 464h264v80H200Z',
+        fill: '#29b6f2',
+        display: selectedIds.value.length > 0,
+        onClick: addNewEndRow,
+      },
+      {
+        name: 'Move up',
+        path: 'M440-80v-647L256-544l-56-56 280-280 280 280-56 57-184-184v647h-80Z',
+        fill: 'black',
+        display: selectedIds.value.length === 1
+          && data.value.columns.findIndex((col) => col.id === selectedIds.value[0]) !== 0,
+        onClick: moveUp,
+      },
+      {
+        name: 'Move down',
+        path: 'M480-80 200-360l56-56 184 183v-647h80v647l184-184 56 57L480-80Z',
+        fill: 'black',
+        display: selectedIds.value.length === 1
+          && data.value.columns.findIndex(
+            (col) => col.id === selectedIds.value[0],
+          ) < data.value.columns.length - 1,
+        onClick: moveDown,
+      },
+    ];
+    return infos.filter((btnInfo) => btnInfo.display);
+  },
+);
 </script>
 
 <style lang="scss" scoped>
