@@ -6,7 +6,7 @@
   >
     <SelectedSvg
       v-if="isSelected"
-      :margin="5"
+      :margin="3"
       :width="width"
       :height="height"
       :x="shape.position.x"
@@ -75,7 +75,7 @@
     <g
       v-if="isSelected"
     >
-      <ActionBtnSvgVue
+      <ActionBtnSvg
         v-for="(btnInfo, index) in actionBtns"
         v-bind:key="btnInfo.name"
         :x="actionPanelX"
@@ -86,8 +86,19 @@
         :path="btnInfo.path"
         :fill="btnInfo.fill"
         @click="btnInfo.onClick"
-      ></ActionBtnSvgVue>
+      ></ActionBtnSvg>
     </g>
+    <template
+      v-for="(col, index) in data.columns"
+      v-bind:key="col.id"
+    >
+      <ConnectionHintSvg
+        v-if="!!selectedIds.find((colId) => colId === col.id)"
+        :x="shape.position.x" :y="getRowStartY(index)"
+        :width="width"
+        :height="col.height"
+      />
+    </template>
   </g>
 </template>
 
@@ -99,7 +110,8 @@ import { Point, Shape } from '../../Shape';
 import { DbTable, createDbTableColumn } from './DbTable';
 import SelectedSvg from '../SelectedSvg.vue';
 import DbColumnList from './DbColumnListSvg.vue';
-import ActionBtnSvgVue from '../ActionBtnSvg.vue';
+import ActionBtnSvg from '../ActionBtnSvg.vue';
+import ConnectionHintSvg from '../ConnectionHintSvg.vue';
 
 const isSelected = ref(false);
 
@@ -113,7 +125,7 @@ const displayTitle = ref(false);
 
 const titleHeight = ref(30);
 
-const actionPanelOffset = 25;
+const actionPanelOffset = 45;
 
 const actionBtnSideLength = 24;
 
@@ -309,6 +321,19 @@ interface BtnInfo {
   fill: string,
   display: boolean,
   onClick: (() => void),
+}
+
+function getRowStartY(index: number) {
+  return shape.value.position.y
+    + titleHeight.value
+    + data.value.columns
+      .map((col) => col.height)
+      .reduce((accumulator, current, currentIndex) => {
+        if (currentIndex >= index) {
+          return accumulator;
+        }
+        return accumulator + current;
+      }, 0);
 }
 
 const actionBtns = computed(

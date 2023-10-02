@@ -22,7 +22,7 @@
       :x1="topLeft.x" :y1="topLeft.y"
       :x2="bottomLeft.x" :y2="bottomLeft.y"
       stroke="transparent"
-      stroke-width="10"
+      stroke-width="5"
     />
   </g>
   <g
@@ -40,7 +40,7 @@
       :x1="topRight.x" :y1="topRight.y"
       :x2="bottomRight.x" :y2="bottomRight.y"
       stroke="transparent"
-      stroke-width="10"
+      stroke-width="5"
     />
   </g>
 </template>
