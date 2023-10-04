@@ -6,6 +6,13 @@
     <DbColumnSvg
       :controller="controller.findColumn(col.id)"
       :width="width"
+      v-model:icon-width="data.iconWidth"
+      v-model:name-width="data.nameWidth"
+      v-model:type-width="data.typeWidth"
+      v-model:label-width="data.labelWidth"
+      :min-icon-width="data.minIconWidth"
+      :min-name-width="data.minNameWidth"
+      v-bind:min-type-width="data.minTypeWidth"
       :selected-ids="selectedIds"
       @on-selected="onSelectedChange"
     ></DbColumnSvg>
