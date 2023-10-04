@@ -6,7 +6,7 @@
       v-if="isSelected"
       :margin="-3"
       :width="width"
-      :height="modelValue.height"
+      :height="controller.getHeight()"
       :x="x"
       :y="y"
       stroke="#29b6f2"
@@ -19,7 +19,7 @@
       v-model="dbColumn.isPrimary"
       :x="x + 2"
       :y="y + 3"
-      :height="dbColumn.height"
+      :height="controller.getHeight()"
       :width="iconWidth"
     >
       <template v-slot:display="props">
@@ -53,7 +53,7 @@
     />
     // Table name
     <TextSvg
-      v-model="dbColumn.name"
+      v-model="name"
       :x="getNameX()"
       :y="y"
       :width="nameWidth"
@@ -89,7 +89,7 @@
       :y="y"
       stroke="black"
       strokeWidth="1"
-      :height="modelValue.height"
+      :height="controller.getHeight()"
       :minWidth="minIconWidth"
     />
     // Name column resize line
@@ -99,7 +99,7 @@
       :y="y"
       stroke="black"
       strokeWidth="1"
-      :height="modelValue.height"
+      :height="controller.getHeight()"
       :minWidth="minNameWidth"
     />
     // Type column resize line
@@ -109,7 +109,7 @@
       :y="y"
       stroke="black"
       strokeWidth="1"
-      :height="modelValue.height"
+      :height="controller.getHeight()"
       :minWidth="minTypeWidth"
     />
     // Label column resize line
@@ -119,7 +119,7 @@
       :y="y"
       stroke="black"
       strokeWidth="1"
-      :height="modelValue.height"
+      :height="controller.getHeight()"
       :minWidth="minLabelWidth"
     />
   </g>
@@ -130,10 +130,10 @@ import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
 import BooleanSvg from '../BooleanSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
-import { DbTableColumn } from './DbTable';
+import { DbColumnController } from '../../services/diagramService';
 
 const props = defineProps<{
-  modelValue: DbTableColumn,
+  controller: DbColumnController,
   iconWidth: number,
   minIconWidth: number,
   nameWidth: number,
@@ -149,7 +149,6 @@ const props = defineProps<{
 }>();
 
 type Emit = {
-  (e: 'update:modelValue', value: DbTableColumn): void
   (e: 'update:iconWidth', value: number): void
   (e: 'update:nameWidth', value: number): void
   (e: 'update:typeWidth', value: number): void
@@ -159,9 +158,9 @@ type Emit = {
 }
 const emit = defineEmits<Emit>();
 
-const dbColumn = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
+const name = computed({
+  get: () => props.controller.getName(),
+  set: (value) => props.controller.setName(value),
 });
 
 const iconWidthComp = computed({

@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia';
+import { DiagramController } from '../services/diagramService';
 
-const useDiagramStore = defineStore('diagram', {
-  state: () => ({
-    touchState: '',
+interface DiagramStore {
+  diagram: DiagramController,
+}
+
+export const useDiagramStore = defineStore('diagram', {
+  state: (): DiagramStore => ({
+    diagram: {} as DiagramController,
   }),
 });

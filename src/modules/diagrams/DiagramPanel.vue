@@ -1,29 +1,24 @@
 <template>
   <svg>
     <DbTableSvg
-      v-for="(item, index) in shapes"
+      v-for="(item, index) in diagramStore.shapes"
       v-bind:key="item.id"
-      v-model="shapes[index]"
-      v-model:data="dbTables[item.id]"
+      v-model="diagramStore.shapes[index]"
+      v-model:data="diagramStore.dbTables[item.id]"
     ></DbTableSvg>
   </svg>
 </template>
-<script setup lang="ts">import { onBeforeMount, ref } from 'vue';
-import { DbTable, createDbTable } from './components/dbTable/DbTable';
-import { Shape, createShape } from './Shape';
+<script setup lang="ts">import { onBeforeMount } from 'vue';
+import { createDbTable } from './components/dbTable/DbTable';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
+import { useDiagramStore } from './stores/diagramStore';
 
-const shapes = ref<Shape[]>([]);
-
-const dbTables = ref<Record<string, DbTable>>({});
+const diagramStore = useDiagramStore();
 
 onBeforeMount(() => {
   for (let i = 0; i < 3; i += 1) {
-    const shape = createShape(50, 50);
-    if (!dbTables.value[shape.id]) {
-      dbTables.value[shape.id] = createDbTable();
-    }
-    shapes.value.push(shape);
+    const dbTable = createDbTable();
+    diagramStore.createDbTable(dbTable, 50, 50);
   }
 });
 </script>

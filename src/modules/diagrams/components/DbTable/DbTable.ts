@@ -25,6 +25,14 @@ export interface DbTableColumn {
    * Row height(Because db column is displayed as row, so it's row height)
    */
   height: number,
+  /**
+   * Id of left connection node
+   */
+  leftPointId: string,
+  /**
+   * Id of right connection node
+   */
+  rightPointId: string,
 }
 
 export interface DbTable {
@@ -93,5 +101,7 @@ export function createDbTableColumn(): DbTableColumn {
     type: 'int',
     uniqueKeys: '',
     height: 30,
+    leftPointId: uuidv4(),
+    rightPointId: uuidv4(),
   };
 }

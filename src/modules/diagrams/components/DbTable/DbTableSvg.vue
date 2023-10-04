@@ -9,8 +9,8 @@
       :margin="3"
       :width="width"
       :height="height"
-      :x="shape.position.x"
-      :y="shape.position.y"
+      :x="controller.getX()"
+      :y="controller.getY()"
       stroke="grey"
       stroke-width="2"
       @on-resize="onResize"
@@ -32,22 +32,22 @@
         />
         <text
           v-if="!displayTitle"
-          :x="shape.position.x + (width / 2)"
-          :y="shape.position.y + 20"
+          :x="controller.getX() + (width / 2)"
+          :y="controller.getY() + 20"
           font-weight="bold"
           text-anchor="middle"
         >
-          {{ data.title }}
+          {{ title }}
         </text>
         <foreignObject
           v-if="displayTitle"
-          :x="shape.position.x"
-          :y="shape.position.y"
+          :x="controller.getX()"
+          :y="controller.getY()"
           :width="width"
-          :height="titleHeight"
+          :height="controller.getTitleHeight()"
           fill="transparent">
           <q-input
-            v-model="data.title"
+            v-model="title"
             autofocus
             dense
             filled
@@ -60,13 +60,14 @@
       <DbColumnList
         ref="dbColumnSvgs"
         v-model="data"
-        :x="shape.position.x"
-        :y="shape.position.y + titleHeight"
+        :controller="controller"
+        :x="controller.getX()"
+        :y="controller.getY() + controller.getTitleHeight()"
         v-model:selected-ids="selectedIds"
       ></DbColumnList>
       <line
-        :x1="shape.position.x" :y1="shape.position.y + height"
-        :x2="shape.position.x + width" :y2="shape.position.y + height"
+        :x1="controller.getX()" :y1="controller.getY() + height"
+        :x2="controller.getX() + width" :y2="controller.getY() + height"
         stroke="black"
         stroke-width="1"
       />
@@ -94,7 +95,7 @@
     >
       <ConnectionHintSvg
         v-if="!!selectedIds.find((colId) => colId === col.id)"
-        :x="shape.position.x" :y="getRowStartY(index)"
+        :x="controller.getX()" :y="controller.getRowStartY(index)"
         :width="width"
         :height="col.height"
       />
@@ -106,12 +107,11 @@
 import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Point, Shape } from '../../Shape';
-import { DbTable, createDbTableColumn } from './DbTable';
 import SelectedSvg from '../SelectedSvg.vue';
 import DbColumnList from './DbColumnListSvg.vue';
 import ActionBtnSvg from '../ActionBtnSvg.vue';
 import ConnectionHintSvg from '../ConnectionHintSvg.vue';
+import { DbTableController, Point } from '../../services/diagramService';
 
 const isSelected = ref(false);
 
@@ -122,8 +122,6 @@ const i18n = useI18n();
 const dbColumnSvgs = ref<InstanceType<typeof DbColumnList>>();
 
 const displayTitle = ref(false);
-
-const titleHeight = ref(30);
 
 const actionPanelOffset = 45;
 
@@ -136,38 +134,23 @@ const actionBtnOffset = 5;
 const selectedIds = ref<string[]>([]);
 
 const props = defineProps<{
-  modelValue: Shape,
-  data: DbTable,
+  controller: DbTableController,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: Shape): void
-  (e: 'update:data', value: DbTable): void
-}
-const emit = defineEmits<Emit>();
-
-const shape = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value),
-});
-
-const data = computed({
-  get: () => props.data,
-  set: (value) => emit('update:data', value),
+const title = computed({
+  get: () => props.controller.getTitle(),
+  set: (value) => props.controller.setTitle(value),
 });
 
 const width = computed(
-  () => data.value.iconWidth
-    + data.value.nameWidth
-    + data.value.typeWidth
-    + data.value.labelWidth,
+  () => props.controller.getIconWidth()
+    + props.controller.getNameWidth()
+    + props.controller.getTypeWidth()
+    + props.controller.getLabelWidth(),
 );
 
 const height = computed(
-  () => titleHeight.value
-    + data.value.columns
-      .map((col) => col.height)
-      .reduce((accumulator, current) => accumulator + current, 0),
+  () => props.controller.getHeight(),
 );
 
 function handleDrag(details: {
@@ -177,10 +160,10 @@ function handleDrag(details: {
   },
 }) {
   if (details.delta?.x) {
-    shape.value.position.x += details.delta.x;
+    props.controller.shiftX(details.delta.x);
   }
   if (details.delta?.y) {
-    shape.value.position.y += details.delta.y;
+    props.controller.shiftY(details.delta.y);
   }
 }
 
@@ -188,45 +171,46 @@ function handleDrag(details: {
  * Path of erd table grid
  */
 const titlePath = computed(
-  () => `M ${shape.value.position.x} ${shape.value.position.y} \
-  H ${shape.value.position.x + width.value} \
-  V ${shape.value.position.y + titleHeight.value} \
-  H ${shape.value.position.x} V ${shape.value.position.y}`,
+  () => `M ${props.controller.getX()} ${props.controller.getY()} \
+  H ${props.controller.getX() + width.value} \
+  V ${props.controller.getY() + props.controller.getTitleHeight()} \
+  H ${props.controller.getX()} V ${props.controller.getY()}`,
 );
 
 /**
  * Starting point(x) of action panel
  */
 const actionPanelX = computed(
-  () => shape.value.position.x + width.value + actionPanelOffset,
+  () => props.controller.getX() + width.value + actionPanelOffset,
 );
 
 function getActionBtnY(index: number) {
-  return shape.value.position.y + index * (actionBtnSideLength + actionBtnOffset);
+  return props.controller.getY() + index * (actionBtnSideLength + actionBtnOffset);
 }
 
 let originalX = 0;
 
 function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
   if (isFirst) {
-    originalX = shape.value.position.x;
+    originalX = props.controller.getX();
     return;
   }
   if (newWidth && newPosition) {
-    data.value.nameWidth = Math.max(
-      data.value.nameWidth + newWidth - width.value,
-      data.value.minNameWidth,
+    const newNameWidth = Math.max(
+      props.controller.getNameWidth() + newWidth - width.value,
+      props.controller.getMinNameWidth(),
     );
-    if (data.value.nameWidth > data.value.minNameWidth) {
-      shape.value.position.x = newPosition.x;
+    props.controller.setNameWidth(newNameWidth);
+    if (props.controller.getNameWidth() > props.controller.getMinNameWidth()) {
+      props.controller.setX(newPosition.x);
     } else {
-      shape.value.position.x = originalX;
+      props.controller.setX(originalX);
     }
   }
 }
 
 function addNewRow() {
-  data.value.columns.push(createDbTableColumn());
+  // data.value.columns.push(createDbTableColumn());
 }
 
 function unselectAll() {
@@ -238,6 +222,7 @@ function unselectAll() {
  * Delete rows and select adjacent row
  */
 function deleteRow() {
+  /*
   if (selectedIds.value.length <= 0) {
     return;
   }
@@ -270,10 +255,11 @@ function deleteRow() {
     selectedIds.value.push(data.value.columns[data.value.columns.length - 1].id);
   } else {
     selectedIds.value.push(data.value.columns[firstIndex].id);
-  }
+  } */
 }
 
 function addNewFrontRow() {
+  /*
   if (selectedIds.value.length <= 0) {
     return;
   }
@@ -281,10 +267,11 @@ function addNewFrontRow() {
   if (index === -1) {
     return;
   }
-  data.value.columns.splice(index, 0, createDbTableColumn());
+  data.value.columns.splice(index, 0, createDbTableColumn()); */
 }
 
 function addNewEndRow() {
+  /*
   if (selectedIds.value.length <= 0) {
     return;
   }
@@ -292,27 +279,29 @@ function addNewEndRow() {
   if (index === -1) {
     return;
   }
-  data.value.columns.splice(index + 1, 0, createDbTableColumn());
+  data.value.columns.splice(index + 1, 0, createDbTableColumn()); */
 }
 
 function moveUp() {
+  /*
   const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
   if (index < 1) {
     return;
   }
   const temp = data.value.columns[index];
   data.value.columns[index] = data.value.columns[index - 1];
-  data.value.columns[index - 1] = temp;
+  data.value.columns[index - 1] = temp; */
 }
 
 function moveDown() {
+  /*
   const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
   if (index >= data.value.columns.length - 1) {
     return;
   }
   const temp = data.value.columns[index];
   data.value.columns[index] = data.value.columns[index + 1];
-  data.value.columns[index + 1] = temp;
+  data.value.columns[index + 1] = temp; */
 }
 
 interface BtnInfo {
@@ -321,19 +310,6 @@ interface BtnInfo {
   fill: string,
   display: boolean,
   onClick: (() => void),
-}
-
-function getRowStartY(index: number) {
-  return shape.value.position.y
-    + titleHeight.value
-    + data.value.columns
-      .map((col) => col.height)
-      .reduce((accumulator, current, currentIndex) => {
-        if (currentIndex >= index) {
-          return accumulator;
-        }
-        return accumulator + current;
-      }, 0);
 }
 
 const actionBtns = computed(
@@ -367,7 +343,7 @@ const actionBtns = computed(
         display: selectedIds.value.length > 0,
         onClick: addNewEndRow,
       },
-      {
+      /* {
         name: 'Move up',
         path: 'M440-80v-647L256-544l-56-56 280-280 280 280-56 57-184-184v647h-80Z',
         fill: 'black',
@@ -384,7 +360,7 @@ const actionBtns = computed(
             (col) => col.id === selectedIds.value[0],
           ) < data.value.columns.length - 1,
         onClick: moveDown,
-      },
+      }, */
     ];
     return infos.filter((btnInfo) => btnInfo.display);
   },
