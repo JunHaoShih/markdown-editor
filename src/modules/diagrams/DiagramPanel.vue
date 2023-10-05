@@ -1,29 +1,49 @@
 <template>
   <svg>
-    <DbTableSvg
-      v-for="(item, index) in shapes"
+    <template
+      v-for="(item, index) in diagram.shapes"
       v-bind:key="item.id"
-      v-model="shapes[index]"
-      v-model:data="dbTables[item.id]"
-    ></DbTableSvg>
+    >
+      <DbTableSvg
+        v-if="item.type === 'dbTable'"
+        v-model="diagram.shapes[index]"
+      ></DbTableSvg>
+    </template>
   </svg>
 </template>
-<script setup lang="ts">import { onBeforeMount, ref } from 'vue';
-import { DbTable, createDbTable } from './components/dbTable/DbTable';
-import { Shape, createShape } from './Shape';
+<script setup lang="ts">
+import { onBeforeMount, ref } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
+import { Diagram, Shape } from './models/shape';
 
-const shapes = ref<Shape[]>([]);
+const diagram = ref<Diagram>({
+  shapes: [],
+  lines: [],
+});
 
-const dbTables = ref<Record<string, DbTable>>({});
+function createDbTable(x: number, y: number): Shape {
+  return {
+    id: uuidv4(),
+    type: 'dbTable',
+    x,
+    y,
+    title: 'Table name',
+    dbColumns: [],
+    extraSizeInfos: {
+      icon: { width: 30, minWidth: 30 },
+      name: { width: 90, minWidth: 90 },
+      type: { width: 50, minWidth: 50 },
+      label: { width: 30, minWidth: 30 },
+    },
+    height: 30,
+    width: 200,
+  };
+}
 
 onBeforeMount(() => {
   for (let i = 0; i < 3; i += 1) {
-    const shape = createShape(50, 50);
-    if (!dbTables.value[shape.id]) {
-      dbTables.value[shape.id] = createDbTable();
-    }
-    shapes.value.push(shape);
+    diagram.value.shapes.push(createDbTable(50, 50));
   }
 });
 </script>

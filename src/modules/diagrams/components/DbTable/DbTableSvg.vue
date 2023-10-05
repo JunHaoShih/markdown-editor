@@ -9,8 +9,8 @@
       :margin="5"
       :width="width"
       :height="height"
-      :x="shape.position.x"
-      :y="shape.position.y"
+      :x="shape.x"
+      :y="shape.y"
       stroke="grey"
       stroke-width="2"
       @on-resize="onResize"
@@ -32,22 +32,22 @@
         />
         <text
           v-if="!displayTitle"
-          :x="shape.position.x + (width / 2)"
-          :y="shape.position.y + 20"
+          :x="shape.x + (width / 2)"
+          :y="shape.y + 20"
           font-weight="bold"
           text-anchor="middle"
         >
-          {{ data.title }}
+          {{ shape.title }}
         </text>
         <foreignObject
           v-if="displayTitle"
-          :x="shape.position.x"
-          :y="shape.position.y"
+          :x="shape.x"
+          :y="shape.y"
           :width="width"
           :height="titleHeight"
           fill="transparent">
           <q-input
-            v-model="data.title"
+            v-model="shape.title"
             autofocus
             dense
             filled
@@ -59,14 +59,15 @@
       </g>
       <DbColumnList
         ref="dbColumnSvgs"
-        v-model="data"
-        :x="shape.position.x"
-        :y="shape.position.y + titleHeight"
+        v-model="shape"
+        :x="shape.x"
+        :y="shape.y + titleHeight"
         v-model:selected-ids="selectedIds"
+        @on-width-changed="onWidthChanged"
       ></DbColumnList>
       <line
-        :x1="shape.position.x" :y1="shape.position.y + height"
-        :x2="shape.position.x + width" :y2="shape.position.y + height"
+        :x1="shape.x" :y1="shape.y + height"
+        :x2="shape.x + width" :y2="shape.y + height"
         stroke="black"
         stroke-width="1"
       />
@@ -95,11 +96,11 @@
 import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Point, Shape } from '../../Shape';
-import { DbTable, createDbTableColumn } from './DbTable';
 import SelectedSvg from '../SelectedSvg.vue';
 import DbColumnList from './DbColumnListSvg.vue';
 import ActionBtnSvgVue from '../ActionBtnSvg.vue';
+import { Point, Shape } from '../../models/shape';
+import { createDbTableColumn } from '../../models/dbTableColumn';
 
 const isSelected = ref(false);
 
@@ -123,14 +124,14 @@ const actionBtnOffset = 5;
 
 const selectedIds = ref<string[]>([]);
 
+const width = ref(0);
+
 const props = defineProps<{
   modelValue: Shape,
-  data: DbTable,
 }>();
 
 type Emit = {
   (e: 'update:modelValue', value: Shape): void
-  (e: 'update:data', value: DbTable): void
 }
 const emit = defineEmits<Emit>();
 
@@ -139,23 +140,17 @@ const shape = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const data = computed({
-  get: () => props.data,
-  set: (value) => emit('update:data', value),
-});
-
-const width = computed(
-  () => data.value.iconWidth
-    + data.value.nameWidth
-    + data.value.typeWidth
-    + data.value.labelWidth,
-);
+function calculateDbColumnsHeight() {
+  const columnsHeight = props.modelValue.dbColumns
+    ? props.modelValue.dbColumns
+      .map((col) => col.height)
+      .reduce((accumulator, current) => accumulator + current, 0)
+    : 0;
+  return columnsHeight;
+}
 
 const height = computed(
-  () => titleHeight.value
-    + data.value.columns
-      .map((col) => col.height)
-      .reduce((accumulator, current) => accumulator + current, 0),
+  () => titleHeight.value + calculateDbColumnsHeight(),
 );
 
 function handleDrag(details: {
@@ -165,10 +160,10 @@ function handleDrag(details: {
   },
 }) {
   if (details.delta?.x) {
-    shape.value.position.x += details.delta.x;
+    shape.value.x += details.delta.x;
   }
   if (details.delta?.y) {
-    shape.value.position.y += details.delta.y;
+    shape.value.y += details.delta.y;
   }
 }
 
@@ -176,45 +171,32 @@ function handleDrag(details: {
  * Path of erd table grid
  */
 const titlePath = computed(
-  () => `M ${shape.value.position.x} ${shape.value.position.y} \
-  H ${shape.value.position.x + width.value} \
-  V ${shape.value.position.y + titleHeight.value} \
-  H ${shape.value.position.x} V ${shape.value.position.y}`,
+  () => `M ${shape.value.x} ${shape.value.y} \
+  H ${shape.value.x + width.value} \
+  V ${shape.value.y + titleHeight.value} \
+  H ${shape.value.x} V ${shape.value.y}`,
 );
 
 /**
  * Starting point(x) of action panel
  */
 const actionPanelX = computed(
-  () => shape.value.position.x + width.value + actionPanelOffset,
+  () => shape.value.x + width.value + actionPanelOffset,
 );
 
 function getActionBtnY(index: number) {
-  return shape.value.position.y + index * (actionBtnSideLength + actionBtnOffset);
+  return shape.value.y + index * (actionBtnSideLength + actionBtnOffset);
 }
 
-let originalX = 0;
-
 function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
-  if (isFirst) {
-    originalX = shape.value.position.x;
-    return;
-  }
-  if (newWidth && newPosition) {
-    data.value.nameWidth = Math.max(
-      data.value.nameWidth + newWidth - width.value,
-      data.value.minNameWidth,
-    );
-    if (data.value.nameWidth > data.value.minNameWidth) {
-      shape.value.position.x = newPosition.x;
-    } else {
-      shape.value.position.x = originalX;
-    }
-  }
+  dbColumnSvgs?.value?.onResize(isFirst, newPosition, newWidth);
 }
 
 function addNewRow() {
-  data.value.columns.push(createDbTableColumn());
+  if (!shape.value.dbColumns) {
+    shape.value.dbColumns = [];
+  }
+  shape.value.dbColumns.push(createDbTableColumn());
 }
 
 function unselectAll() {
@@ -226,14 +208,19 @@ function unselectAll() {
  * Delete rows and select adjacent row
  */
 function deleteRow() {
+  if (!shape.value.dbColumns) {
+    shape.value.dbColumns = [];
+    return;
+  }
   if (selectedIds.value.length <= 0) {
     return;
   }
   let firstIndex = -1;
 
   // Delete rows
-  selectedIds.value.forEach((colId) => {
-    const index = data.value.columns.findIndex((col) => col.id === colId);
+  // eslint-disable-next-line no-restricted-syntax
+  for (const colId of selectedIds.value) {
+    const index = shape.value.dbColumns.findIndex((col) => col.id === colId);
     if (index === -1) {
       $q.notify({
         type: 'error',
@@ -245,62 +232,79 @@ function deleteRow() {
     if (firstIndex === -1) {
       firstIndex = index;
     }
-    data.value.columns.splice(index, 1);
-  });
+    shape.value.dbColumns.splice(index, 1);
+  }
+
   // Clear selected ids
   selectedIds.value.length = 0;
 
-  if (firstIndex === -1 || data.value.columns.length === 0) {
+  if (firstIndex === -1 || shape.value.dbColumns.length === 0) {
     return;
   }
   // select adjacent row
-  if (firstIndex >= data.value.columns.length) {
-    selectedIds.value.push(data.value.columns[data.value.columns.length - 1].id);
+  if (firstIndex >= shape.value.dbColumns.length) {
+    selectedIds.value.push(shape.value.dbColumns[shape.value.dbColumns.length - 1].id);
   } else {
-    selectedIds.value.push(data.value.columns[firstIndex].id);
+    selectedIds.value.push(shape.value.dbColumns[firstIndex].id);
   }
 }
 
 function addNewFrontRow() {
+  if (!shape.value.dbColumns) {
+    shape.value.dbColumns = [];
+  }
   if (selectedIds.value.length <= 0) {
     return;
   }
-  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  const index = shape.value.dbColumns.findIndex((col) => col.id === selectedIds.value[0]);
   if (index === -1) {
     return;
   }
-  data.value.columns.splice(index, 0, createDbTableColumn());
+  shape.value.dbColumns.splice(index, 0, createDbTableColumn());
 }
 
 function addNewEndRow() {
+  if (!shape.value.dbColumns) {
+    shape.value.dbColumns = [];
+  }
   if (selectedIds.value.length <= 0) {
     return;
   }
-  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  const index = shape.value.dbColumns.findIndex((col) => col.id === selectedIds.value[0]);
   if (index === -1) {
     return;
   }
-  data.value.columns.splice(index + 1, 0, createDbTableColumn());
+  shape.value.dbColumns.splice(index + 1, 0, createDbTableColumn());
 }
 
 function moveUp() {
-  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
+  if (!shape.value.dbColumns) {
+    return;
+  }
+  const index = shape.value.dbColumns.findIndex((col) => col.id === selectedIds.value[0]);
   if (index < 1) {
     return;
   }
-  const temp = data.value.columns[index];
-  data.value.columns[index] = data.value.columns[index - 1];
-  data.value.columns[index - 1] = temp;
+  const temp = shape.value.dbColumns[index];
+  shape.value.dbColumns[index] = shape.value.dbColumns[index - 1];
+  shape.value.dbColumns[index - 1] = temp;
 }
 
 function moveDown() {
-  const index = data.value.columns.findIndex((col) => col.id === selectedIds.value[0]);
-  if (index >= data.value.columns.length - 1) {
+  if (!shape.value.dbColumns) {
     return;
   }
-  const temp = data.value.columns[index];
-  data.value.columns[index] = data.value.columns[index + 1];
-  data.value.columns[index + 1] = temp;
+  const index = shape.value.dbColumns.findIndex((col) => col.id === selectedIds.value[0]);
+  if (index >= shape.value.dbColumns.length - 1) {
+    return;
+  }
+  const temp = shape.value.dbColumns[index];
+  shape.value.dbColumns[index] = shape.value.dbColumns[index + 1];
+  shape.value.dbColumns[index + 1] = temp;
+}
+
+function onWidthChanged(value: number) {
+  width.value = value;
 }
 
 interface BtnInfo {
@@ -313,6 +317,12 @@ interface BtnInfo {
 
 const actionBtns = computed(
   (): BtnInfo[] => {
+    const currentIndex = shape.value.dbColumns
+      ? shape.value.dbColumns.findIndex((col) => col.id === selectedIds.value[0])
+      : -1;
+    const currentLength = shape.value.dbColumns
+      ? shape.value.dbColumns.length
+      : 0;
     const infos: BtnInfo[] = [
       {
         name: 'Add',
@@ -347,7 +357,7 @@ const actionBtns = computed(
         path: 'M440-80v-647L256-544l-56-56 280-280 280 280-56 57-184-184v647h-80Z',
         fill: 'black',
         display: selectedIds.value.length === 1
-          && data.value.columns.findIndex((col) => col.id === selectedIds.value[0]) !== 0,
+          && currentIndex > 0,
         onClick: moveUp,
       },
       {
@@ -355,9 +365,7 @@ const actionBtns = computed(
         path: 'M480-80 200-360l56-56 184 183v-647h80v647l184-184 56 57L480-80Z',
         fill: 'black',
         display: selectedIds.value.length === 1
-          && data.value.columns.findIndex(
-            (col) => col.id === selectedIds.value[0],
-          ) < data.value.columns.length - 1,
+          && currentIndex < currentLength - 1,
         onClick: moveDown,
       },
     ];

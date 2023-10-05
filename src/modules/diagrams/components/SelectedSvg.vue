@@ -46,7 +46,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Point } from '../Shape';
+import { Point } from '../models/shape';
 
 const props = withDefaults(defineProps<{
   margin: number,
