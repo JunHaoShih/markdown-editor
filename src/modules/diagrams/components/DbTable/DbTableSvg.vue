@@ -6,7 +6,7 @@
   >
     <SelectedSvg
       v-if="isSelected"
-      :margin="5"
+      :margin="3"
       :width="width"
       :height="height"
       :x="shape.x"
@@ -57,14 +57,27 @@
           ></q-input>
         </foreignObject>
       </g>
-      <DbColumnList
-        ref="dbColumnSvgs"
-        v-model="shape"
-        :x="shape.x"
-        :y="shape.y + titleHeight"
-        v-model:selected-ids="selectedIds"
-        @on-width-changed="onWidthChanged"
-      ></DbColumnList>
+      <g
+        v-for="(col, index) in columns"
+        v-bind:key="col.id"
+      >
+        <DbColumnSvg
+          v-model="columns[index]"
+          v-model:icon-width="iconWidth"
+          v-model:name-width="nameWidth"
+          v-model:type-width="typeWidth"
+          v-model:label-width="labelWidth"
+          :min-icon-width="minIconWidth"
+          :min-name-width="minNameWidth"
+          :min-type-width="minTypeWidth"
+          :min-label-width="minLabelWidth"
+          :x="shape.x"
+          :y="getRowStartY(index)"
+          :width="width"
+          :selected-ids="selectedIds"
+          @on-selected="onSelectedChange"
+        ></DbColumnSvg>
+      </g>
       <line
         :x1="shape.x" :y1="shape.y + height"
         :x2="shape.x + width" :y2="shape.y + height"
@@ -76,7 +89,7 @@
     <g
       v-if="isSelected"
     >
-      <ActionBtnSvgVue
+      <ActionBtnSvg
         v-for="(btnInfo, index) in actionBtns"
         v-bind:key="btnInfo.name"
         :x="actionPanelX"
@@ -87,8 +100,21 @@
         :path="btnInfo.path"
         :fill="btnInfo.fill"
         @click="btnInfo.onClick"
-      ></ActionBtnSvgVue>
+      ></ActionBtnSvg>
     </g>
+    <template
+      v-for="(col, index) in columns"
+      v-bind:key="col.id"
+    >
+      <ConnectionHintSvg
+        v-if="!!selectedIds.find((colId) => colId === col.id)"
+        :x="shape.x" :y="getRowStartY(index)"
+        :width="width"
+        :height="col.height"
+        :left-node-id="col.leftPointId"
+        :right-node-id="col.rightPointId"
+      />
+    </template>
   </g>
 </template>
 
@@ -96,11 +122,12 @@
 import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import DbColumnSvg from './DbColumnSvg.vue';
+import ConnectionHintSvg from '../ConnectionHintSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
-import DbColumnList from './DbColumnListSvg.vue';
-import ActionBtnSvgVue from '../ActionBtnSvg.vue';
+import ActionBtnSvg from '../ActionBtnSvg.vue';
 import { Point, Shape } from '../../models/shape';
-import { createDbTableColumn } from '../../models/dbTableColumn';
+import { createDbTableColumn, dbTableConf } from '../../services/dbTableService';
 
 const isSelected = ref(false);
 
@@ -108,13 +135,11 @@ const $q = useQuasar();
 
 const i18n = useI18n();
 
-const dbColumnSvgs = ref<InstanceType<typeof DbColumnList>>();
-
 const displayTitle = ref(false);
 
 const titleHeight = ref(30);
 
-const actionPanelOffset = 25;
+const actionPanelOffset = 45;
 
 const actionBtnSideLength = 24;
 
@@ -123,8 +148,6 @@ const actionBtnRx = 3;
 const actionBtnOffset = 5;
 
 const selectedIds = ref<string[]>([]);
-
-const width = ref(0);
 
 const props = defineProps<{
   modelValue: Shape,
@@ -140,17 +163,93 @@ const shape = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-function calculateDbColumnsHeight() {
-  const columnsHeight = props.modelValue.dbColumns
-    ? props.modelValue.dbColumns
+const columns = computed({
+  get: () => shape.value.dbColumns ?? [],
+  set: (value) => {
+    shape.value.dbColumns = value;
+  },
+});
+
+const iconWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.icon.width ?? dbTableConf.minIconWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.icon.width = value;
+  },
+});
+
+const minIconWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.icon.minWidth ?? dbTableConf.minIconWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.icon.minWidth = value;
+  },
+});
+
+const nameWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.name.width ?? dbTableConf.minNameWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.name.width = value;
+  },
+});
+
+const minNameWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.name.minWidth ?? dbTableConf.minNameWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.name.minWidth = value;
+  },
+});
+
+const typeWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.type.width ?? dbTableConf.minTypeWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.type.width = value;
+  },
+});
+
+const minTypeWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.type.minWidth ?? dbTableConf.minTypeWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.type.minWidth = value;
+  },
+});
+
+const labelWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.label.width ?? dbTableConf.minLabelWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.label.width = value;
+  },
+});
+
+const minLabelWidth = computed({
+  get: (): number => shape.value.extraSizeInfos.label.minWidth ?? dbTableConf.minLabelWidth,
+  set: (value) => {
+    shape.value.extraSizeInfos.label.minWidth = value;
+  },
+});
+
+const width = computed(
+  () => iconWidth.value
+    + nameWidth.value
+    + typeWidth.value
+    + labelWidth.value,
+);
+
+function getRowStartY(index: number) {
+  return shape.value.y
+    + titleHeight.value
+    + columns.value
       .map((col) => col.height)
-      .reduce((accumulator, current) => accumulator + current, 0)
-    : 0;
-  return columnsHeight;
+      .reduce((accumulator, current, currentIndex) => {
+        if (currentIndex >= index) {
+          return accumulator;
+        }
+        return accumulator + current;
+      }, 0);
 }
 
 const height = computed(
-  () => titleHeight.value + calculateDbColumnsHeight(),
+  () => titleHeight.value + columns.value
+    .map((col) => col.height)
+    .reduce((accumulator, current) => accumulator + current, 0),
 );
 
 function handleDrag(details: {
@@ -188,8 +287,24 @@ function getActionBtnY(index: number) {
   return shape.value.y + index * (actionBtnSideLength + actionBtnOffset);
 }
 
+let originalX = 0;
+
 function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
-  dbColumnSvgs?.value?.onResize(isFirst, newPosition, newWidth);
+  if (isFirst) {
+    originalX = shape.value.x;
+    return;
+  }
+  if (newWidth && newPosition) {
+    nameWidth.value = Math.max(
+      nameWidth.value + newWidth - width.value,
+      minNameWidth.value,
+    );
+    if (nameWidth.value > minNameWidth.value) {
+      shape.value.x = newPosition.x;
+    } else {
+      shape.value.x = originalX;
+    }
+  }
 }
 
 function addNewRow() {
@@ -199,9 +314,16 @@ function addNewRow() {
   shape.value.dbColumns.push(createDbTableColumn());
 }
 
+function onSelectedChange(id: string) {
+  selectedIds.value.length = 0;
+  if (!selectedIds.value.find((colId) => colId === id)) {
+    selectedIds.value.push(id);
+  }
+}
+
 function unselectAll() {
   isSelected.value = false;
-  dbColumnSvgs.value?.unselectAll();
+  selectedIds.value.length = 0;
 }
 
 /**
@@ -301,10 +423,6 @@ function moveDown() {
   const temp = shape.value.dbColumns[index];
   shape.value.dbColumns[index] = shape.value.dbColumns[index + 1];
   shape.value.dbColumns[index + 1] = temp;
-}
-
-function onWidthChanged(value: number) {
-  width.value = value;
 }
 
 interface BtnInfo {

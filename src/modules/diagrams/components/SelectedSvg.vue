@@ -22,7 +22,7 @@
       :x1="topLeft.x" :y1="topLeft.y"
       :x2="bottomLeft.x" :y2="bottomLeft.y"
       stroke="transparent"
-      stroke-width="10"
+      stroke-width="5"
     />
   </g>
   <g

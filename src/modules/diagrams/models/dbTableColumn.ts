@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 export interface DbTableColumn {
   /**
    * Guid of this data
@@ -33,17 +31,4 @@ export interface DbTableColumn {
    * Id of right connection node
    */
   rightPointId: string,
-}
-
-export function createDbTableColumn(): DbTableColumn {
-  return {
-    id: uuidv4(),
-    name: 'column',
-    isPrimary: false,
-    type: 'int',
-    uniqueKeys: '',
-    height: 30,
-    leftPointId: uuidv4(),
-    rightPointId: uuidv4(),
-  };
 }
