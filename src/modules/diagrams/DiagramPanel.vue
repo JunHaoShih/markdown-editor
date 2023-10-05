@@ -1,5 +1,5 @@
 <template>
-  <svg>
+  <svg ref="svgRef">
     <template
       v-for="(item, index) in diagram.shapes"
       v-bind:key="item.id"
@@ -12,14 +12,26 @@
   </svg>
 </template>
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, onMounted, ref } from 'vue';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import { Diagram } from './models/shape';
 import { createDbTable } from './services/dbTableService';
+import { useDiagramStore } from './stores/diagramStore';
+
+const diagramStore = useDiagramStore();
+
+const svgRef = ref<InstanceType<typeof SVGElement> | null>(null);
 
 const diagram = ref<Diagram>({
   shapes: [],
   lines: [],
+});
+
+onMounted(() => {
+  if (!svgRef.value) {
+    return;
+  }
+  diagramStore.setBoudings(svgRef.value.getBoundingClientRect());
 });
 
 onBeforeMount(() => {

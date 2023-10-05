@@ -125,12 +125,13 @@
   </g>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeMount, watch } from 'vue';
 import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
 import BooleanSvg from '../BooleanSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
-import { DbTableColumn } from './DbTable';
+import { DbTableColumn } from '../../models/dbTableColumn';
+import { Orient } from '../../models/shape';
 
 const props = defineProps<{
   modelValue: DbTableColumn,
@@ -210,7 +211,55 @@ function getRowBottomPath() {
   return `M ${startX} ${startY} H ${startX + props.width}`;
 }
 
+const relocateNodes: Record<Orient, () => void> = {
+  left: () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'left');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x;
+    node.point.y = props.y + (dbColumn.value.height / 2);
+  },
+  right: () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'right');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x + props.width;
+    node.point.y = props.y + (dbColumn.value.height / 2);
+  },
+  top: () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'top');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x + (props.width / 2);
+    node.point.y = props.y;
+  },
+  bottom: () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'bottom');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x + (props.width / 2);
+    node.point.y = props.y + dbColumn.value.height;
+  },
+};
+
+watch(() => [props.x, props.y, props.width], () => {
+  dbColumn.value.connectionNodes.forEach((node) => {
+    relocateNodes[node.orient]();
+  });
+});
+
 function onSelected() {
   emit('onSelected', dbColumn.value.id);
 }
+
+onBeforeMount(() => {
+  relocateNodes.left();
+  relocateNodes.right();
+  relocateNodes.top();
+  relocateNodes.bottom();
+});
 </script>

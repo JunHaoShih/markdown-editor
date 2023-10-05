@@ -1,20 +1,28 @@
 <template>
   <g>
     <path
-      v-if="rightNodeId"
+      v-for="node in nodes"
+      v-bind:key="node.id"
       fill="#29b6f2"
-      :d="rightArrowPath"
+      :d="getArrow(node)"
+      :transform="getTransform(node)"
+      @mousedown="setStartLocation(node)"
+      v-touch-pan.prevent.mouse="handleDrag"
     />
-    <path
-      v-if="leftNodeId"
-      fill="#29b6f2"
-      :d="leftArrowPath"
-    />
+    <line
+      v-if="showLine"
+      :x1="startLocation.x"
+      :y1="startLocation.y"
+      :x2="dragLocation.x"
+      :y2="dragLocation.y"
+      style="stroke:rgb(0, 0, 0);stroke-width:2" />
   </g>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref } from 'vue';
+import { ConnectionNode, Orient, Point } from '../models/shape';
+import { useDiagramStore } from '../stores/diagramStore';
 
 const offset = 20;
 
@@ -22,40 +30,74 @@ const arrowWidth = 20;
 
 const arrowHeight = 16;
 
-const props = defineProps<{
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  leftNodeId?: string,
-  rightNodeId?: string,
+const diagramStore = useDiagramStore();
+
+defineProps<{
+  nodes: ConnectionNode[],
 }>();
 
-const centerY = computed(
-  () => props.y + (props.height / 2),
-);
+function getArrow(node: ConnectionNode) {
+  return `M ${node.point.x} ${node.point.y} \
+  V ${node.point.y - (arrowHeight / 2)} \
+  L ${node.point.x + arrowWidth} ${node.point.y} \
+  L ${node.point.x} ${node.point.y + (arrowHeight / 2)} \
+  V ${node.point.y}`;
+}
 
-const rightArrowX = computed(
-  () => props.x + props.width + offset,
-);
+const angles: Record<Orient, string> = {
+  left: '180',
+  right: '0',
+  bottom: '90',
+  top: '270',
+};
 
-const rightArrowPath = computed(
-  () => `M ${rightArrowX.value} ${centerY.value} \
-  V ${centerY.value - (arrowHeight / 2)} \
-  L ${rightArrowX.value + arrowWidth} ${centerY.value} \
-  L ${rightArrowX.value} ${centerY.value + (arrowHeight / 2)} \
-  V ${centerY.value}`,
-);
+function getTransform(node: ConnectionNode) {
+  return `rotate(${angles[node.orient]}, ${node.point.x}, ${node.point.y}) translate(${offset})`;
+}
 
-const leftArrowX = computed(
-  () => props.x - offset,
-);
+const showLine = ref(false);
 
-const leftArrowPath = computed(
-  () => `M ${leftArrowX.value} ${centerY.value} \
-  V ${centerY.value - (arrowHeight / 2)} \
-  L ${leftArrowX.value - arrowWidth} ${centerY.value} \
-  L ${leftArrowX.value} ${centerY.value + (arrowHeight / 2)} \
-  V ${centerY.value}`,
-);
+const dragLocation = ref<Point>({
+  x: 0,
+  y: 0,
+});
+
+const startLocation = ref<Point>({
+  x: 0,
+  y: 0,
+});
+
+function handleDrag(details: {
+  isFirst?: boolean,
+  isFinal?: boolean,
+  position?: {
+    top?: number,
+    left?: number,
+  },
+}) {
+  const currentLocation: Point = {
+    x: 0,
+    y: 0,
+  };
+  if (details.position?.left) {
+    currentLocation.x = details.position.left;
+  }
+  if (details.position?.top) {
+    currentLocation.y = details.position.top;
+  }
+
+  dragLocation.value = diagramStore.pointShift(currentLocation);
+
+  if (details.isFirst) {
+    showLine.value = true;
+  }
+  if (details.isFinal) {
+    showLine.value = false;
+  }
+}
+
+function setStartLocation(node: ConnectionNode) {
+  startLocation.value.x = node.point.x;
+  startLocation.value.y = node.point.y;
+}
 </script>

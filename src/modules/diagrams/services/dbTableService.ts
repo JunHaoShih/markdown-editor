@@ -36,7 +36,17 @@ export function createDbTableColumn(): DbTableColumn {
     type: 'int',
     uniqueKeys: '',
     height: 30,
-    leftPointId: uuidv4(),
-    rightPointId: uuidv4(),
+    connectionNodes: [
+      {
+        id: uuidv4(),
+        orient: 'left',
+        point: { x: 0, y: 0 },
+      },
+      {
+        id: uuidv4(),
+        orient: 'right',
+        point: { x: 0, y: 0 },
+      },
+    ],
   };
 }

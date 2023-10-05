@@ -41,6 +41,14 @@ export interface Shape {
   dbColumns?: DbTableColumn[],
 }
 
+export type Orient = 'left' | 'top' | 'bottom' | 'right';
+
+export interface ConnectionNode {
+  id: string,
+  point: Point,
+  orient: Orient,
+}
+
 interface Line {
   id: string,
   fromShapeId?: string | null,

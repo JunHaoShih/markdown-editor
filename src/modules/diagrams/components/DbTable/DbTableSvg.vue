@@ -103,16 +103,12 @@
       ></ActionBtnSvg>
     </g>
     <template
-      v-for="(col, index) in columns"
+      v-for="col in columns"
       v-bind:key="col.id"
     >
       <ConnectionHintSvg
         v-if="!!selectedIds.find((colId) => colId === col.id)"
-        :x="shape.x" :y="getRowStartY(index)"
-        :width="width"
-        :height="col.height"
-        :left-node-id="col.leftPointId"
-        :right-node-id="col.rightPointId"
+        :nodes="col.connectionNodes"
       />
     </template>
   </g>
