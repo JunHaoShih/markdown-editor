@@ -7,6 +7,14 @@ export interface Point {
   y: number,
 }
 
+export type Orient = 'left' | 'top' | 'bottom' | 'right';
+
+export interface ConnectionNode {
+  id: string,
+  point: Point,
+  orient: Orient,
+}
+
 interface SizeInfo {
   width?: number,
   minWidth?: number,
@@ -32,6 +40,10 @@ export interface Shape {
    */
   height: number,
   /**
+   * All connectable nodes of this shape(does not include any child)
+   */
+  connectionNodes: ConnectionNode[],
+  /**
    * Extran infomation of shape, please store extra info in here if sizeInfo is not enough
    */
   extraSizeInfos: Record<string, SizeInfo>,
@@ -41,20 +53,12 @@ export interface Shape {
   dbColumns?: DbTableColumn[],
 }
 
-export type Orient = 'left' | 'top' | 'bottom' | 'right';
-
-export interface ConnectionNode {
-  id: string,
-  point: Point,
-  orient: Orient,
-}
-
-interface Line {
+export interface Line {
   id: string,
   fromShapeId?: string | null,
   toShapeId?: string | null,
   fromNode?: string | null,
-  toNode: string | null,
+  toNode?: string | null,
   fromAbsolute?: Point | null,
   toAbsolute?: Point | null,
 }

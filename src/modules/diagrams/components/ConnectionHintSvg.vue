@@ -1,21 +1,26 @@
 <template>
   <g>
-    <path
+    <template
       v-for="node in nodes"
       v-bind:key="node.id"
-      fill="#29b6f2"
-      :d="getArrow(node)"
-      :transform="getTransform(node)"
-      @mousedown="setStartLocation(node)"
-      v-touch-pan.prevent.mouse="handleDrag"
-    />
-    <line
-      v-if="showLine"
-      :x1="startLocation.x"
-      :y1="startLocation.y"
-      :x2="dragLocation.x"
-      :y2="dragLocation.y"
-      style="stroke:rgb(0, 0, 0);stroke-width:2" />
+    >
+      <path
+        :fill="selected ? '#29b6f2' : 'none'"
+        :d="getArrow(node)"
+        :transform="getTransform(node)"
+        @mousedown="setStartLocation(node)"
+      />
+      <circle
+        :cx="node.point.x"
+        :cy="node.point.y"
+        r="3"
+        :fill="isNodeHover ? '#29b6f2' : 'transparent'"
+        @mouseover="isNodeHover = true"
+        @mouseout="isNodeHover = false"
+        @mouseenter="setToNode(node)"
+        @mouseleave="unsetToNode(node)"
+      />
+    </template>
   </g>
 </template>
 
@@ -30,10 +35,13 @@ const arrowWidth = 20;
 
 const arrowHeight = 16;
 
+const isNodeHover = ref(false);
+
 const diagramStore = useDiagramStore();
 
 defineProps<{
   nodes: ConnectionNode[],
+  selected: boolean,
 }>();
 
 function getArrow(node: ConnectionNode) {
@@ -55,49 +63,26 @@ function getTransform(node: ConnectionNode) {
   return `rotate(${angles[node.orient]}, ${node.point.x}, ${node.point.y}) translate(${offset})`;
 }
 
-const showLine = ref(false);
-
-const dragLocation = ref<Point>({
-  x: 0,
-  y: 0,
-});
-
 const startLocation = ref<Point>({
   x: 0,
   y: 0,
 });
 
-function handleDrag(details: {
-  isFirst?: boolean,
-  isFinal?: boolean,
-  position?: {
-    top?: number,
-    left?: number,
-  },
-}) {
-  const currentLocation: Point = {
-    x: 0,
-    y: 0,
-  };
-  if (details.position?.left) {
-    currentLocation.x = details.position.left;
-  }
-  if (details.position?.top) {
-    currentLocation.y = details.position.top;
-  }
-
-  dragLocation.value = diagramStore.pointShift(currentLocation);
-
-  if (details.isFirst) {
-    showLine.value = true;
-  }
-  if (details.isFinal) {
-    showLine.value = false;
-  }
-}
-
 function setStartLocation(node: ConnectionNode) {
   startLocation.value.x = node.point.x;
   startLocation.value.y = node.point.y;
+  diagramStore.startHolding('connect', node.point.x, node.point.y, node.id);
+}
+
+function setToNode(node: ConnectionNode) {
+  if (diagramStore.holdType === 'connect') {
+    diagramStore.setToNode(node.id);
+  }
+}
+
+function unsetToNode(node: ConnectionNode) {
+  if (diagramStore.holdType === 'connect') {
+    diagramStore.unsetToNode(node.id);
+  }
 }
 </script>

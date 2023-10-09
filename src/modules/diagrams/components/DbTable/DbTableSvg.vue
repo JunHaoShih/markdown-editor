@@ -12,7 +12,7 @@
       :x="shape.x"
       :y="shape.y"
       stroke="grey"
-      stroke-width="2"
+      stroke-width="1"
       @on-resize="onResize"
       :left-resizable="true"
       :right-resizable="true"
@@ -107,7 +107,7 @@
       v-bind:key="col.id"
     >
       <ConnectionHintSvg
-        v-if="!!selectedIds.find((colId) => colId === col.id)"
+        :selected="!!selectedIds.find((colId) => colId === col.id)"
         :nodes="col.connectionNodes"
       />
     </template>

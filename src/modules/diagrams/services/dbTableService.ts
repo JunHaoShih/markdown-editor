@@ -17,6 +17,7 @@ export function createDbTable(x: number, y: number): Shape {
     y,
     title: 'Table name',
     dbColumns: [],
+    connectionNodes: [],
     extraSizeInfos: {
       icon: { width: 30, minWidth: dbTableConf.minIconWidth },
       name: { width: 90, minWidth: dbTableConf.minNameWidth },
@@ -49,4 +50,16 @@ export function createDbTableColumn(): DbTableColumn {
       },
     ],
   };
+}
+
+/**
+ * Find target node inside DbTableColumns
+ * @param dbColumns Target DbTableColumns
+ * @param nodeId The node id you want to find
+ * @returns Search result
+ */
+export function findConnectionNode(dbColumns: DbTableColumn[], nodeId: string) {
+  return dbColumns
+    .flatMap((col) => col.connectionNodes)
+    .find((node) => node.id === nodeId);
 }

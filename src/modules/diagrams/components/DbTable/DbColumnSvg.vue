@@ -10,7 +10,7 @@
       :x="x"
       :y="y"
       stroke="#29b6f2"
-      stroke-width="2"
+      stroke-width="1"
       :left-resizable="false"
       :right-resizable="false"
     />
@@ -125,7 +125,9 @@
   </g>
 </template>
 <script setup lang="ts">
-import { computed, onBeforeMount, watch } from 'vue';
+import {
+  computed, onBeforeMount, watch,
+} from 'vue';
 import RightResizeLine from './RightResizeLine.vue';
 import TextSvg from '../TextSvg.vue';
 import BooleanSvg from '../BooleanSvg.vue';
