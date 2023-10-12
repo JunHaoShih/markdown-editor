@@ -1,45 +1,77 @@
 <template>
-  <svg ref="svgRef"
-    @mousemove="onMouseMove"
-    @mouseup="onMouseUp"
-  >
-    <line
-      v-if="diagramStore.holdInfo.type === 'connect'"
-      :x1="diagramStore.holdFrom.x"
-      :y1="diagramStore.holdFrom.y"
-      :x2="diagramStore.holdTo.x"
-      :y2="diagramStore.holdTo.y"
-      style="stroke:rgb(0, 0, 0);stroke-width:1"
-    />
-    <template
-      v-for="(item, index) in diagramStore.diagram.shapes"
-      v-bind:key="item.id"
+  <div>
+    <q-splitter
+      v-model="splitterModel"
+      unit="px"
+      class="outer-max"
     >
-      <DbTableSvg
-        v-if="item.type === 'dbTable'"
-        v-model="diagramStore.diagram.shapes[index]"
-      ></DbTableSvg>
-    </template>
-    <template
-      v-for="(item, index) in diagramStore.diagram.lines"
-      v-bind:key="item.id"
-    >
-      <LineSvg
-        v-model="diagramStore.diagram.lines[index]"
-      ></LineSvg>
-    </template>
-  </svg>
+      <template v-slot:before>
+        <ShapePanel/>
+      </template>
+      <template v-slot:after>
+        <svg ref="svgRef"
+          @dragover="allowDrop"
+          @drop="onDrop"
+          @mousemove="onMouseMove"
+          @mouseup="onMouseUp"
+        >
+          <line
+            v-if="diagramStore.holdInfo.type === 'connect'"
+            :x1="diagramStore.holdFrom.x"
+            :y1="diagramStore.holdFrom.y"
+            :x2="diagramStore.holdTo.x"
+            :y2="diagramStore.holdTo.y"
+            style="stroke:rgb(0, 0, 0);stroke-width:1"
+          />
+          <template
+            v-for="(item, index) in diagramStore.diagram.shapes"
+            v-bind:key="item.id"
+          >
+            <DbTableSvg
+              v-if="item.type === 'dbTable'"
+              v-model="diagramStore.diagram.shapes[index]"
+            ></DbTableSvg>
+          </template>
+          <template
+            v-for="(item, index) in diagramStore.diagram.lines"
+            v-bind:key="item.id"
+          >
+            <LineSvg
+              v-model="diagramStore.diagram.lines[index]"
+            ></LineSvg>
+          </template>
+        </svg>
+      </template>
+    </q-splitter>
+  </div>
 </template>
 <script setup lang="ts">
-import { onBeforeMount, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
 import { createDbTable } from './services/dbTableService';
 import { useDiagramStore } from './stores/diagramStore';
+import ShapePanel from './components/ShapePanel.vue';
+import { ShapeType } from './models/shape';
+
+const splitterModel = ref(200);
 
 const diagramStore = useDiagramStore();
 
 const svgRef = ref<InstanceType<typeof SVGElement> | null>(null);
+
+function allowDrop(ev: DragEvent) {
+  ev.preventDefault();
+}
+
+function onDrop(ev: DragEvent) {
+  ev.preventDefault();
+  const type = ev.dataTransfer?.getData('text') as ShapeType;
+  if (type && type === 'dbTable') {
+    const mousePoint = diagramStore.pointShift({ x: ev.x, y: ev.y });
+    diagramStore.diagram.shapes.push(createDbTable(mousePoint.x, mousePoint.y));
+  }
+}
 
 function onMouseMove(evt: MouseEvent) {
   diagramStore.movingByEvent(evt);
@@ -65,12 +97,6 @@ onMounted(() => {
     return;
   }
   diagramStore.setBoudings(svgRef.value.getBoundingClientRect());
-});
-
-onBeforeMount(() => {
-  for (let i = 0; i < 3; i += 1) {
-    diagramStore.diagram.shapes.push(createDbTable(50, 50));
-  }
 });
 </script>
 

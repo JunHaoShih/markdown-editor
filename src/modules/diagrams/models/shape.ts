@@ -1,6 +1,6 @@
 import { DbTableColumn } from './dbTableColumn';
 
-type ShapeType = 'dbTable' | 'rectangle';
+export type ShapeType = 'dbTable' | 'rectangle';
 
 export interface Point {
   x: number,
