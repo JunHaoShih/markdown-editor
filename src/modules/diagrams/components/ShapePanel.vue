@@ -5,7 +5,7 @@
       v-bind:key="icon.type"
       draggable="true"
       @dragstart="onDragStart($event, icon)"
-      style="border-width: 2px; border-color: red; border-style: dashed; border-radius: 5px;"
+      class="icon-btn"
     >
       <svg
         :viewBox="icon.viewBox"
@@ -27,8 +27,9 @@ import { dbTableIcon } from '../services/dbTableService';
 
 function onDragStart(ev: DragEvent, icon: IconInfo) {
   ev.dataTransfer?.setData('text', icon.type);
-  // Create an SVG element
+  // Namespace of svg, do not change it
   const svgNS = 'http://www.w3.org/2000/svg';
+  // Create an SVG element
   const svg = document.createElementNS(svgNS, 'svg');
 
   // Create a rectangle element within the SVG
@@ -53,5 +54,16 @@ const icons = computed(
 <style lang="scss" scoped>
 .flex-container {
   display: flex;
+}
+
+.icon-btn {
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 5px;
+  border-color: red;
+}
+
+.icon-btn:hover {
+  background-color: lightgray;
 }
 </style>
