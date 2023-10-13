@@ -16,6 +16,8 @@
       @on-resize="onResize"
       :left-resizable="true"
       :right-resizable="true"
+      :bottom-resizable="true"
+      :top-resizable="true"
     />
     <g v-touch-pan.prevent.mouse="handleDrag">
       <path
@@ -83,20 +85,44 @@ const minHeight = computed({
 
 let originalX = 0;
 
+let originalY = 0;
+
+let originalBottomY = 0;
+
 let originalRightX = 0;
 
-function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
+function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number, newHeight?: number) {
   if (isFirst) {
     originalX = shape.value.x;
+    originalY = shape.value.y;
     originalRightX = shape.value.x + shape.value.width;
+    originalBottomY = shape.value.y + shape.value.height;
     return;
   }
-  if (newWidth && newPosition) {
+
+  if (!newPosition) {
+    return;
+  }
+
+  if (newWidth) {
     shape.value.width = Math.max(newWidth, minWidth.value);
     if (shape.value.width > minWidth.value) {
       shape.value.x = newPosition.x;
+    } else if (originalX === newPosition.x) {
+      shape.value.x = originalX;
     } else {
       shape.value.x = originalRightX - shape.value.width;
+    }
+  }
+
+  if (newHeight) {
+    shape.value.height = Math.max(newHeight, minHeight.value);
+    if (shape.value.height > minHeight.value) {
+      shape.value.y = newPosition.y;
+    } else if (originalY === newPosition.y) {
+      shape.value.y = originalY;
+    } else {
+      shape.value.y = originalBottomY - shape.value.height;
     }
   }
 }

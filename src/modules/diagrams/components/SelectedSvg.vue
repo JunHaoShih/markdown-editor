@@ -40,7 +40,44 @@
       :x1="topRight.x" :y1="topRight.y"
       :x2="bottomRight.x" :y2="bottomRight.y"
       stroke="transparent"
-      stroke-width="10"
+      stroke-width="5"
+    />
+  </g>
+  <g
+    v-if="bottomResizable"
+    v-touch-pan.mouse.vertical="resizeBottom"
+    style="cursor: row-resize;"
+  >
+    <circle
+      :cx="(bottomLeft.x + bottomRight.x) / 2"
+      :cy="y + height + (margin * 4)"
+      r="5"
+      fill="#29b6f2"
+    />
+    <line
+      :x1="bottomLeft.x" :y1="bottomLeft.y"
+      :x2="bottomRight.x" :y2="bottomRight.y"
+      stroke="transparent"
+      stroke-width="5"
+    />
+  </g>
+  <g
+    v-if="topResizable"
+    v-touch-pan.mouse.vertical="resizeTop"
+    style="cursor: row-resize;"
+  >
+    <circle
+      :cx="(topLeft.x + topRight.x) / 2"
+      :cy="y - (margin * 4)"
+      r="5"
+      fill="#29b6f2"
+    />
+    <line
+      :x1="topLeft.x" :y1="topLeft.y"
+      :x2="topRight.x" :y2="topRight.y"
+      stroke="transparent"
+      stroke-width="5"
+      fill="red"
     />
   </g>
 </template>
@@ -58,12 +95,16 @@ const props = withDefaults(defineProps<{
   strokeWidth: string,
   leftResizable?: boolean,
   rightResizable?: boolean,
+  bottomResizable?: boolean,
+  topResizable?: boolean,
 }>(), {
   margin: 0,
   stroke: 'black',
   strokeWidth: '2',
   leftResizable: false,
   rightResizable: false,
+  bottomResizable: false,
+  topResizable: false,
 });
 
 type Emit = {
@@ -113,6 +154,8 @@ const initialPosition: Point = {
 
 let initialWidth = 0;
 
+let initialHeight = 0;
+
 function resizeLeft(details: {
   isFirst?: boolean,
   offset?: {
@@ -161,6 +204,57 @@ function resizeRight(details: {
       x: initialPosition.x,
       y: initialPosition.y,
     }, newWidth, props.height);
+  }
+}
+
+function resizeBottom(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (!props.rightResizable) {
+    return;
+  }
+  if (details.isFirst) {
+    initialPosition.x = props.x;
+    initialPosition.y = props.y;
+    initialHeight = props.height;
+    emit('onResize', true);
+  }
+  if (details.offset && details.offset.y) {
+    const newHeight = initialHeight + details.offset.y;
+    emit('onResize', false, {
+      x: initialPosition.x,
+      y: initialPosition.y,
+    }, props.width, newHeight);
+  }
+}
+
+function resizeTop(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (!props.topResizable) {
+    return;
+  }
+  if (details.isFirst) {
+    initialPosition.x = props.x;
+    initialPosition.y = props.y;
+    initialHeight = props.height;
+    emit('onResize', true);
+  }
+  if (details.offset && details.offset.y) {
+    const newY = initialPosition.y + details.offset.y;
+    const newHeight = initialHeight - details.offset.y;
+    emit('onResize', false, {
+      x: initialPosition.x,
+      y: newY,
+    }, props.width, newHeight);
   }
 }
 </script>
