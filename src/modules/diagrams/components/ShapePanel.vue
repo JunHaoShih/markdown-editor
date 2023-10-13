@@ -1,11 +1,11 @@
 <template>
-  <div class="flex-container">
+  <div class="tw-flex">
     <div
       v-for="icon in icons"
       v-bind:key="icon.type"
       draggable="true"
       @dragstart="onDragStart($event, icon)"
-      class="icon-btn"
+      class="tw-border-solid tw-border-2 tw-rounded-md tw-border-red-500 hover:tw-bg-gray-200"
     >
       <svg
         :viewBox="icon.viewBox"
@@ -50,20 +50,3 @@ const icons = computed(
   ],
 );
 </script>
-
-<style lang="scss" scoped>
-.flex-container {
-  display: flex;
-}
-
-.icon-btn {
-  border-style: solid;
-  border-width: 2px;
-  border-radius: 5px;
-  border-color: red;
-}
-
-.icon-btn:hover {
-  background-color: lightgray;
-}
-</style>
