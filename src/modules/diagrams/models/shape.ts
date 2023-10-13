@@ -39,6 +39,8 @@ export interface Shape {
    * Shape height
    */
   height: number,
+  minWidth?: number,
+  minHeight?: number,
   /**
    * All connectable nodes of this shape(does not include any child)
    */

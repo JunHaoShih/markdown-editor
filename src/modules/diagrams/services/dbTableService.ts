@@ -33,7 +33,7 @@ export function createDbTable(x: number, y: number): Shape {
       label: { width: 30, minWidth: dbTableConf.minLabelWidth },
     },
     height: 30,
-    width: 200,
+    width: fullWidth(),
   };
 }
 
@@ -72,6 +72,9 @@ export function findConnectionNode(dbColumns: DbTableColumn[], nodeId: string) {
     .find((node) => node.id === nodeId);
 }
 
+/**
+ * Database icon information
+ */
 export const dbTableIcon: IconInfo = {
   type: 'dbTable',
   name: 'diagram.dbTable',

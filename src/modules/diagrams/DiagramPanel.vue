@@ -31,6 +31,10 @@
               v-if="item.type === 'dbTable'"
               v-model="diagramStore.diagram.shapes[index]"
             ></DbTableSvg>
+            <RectangleSvg
+              v-if="item.type === 'rectangle'"
+              v-model="diagramStore.diagram.shapes[index]"
+            ></RectangleSvg>
           </template>
           <template
             v-for="(item, index) in diagramStore.diagram.lines"
@@ -49,10 +53,12 @@
 import { onMounted, ref } from 'vue';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
+import RectangleSvg from './components/basicShapes/RectangleSvg.vue';
 import { createDbTable } from './services/dbTableService';
 import { useDiagramStore } from './stores/diagramStore';
 import ShapePanel from './components/ShapePanel.vue';
 import { ShapeType } from './models/shape';
+import { createRectangle } from './services/basicShapeService';
 
 const splitterModel = ref(200);
 
@@ -67,9 +73,14 @@ function allowDrop(ev: DragEvent) {
 function onDrop(ev: DragEvent) {
   ev.preventDefault();
   const type = ev.dataTransfer?.getData('text') as ShapeType;
-  if (type && type === 'dbTable') {
-    const mousePoint = diagramStore.pointShift({ x: ev.x, y: ev.y });
+  if (!type) {
+    return;
+  }
+  const mousePoint = diagramStore.pointShift({ x: ev.x, y: ev.y });
+  if (type === 'dbTable') {
     diagramStore.diagram.shapes.push(createDbTable(mousePoint.x, mousePoint.y));
+  } else if (type === 'rectangle') {
+    diagramStore.diagram.shapes.push(createRectangle(mousePoint.x, mousePoint.y));
   }
 }
 

@@ -11,10 +11,10 @@
     />
     <text
       v-if="!isEdit"
-      :x="x + 10"
+      :x="textX"
       :y="y + 20"
       :font-weight="fontWeight"
-      text-anchor="center"
+      :text-anchor="textAnchor"
     >
       {{ inputText }}
     </text>
@@ -40,19 +40,42 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: string,
   x: number,
   y: number,
   width: number,
   height: number,
-  fontWeight?: string
-}>();
+  fontWeight?: string,
+  textAnchor?: 'start' | 'middle' | 'end',
+}>(), {
+  textAnchor: 'start',
+});
 
 type Emit = {
   (e: 'update:modelValue', value: string): void
 }
 const emit = defineEmits<Emit>();
+
+const textX = computed(
+  () => {
+    let x = 0;
+    switch (props.textAnchor) {
+      case 'start':
+        x = props.x + 10;
+        break;
+      case 'middle':
+        x = props.x + (props.width / 2);
+        break;
+      case 'end':
+        x = props.x + props.width - 10;
+        break;
+      default:
+        x = props.x + 10;
+    }
+    return x;
+  },
+);
 
 const inputText = computed({
   get: () => props.modelValue,
