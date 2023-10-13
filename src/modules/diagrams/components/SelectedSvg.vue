@@ -10,7 +10,7 @@
   <g
     v-if="leftResizable"
     style="cursor: col-resize;"
-    v-touch-pan.mouse.horizontal="resizeLeft"
+    v-touch-pan.mouse="resizeLeft"
   >
     <circle
       :cx="x - (margin * 4)"
@@ -45,7 +45,7 @@
   </g>
   <g
     v-if="bottomResizable"
-    v-touch-pan.mouse.vertical="resizeBottom"
+    v-touch-pan.mouse="resizeBottom"
     style="cursor: row-resize;"
   >
     <circle
@@ -63,11 +63,11 @@
   </g>
   <g
     v-if="topResizable"
-    v-touch-pan.mouse.vertical="resizeTop"
+    v-touch-pan.mouse="resizeTop"
     style="cursor: row-resize;"
   >
     <circle
-      :cx="(topLeft.x + topRight.x) / 2"
+      :cx="(x + topRight.x) / 2"
       :cy="y - (margin * 4)"
       r="5"
       fill="#29b6f2"
@@ -78,6 +78,54 @@
       stroke="transparent"
       stroke-width="5"
       fill="red"
+    />
+  </g>
+  <g
+    v-if="topResizable && leftResizable"
+    class="tw-cursor-nw-resize"
+    v-touch-pan.mouse="resizeTopLeft"
+  >
+    <circle
+      :cx="x - (margin * 4)"
+      :cy="y - (margin * 4)"
+      r="5"
+      fill="#29b6f2"
+    />
+  </g>
+  <g
+    v-if="topResizable && rightResizable"
+    class="tw-cursor-ne-resize"
+    v-touch-pan.mouse="resizeTopRight"
+  >
+    <circle
+      :cx="x + width + (margin * 4)"
+      :cy="y - (margin * 4)"
+      r="5"
+      fill="#29b6f2"
+    />
+  </g>
+  <g
+    v-if="bottomResizable && leftResizable"
+    class="tw-cursor-ne-resize"
+    v-touch-pan.mouse="resizeBottomLeft"
+  >
+    <circle
+      :cx="x - (margin * 4)"
+      :cy="y + height + (margin * 4)"
+      r="5"
+      fill="#29b6f2"
+    />
+  </g>
+  <g
+    v-if="bottomResizable && rightResizable"
+    class="tw-cursor-nw-resize"
+    v-touch-pan.mouse="resizeBottomRight"
+  >
+    <circle
+      :cx="x + width + (margin * 4)"
+      :cy="y + height + (margin * 4)"
+      r="5"
+      fill="#29b6f2"
     />
   </g>
 </template>
@@ -156,6 +204,64 @@ let initialWidth = 0;
 
 let initialHeight = 0;
 
+interface ResizeInfo {
+  topResizable?: boolean,
+  bottomResizable?: boolean,
+  leftResizable?: boolean,
+  rightResizable?: boolean,
+}
+
+function getNewWidth(resizeInfo: ResizeInfo, offsetX: number, defaultWidth: number) {
+  if (resizeInfo.leftResizable) {
+    return defaultWidth - offsetX;
+  }
+  if (resizeInfo.rightResizable) {
+    return defaultWidth + offsetX;
+  }
+  return defaultWidth;
+}
+
+function getNewHeight(resizeInfo: ResizeInfo, offsetY: number, defaultHeight: number) {
+  if (resizeInfo.topResizable) {
+    return defaultHeight - offsetY;
+  }
+  if (resizeInfo.bottomResizable) {
+    return defaultHeight + offsetY;
+  }
+  return defaultHeight;
+}
+
+function resize(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}, info: ResizeInfo) {
+  if (details.isFirst) {
+    initialPosition.x = props.x;
+    initialPosition.y = props.y;
+    initialHeight = props.height;
+    initialWidth = props.width;
+    emit('onResize', true);
+  }
+  if (details.offset && details.offset.y && details.offset.x) {
+    const newX = info.leftResizable
+      ? initialPosition.x + details.offset.x
+      : initialPosition.x;
+    const newWidth = getNewWidth(info, details.offset.x, initialWidth);
+
+    const newY = info.topResizable
+      ? initialPosition.y + details.offset.y
+      : initialPosition.y;
+    const newHeight = getNewHeight(info, details.offset.y, initialHeight);
+    emit('onResize', false, {
+      x: newX,
+      y: newY,
+    }, newWidth, newHeight);
+  }
+}
+
 function resizeLeft(details: {
   isFirst?: boolean,
   offset?: {
@@ -163,23 +269,9 @@ function resizeLeft(details: {
     y?: number,
   },
 }) {
-  if (!props.leftResizable) {
-    return;
-  }
-  if (details.isFirst) {
-    initialPosition.x = props.x;
-    initialPosition.y = props.y;
-    initialWidth = props.width;
-    emit('onResize', true);
-  }
-  if (details.offset && details.offset.x) {
-    const newX = initialPosition.x + details.offset.x;
-    const newWidth = initialWidth - details.offset.x;
-    emit('onResize', false, {
-      x: newX,
-      y: initialPosition.y,
-    }, newWidth, props.height);
-  }
+  resize(details, {
+    leftResizable: true,
+  });
 }
 
 function resizeRight(details: {
@@ -189,47 +281,9 @@ function resizeRight(details: {
     y?: number,
   },
 }) {
-  if (!props.rightResizable) {
-    return;
-  }
-  if (details.isFirst) {
-    initialPosition.x = props.x;
-    initialPosition.y = props.y;
-    initialWidth = props.width;
-    emit('onResize', true);
-  }
-  if (details.offset && details.offset.x) {
-    const newWidth = initialWidth + details.offset.x;
-    emit('onResize', false, {
-      x: initialPosition.x,
-      y: initialPosition.y,
-    }, newWidth, props.height);
-  }
-}
-
-function resizeBottom(details: {
-  isFirst?: boolean,
-  offset?: {
-    x?: number,
-    y?: number,
-  },
-}) {
-  if (!props.rightResizable) {
-    return;
-  }
-  if (details.isFirst) {
-    initialPosition.x = props.x;
-    initialPosition.y = props.y;
-    initialHeight = props.height;
-    emit('onResize', true);
-  }
-  if (details.offset && details.offset.y) {
-    const newHeight = initialHeight + details.offset.y;
-    emit('onResize', false, {
-      x: initialPosition.x,
-      y: initialPosition.y,
-    }, props.width, newHeight);
-  }
+  resize(details, {
+    rightResizable: true,
+  });
 }
 
 function resizeTop(details: {
@@ -239,22 +293,72 @@ function resizeTop(details: {
     y?: number,
   },
 }) {
-  if (!props.topResizable) {
-    return;
-  }
-  if (details.isFirst) {
-    initialPosition.x = props.x;
-    initialPosition.y = props.y;
-    initialHeight = props.height;
-    emit('onResize', true);
-  }
-  if (details.offset && details.offset.y) {
-    const newY = initialPosition.y + details.offset.y;
-    const newHeight = initialHeight - details.offset.y;
-    emit('onResize', false, {
-      x: initialPosition.x,
-      y: newY,
-    }, props.width, newHeight);
-  }
+  resize(details, {
+    topResizable: true,
+  });
+}
+
+function resizeBottom(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  resize(details, {
+    bottomResizable: true,
+  });
+}
+
+function resizeTopLeft(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  resize(details, {
+    topResizable: true,
+    leftResizable: true,
+  });
+}
+
+function resizeTopRight(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  resize(details, {
+    topResizable: true,
+    rightResizable: true,
+  });
+}
+
+function resizeBottomLeft(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  resize(details, {
+    bottomResizable: true,
+    leftResizable: true,
+  });
+}
+
+function resizeBottomRight(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  resize(details, {
+    bottomResizable: true,
+    rightResizable: true,
+  });
 }
 </script>
