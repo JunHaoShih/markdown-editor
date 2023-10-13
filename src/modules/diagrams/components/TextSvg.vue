@@ -12,7 +12,7 @@
     <text
       v-if="!isEdit"
       :x="textX"
-      :y="y + 20"
+      :y="textY"
       :font-weight="fontWeight"
       :text-anchor="textAnchor"
     >
@@ -48,8 +48,10 @@ const props = withDefaults(defineProps<{
   height: number,
   fontWeight?: string,
   textAnchor?: 'start' | 'middle' | 'end',
+  verticalAlign?: 'top' | 'center' | 'bottom'
 }>(), {
   textAnchor: 'start',
+  verticalAlign: 'top',
 });
 
 type Emit = {
@@ -74,6 +76,26 @@ const textX = computed(
         x = props.x + 10;
     }
     return x;
+  },
+);
+
+const textY = computed(
+  () => {
+    let y = 0;
+    switch (props.verticalAlign) {
+      case 'top':
+        y = props.y + 20;
+        break;
+      case 'center':
+        y = props.y + (props.height / 2) + 5;
+        break;
+      case 'bottom':
+        y = props.y + props.height - 10;
+        break;
+      default:
+        y = props.y + 20;
+    }
+    return y;
   },
 );
 

@@ -33,6 +33,7 @@
         :width="shape.width"
         :height="shape.height"
         text-anchor="middle"
+        vertical-align="center"
       />
     </g>
   </g>
