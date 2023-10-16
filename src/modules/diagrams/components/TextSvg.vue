@@ -31,8 +31,8 @@
         dense
         filled
         type="text"
-        @blur="isEdit = false"
-        v-on:keyup.prevent.enter="isEdit = false"
+        @blur="focusDiagramPanel"
+        v-on:keyup.prevent.enter="focusDiagramPanel"
         @keydown.stop.delete=""
       ></q-input>
     </foreignObject>
@@ -113,4 +113,10 @@ const clickPath = computed(
 );
 
 const isEdit = ref(false);
+
+function focusDiagramPanel() {
+  isEdit.value = false;
+  // I have to refocus on diagramPanel, so the diagramPanel can be correctly triggered
+  document.getElementById('diagramPanel')?.focus();
+}
 </script>

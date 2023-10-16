@@ -10,6 +10,7 @@
       </template>
       <template v-slot:after>
         <svg ref="svgRef"
+          id="diagramPanel"
           @dragover="allowDrop"
           @drop="onDrop"
           @mousemove="onMouseMove"
