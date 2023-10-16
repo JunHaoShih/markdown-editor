@@ -72,6 +72,7 @@ function setStartLocation(node: ConnectionNode) {
   startLocation.value.x = node.point.x;
   startLocation.value.y = node.point.y;
   diagramStore.startHolding('connect', node.point.x, node.point.y, node.id);
+  diagramStore.selectedIds.length = 0;
 }
 
 function setToNode(node: ConnectionNode) {
