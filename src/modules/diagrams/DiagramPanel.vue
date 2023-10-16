@@ -14,6 +14,8 @@
           @drop="onDrop"
           @mousemove="onMouseMove"
           @mouseup="onMouseUp"
+          @keydown.delete="onDeleteClicked"
+          tabindex="-1"
         >
           <line
             v-if="diagramStore.holdInfo.type === 'connect'"
@@ -101,6 +103,17 @@ function onMouseUp() {
     }
   }
   diagramStore.endHolding();
+  diagramStore.selectedIds.length = 0;
+}
+
+function onDeleteClicked() {
+  diagramStore.selectedIds.forEach((id) => {
+    const index = diagramStore.diagram.shapes.findIndex((shape) => shape.id === id);
+    if (index === -1) {
+      return;
+    }
+    diagramStore.diagram.shapes.splice(index, 1);
+  });
   diagramStore.selectedIds.length = 0;
 }
 
