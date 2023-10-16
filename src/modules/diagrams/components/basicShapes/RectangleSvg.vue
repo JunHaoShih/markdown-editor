@@ -1,8 +1,7 @@
 <template>
-  <g
-    class="prevent-select tw-outline-none"
-    @click="isSelected = true"
-    @blur="isSelected = false"
+  <ShapeSlot
+    v-model="isSelected"
+    :id="shape.id"
   >
     <SelectedSvg
       v-if="isSelected"
@@ -36,13 +35,14 @@
         vertical-align="center"
       />
     </g>
-  </g>
+  </ShapeSlot>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import TextSvg from '../TextSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
+import ShapeSlot from '../ShapeSlot.vue';
 import { Point, Shape } from '../../models/shape';
 import { rectConf } from '../../services/basicShapeService';
 

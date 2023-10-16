@@ -1,132 +1,134 @@
 <template>
-  <path
-    :d="selectedPath"
-    :stroke="stroke"
-    :stroke-width="strokeWidth"
-    fill="transparent"
-    stroke-linecap="round"
-    stroke-dasharray="5,5"
-  />
-  <g
-    v-if="leftResizable"
-    style="cursor: col-resize;"
-    v-touch-pan.mouse="resizeLeft"
-  >
-    <circle
-      :cx="x - (margin * 4)"
-      :cy="(topLeft.y + bottomLeft.y) / 2"
-      r="5"
-      fill="#29b6f2"
+  <g @mouseup.stop="">
+    <path
+      :d="selectedPath"
+      :stroke="stroke"
+      :stroke-width="strokeWidth"
+      fill="transparent"
+      stroke-linecap="round"
+      stroke-dasharray="5,5"
     />
-    <line
-      :x1="topLeft.x" :y1="topLeft.y"
-      :x2="bottomLeft.x" :y2="bottomLeft.y"
-      stroke="transparent"
-      stroke-width="5"
-    />
-  </g>
-  <g
-    v-if="rightResizable"
-    v-touch-pan.mouse.horizontal="resizeRight"
-    style="cursor: col-resize;"
-  >
-    <circle
-      :cx="x + width + (margin * 4)"
-      :cy="(topRight.y + bottomRight.y) / 2"
-      r="5"
-      fill="#29b6f2"
-    />
-    <line
-      :x1="topRight.x" :y1="topRight.y"
-      :x2="bottomRight.x" :y2="bottomRight.y"
-      stroke="transparent"
-      stroke-width="5"
-    />
-  </g>
-  <g
-    v-if="bottomResizable"
-    v-touch-pan.mouse="resizeBottom"
-    style="cursor: row-resize;"
-  >
-    <circle
-      :cx="(bottomLeft.x + bottomRight.x) / 2"
-      :cy="y + height + (margin * 4)"
-      r="5"
-      fill="#29b6f2"
-    />
-    <line
-      :x1="bottomLeft.x" :y1="bottomLeft.y"
-      :x2="bottomRight.x" :y2="bottomRight.y"
-      stroke="transparent"
-      stroke-width="5"
-    />
-  </g>
-  <g
-    v-if="topResizable"
-    v-touch-pan.mouse="resizeTop"
-    style="cursor: row-resize;"
-  >
-    <circle
-      :cx="(x + topRight.x) / 2"
-      :cy="y - (margin * 4)"
-      r="5"
-      fill="#29b6f2"
-    />
-    <line
-      :x1="topLeft.x" :y1="topLeft.y"
-      :x2="topRight.x" :y2="topRight.y"
-      stroke="transparent"
-      stroke-width="5"
-      fill="red"
-    />
-  </g>
-  <g
-    v-if="topResizable && leftResizable"
-    class="tw-cursor-nw-resize"
-    v-touch-pan.mouse="resizeTopLeft"
-  >
-    <circle
-      :cx="x - (margin * 4)"
-      :cy="y - (margin * 4)"
-      r="5"
-      fill="#29b6f2"
-    />
-  </g>
-  <g
-    v-if="topResizable && rightResizable"
-    class="tw-cursor-ne-resize"
-    v-touch-pan.mouse="resizeTopRight"
-  >
-    <circle
-      :cx="x + width + (margin * 4)"
-      :cy="y - (margin * 4)"
-      r="5"
-      fill="#29b6f2"
-    />
-  </g>
-  <g
-    v-if="bottomResizable && leftResizable"
-    class="tw-cursor-ne-resize"
-    v-touch-pan.mouse="resizeBottomLeft"
-  >
-    <circle
-      :cx="x - (margin * 4)"
-      :cy="y + height + (margin * 4)"
-      r="5"
-      fill="#29b6f2"
-    />
-  </g>
-  <g
-    v-if="bottomResizable && rightResizable"
-    class="tw-cursor-nw-resize"
-    v-touch-pan.mouse="resizeBottomRight"
-  >
-    <circle
-      :cx="x + width + (margin * 4)"
-      :cy="y + height + (margin * 4)"
-      r="5"
-      fill="#29b6f2"
-    />
+    <g
+      v-if="leftResizable"
+      style="cursor: col-resize;"
+      v-touch-pan.mouse="resizeLeft"
+    >
+      <circle
+        :cx="x - (margin * 4)"
+        :cy="(topLeft.y + bottomLeft.y) / 2"
+        r="5"
+        fill="#29b6f2"
+      />
+      <line
+        :x1="topLeft.x" :y1="topLeft.y"
+        :x2="bottomLeft.x" :y2="bottomLeft.y"
+        stroke="transparent"
+        stroke-width="5"
+      />
+    </g>
+    <g
+      v-if="rightResizable"
+      v-touch-pan.mouse.horizontal="resizeRight"
+      style="cursor: col-resize;"
+    >
+      <circle
+        :cx="x + width + (margin * 4)"
+        :cy="(topRight.y + bottomRight.y) / 2"
+        r="5"
+        fill="#29b6f2"
+      />
+      <line
+        :x1="topRight.x" :y1="topRight.y"
+        :x2="bottomRight.x" :y2="bottomRight.y"
+        stroke="transparent"
+        stroke-width="5"
+      />
+    </g>
+    <g
+      v-if="bottomResizable"
+      v-touch-pan.mouse="resizeBottom"
+      style="cursor: row-resize;"
+    >
+      <circle
+        :cx="(bottomLeft.x + bottomRight.x) / 2"
+        :cy="y + height + (margin * 4)"
+        r="5"
+        fill="#29b6f2"
+      />
+      <line
+        :x1="bottomLeft.x" :y1="bottomLeft.y"
+        :x2="bottomRight.x" :y2="bottomRight.y"
+        stroke="transparent"
+        stroke-width="5"
+      />
+    </g>
+    <g
+      v-if="topResizable"
+      v-touch-pan.mouse="resizeTop"
+      style="cursor: row-resize;"
+    >
+      <circle
+        :cx="(x + topRight.x) / 2"
+        :cy="y - (margin * 4)"
+        r="5"
+        fill="#29b6f2"
+      />
+      <line
+        :x1="topLeft.x" :y1="topLeft.y"
+        :x2="topRight.x" :y2="topRight.y"
+        stroke="transparent"
+        stroke-width="5"
+        fill="red"
+      />
+    </g>
+    <g
+      v-if="topResizable && leftResizable"
+      class="tw-cursor-nw-resize"
+      v-touch-pan.mouse="resizeTopLeft"
+    >
+      <circle
+        :cx="x - (margin * 4)"
+        :cy="y - (margin * 4)"
+        r="5"
+        fill="#29b6f2"
+      />
+    </g>
+    <g
+      v-if="topResizable && rightResizable"
+      class="tw-cursor-ne-resize"
+      v-touch-pan.mouse="resizeTopRight"
+    >
+      <circle
+        :cx="x + width + (margin * 4)"
+        :cy="y - (margin * 4)"
+        r="5"
+        fill="#29b6f2"
+      />
+    </g>
+    <g
+      v-if="bottomResizable && leftResizable"
+      class="tw-cursor-ne-resize"
+      v-touch-pan.mouse="resizeBottomLeft"
+    >
+      <circle
+        :cx="x - (margin * 4)"
+        :cy="y + height + (margin * 4)"
+        r="5"
+        fill="#29b6f2"
+      />
+    </g>
+    <g
+      v-if="bottomResizable && rightResizable"
+      class="tw-cursor-nw-resize"
+      v-touch-pan.mouse="resizeBottomRight"
+    >
+      <circle
+        :cx="x + width + (margin * 4)"
+        :cy="y + height + (margin * 4)"
+        r="5"
+        fill="#29b6f2"
+      />
+    </g>
   </g>
 </template>
 <script setup lang="ts">

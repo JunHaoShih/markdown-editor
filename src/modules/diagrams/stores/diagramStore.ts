@@ -17,6 +17,7 @@ interface DiagramStore {
   offsetX: number,
   offsetY: number,
   holdInfo: MouseHoldInfo,
+  selectedIds: string[],
 }
 
 export const useDiagramStore = defineStore('diagram', {
@@ -39,6 +40,7 @@ export const useDiagramStore = defineStore('diagram', {
         y: 0,
       },
     },
+    selectedIds: [],
   }),
   getters: {
     holdType: (state) => state.holdInfo.type,
@@ -98,6 +100,29 @@ export const useDiagramStore = defineStore('diagram', {
     unsetToNode(nodeId: string) {
       if (this.holdInfo.holdToId === nodeId) {
         this.holdInfo.holdToId = undefined;
+      }
+    },
+
+    /**
+     * Delete shape by id
+     * @param id Shape id
+     */
+    deleteShape(id: string) {
+      const index = this.diagram.shapes.findIndex((shape) => shape.id === id);
+      if (index === -1) {
+        return;
+      }
+      this.diagram.shapes.splice(index, 1);
+    },
+
+    /**
+     * Add id to selected list
+     * @param id Shape id what is selected
+     */
+    addSelectedId(id: string) {
+      const target = this.selectedIds.find((selectedId) => selectedId === id);
+      if (!target) {
+        this.selectedIds.push(id);
       }
     },
   },

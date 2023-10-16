@@ -1,6 +1,7 @@
 <template>
   <g
     :transform="`translate(${x}, ${y})`"
+    @mouseup.stop
   >
     <rect
       :width="width" :height="height" :rx="rx"

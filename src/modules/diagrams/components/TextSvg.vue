@@ -33,6 +33,7 @@
         type="text"
         @blur="isEdit = false"
         v-on:keyup.prevent.enter="isEdit = false"
+        @keydown.stop.delete=""
       ></q-input>
     </foreignObject>
   </g>

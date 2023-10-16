@@ -101,6 +101,7 @@ function onMouseUp() {
     }
   }
   diagramStore.endHolding();
+  diagramStore.selectedIds.length = 0;
 }
 
 onMounted(() => {

@@ -1,8 +1,8 @@
 <template>
-  <g
-    class="prevent-select no-focus-ring"
-    @click="isSelected = true"
-    @blur="unselectAll"
+  <ShapeSlot
+    v-model="isSelected"
+    :id="shape.id"
+    :on-unselect="unselectAll"
   >
     <SelectedSvg
       v-if="isSelected"
@@ -111,7 +111,7 @@
         :nodes="col.connectionNodes"
       />
     </template>
-  </g>
+  </ShapeSlot>
 </template>
 
 <script setup lang="ts">
@@ -121,6 +121,7 @@ import { useI18n } from 'vue-i18n';
 import DbColumnSvg from './DbColumnSvg.vue';
 import ConnectionHintSvg from '../ConnectionHintSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
+import ShapeSlot from '../ShapeSlot.vue';
 import ActionBtnSvg from '../ActionBtnSvg.vue';
 import { Point, Shape } from '../../models/shape';
 import { createDbTableColumn, dbTableConf } from '../../services/dbTableService';
@@ -318,7 +319,6 @@ function onSelectedChange(id: string) {
 }
 
 function unselectAll() {
-  isSelected.value = false;
   selectedIds.value.length = 0;
 }
 
