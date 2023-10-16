@@ -20,7 +20,28 @@ export function createRectangle(x: number, y: number): Shape {
     height: rectConf.defaultHeight,
     minWidth: rectConf.minWidth,
     minHeight: rectConf.minHeight,
-    connectionNodes: [],
+    connectionNodes: [
+      {
+        id: uuidv4(),
+        orient: 'left',
+        point: { x: 0, y: 0 },
+      },
+      {
+        id: uuidv4(),
+        orient: 'right',
+        point: { x: 0, y: 0 },
+      },
+      {
+        id: uuidv4(),
+        orient: 'top',
+        point: { x: 0, y: 0 },
+      },
+      {
+        id: uuidv4(),
+        orient: 'bottom',
+        point: { x: 0, y: 0 },
+      },
+    ],
     extraSizeInfos: {},
   };
 }

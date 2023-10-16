@@ -103,12 +103,16 @@
       ></ActionBtnSvg>
     </g>
     <template
-      v-for="col in columns"
+      v-for="(col, index) in columns"
       v-bind:key="col.id"
     >
       <ConnectionHintSvg
         :selected="!!selectedIds.find((colId) => colId === col.id)"
-        :nodes="col.connectionNodes"
+        v-model="columns[index].connectionNodes"
+        :x="shape.x"
+        :y="getRowStartY(index)"
+        :width="width"
+        :height="col.height"
       />
     </template>
   </ShapeSlot>

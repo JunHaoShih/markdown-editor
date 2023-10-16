@@ -25,7 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import {
+  computed, onBeforeMount, ref, watch,
+} from 'vue';
 import { ConnectionNode, Orient, Point } from '../models/shape';
 import { useDiagramStore } from '../stores/diagramStore';
 
@@ -39,10 +41,24 @@ const isNodeHover = ref(false);
 
 const diagramStore = useDiagramStore();
 
-defineProps<{
-  nodes: ConnectionNode[],
+const props = defineProps<{
+  modelValue: ConnectionNode[],
   selected: boolean,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
 }>();
+
+type Emit = {
+  (e: 'update:modelValue', value: ConnectionNode[]): void
+}
+const emit = defineEmits<Emit>();
+
+const nodes = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+});
 
 function getArrow(node: ConnectionNode) {
   return `M ${node.point.x} ${node.point.y} \
@@ -86,4 +102,52 @@ function unsetToNode(node: ConnectionNode) {
     diagramStore.unsetToNode(node.id);
   }
 }
+
+const relocateNodes: Record<Orient, () => void> = {
+  left: () => {
+    const node = nodes.value.find((cn) => cn.orient === 'left');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x;
+    node.point.y = props.y + (props.height / 2);
+  },
+  right: () => {
+    const node = nodes.value.find((cn) => cn.orient === 'right');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x + props.width;
+    node.point.y = props.y + (props.height / 2);
+  },
+  top: () => {
+    const node = nodes.value.find((cn) => cn.orient === 'top');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x + (props.width / 2);
+    node.point.y = props.y;
+  },
+  bottom: () => {
+    const node = nodes.value.find((cn) => cn.orient === 'bottom');
+    if (!node) {
+      return;
+    }
+    node.point.x = props.x + (props.width / 2);
+    node.point.y = props.y + props.height;
+  },
+};
+
+watch(() => [props.x, props.y, props.width], () => {
+  nodes.value.forEach((node) => {
+    relocateNodes[node.orient]();
+  });
+});
+
+onBeforeMount(() => {
+  relocateNodes.left();
+  relocateNodes.right();
+  relocateNodes.top();
+  relocateNodes.bottom();
+});
 </script>
