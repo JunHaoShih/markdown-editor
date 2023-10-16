@@ -21,42 +21,16 @@
       v-touch-pan.prevent.mouse="handleDrag"
     >
       // title area
-      <g
-        @dblclick="displayTitle = true"
-      >
-        <path
-          :d="titlePath"
-          stroke="black"
-          stroke-width="1"
-          fill="transparent"
-        />
-        <text
-          v-if="!displayTitle"
-          :x="shape.x + (width / 2)"
-          :y="shape.y + 20"
-          font-weight="bold"
-          text-anchor="middle"
-        >
-          {{ shape.title }}
-        </text>
-        <foreignObject
-          v-if="displayTitle"
-          :x="shape.x"
-          :y="shape.y"
-          :width="width"
-          :height="titleHeight"
-          fill="transparent">
-          <q-input
-            v-model="shape.title"
-            autofocus
-            dense
-            filled
-            type="text"
-            @blur="displayTitle = false"
-            v-on:keyup.prevent.enter="displayTitle = false"
-          ></q-input>
-        </foreignObject>
-      </g>
+      <TextSvg
+        v-model="shape.title"
+        :x="shape.x"
+        :y="shape.y"
+        :width="width"
+        :height="titleHeight"
+        text-anchor="middle"
+        stroke="black"
+        stroke-width="1"
+      />
       <g
         v-for="(col, index) in columns"
         v-bind:key="col.id"
@@ -123,6 +97,7 @@ import { useQuasar } from 'quasar';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DbColumnSvg from './DbColumnSvg.vue';
+import TextSvg from '../TextSvg.vue';
 import ConnectionHintSvg from '../ConnectionHintSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
 import ShapeSlot from '../ShapeSlot.vue';
@@ -135,8 +110,6 @@ const isSelected = ref(false);
 const $q = useQuasar();
 
 const i18n = useI18n();
-
-const displayTitle = ref(false);
 
 const titleHeight = ref(30);
 
@@ -266,16 +239,6 @@ function handleDrag(details: {
     shape.value.y += details.delta.y;
   }
 }
-
-/**
- * Path of erd table grid
- */
-const titlePath = computed(
-  () => `M ${shape.value.x} ${shape.value.y} \
-  H ${shape.value.x + width.value} \
-  V ${shape.value.y + titleHeight.value} \
-  H ${shape.value.x} V ${shape.value.y}`,
-);
 
 /**
  * Starting point(x) of action panel

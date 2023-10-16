@@ -5,8 +5,8 @@
   >
     <path
       :d="clickPath"
-      stroke="transparent"
-      stroke-width="1"
+      :stroke="stroke"
+      :stroke-width="strokeWidth"
       fill="transparent"
     />
     <text
@@ -50,9 +50,13 @@ const props = withDefaults(defineProps<{
   fontWeight?: string,
   textAnchor?: 'start' | 'middle' | 'end',
   verticalAlign?: 'top' | 'center' | 'bottom'
+  strokeWidth?: string,
+  stroke?: string,
 }>(), {
   textAnchor: 'start',
   verticalAlign: 'top',
+  strokeWidth: '1',
+  stroke: 'transparent',
 });
 
 type Emit = {
