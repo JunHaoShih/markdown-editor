@@ -1,6 +1,6 @@
 import { DbTableColumn } from './dbTableColumn';
 
-export type ShapeType = 'dbTable' | 'rectangle';
+export type ShapeType = 'dbTable' | 'line' | 'rectangle';
 
 export interface Point {
   x: number,
@@ -23,9 +23,21 @@ interface SizeInfo {
 }
 
 export interface Shape {
+  /**
+   * Shape id
+   */
   id: string,
+  /**
+   * Shape type
+   */
   type: ShapeType,
+  /**
+   * Position at X coordinate
+   */
   x: number,
+  /**
+   * Position at Y coordinate
+   */
   y: number,
   /**
    * Shape title
@@ -39,7 +51,13 @@ export interface Shape {
    * Shape height
    */
   height: number,
+  /**
+   * Minimum width of shape
+   */
   minWidth?: number,
+  /**
+   * Minimum height of shape
+   */
   minHeight?: number,
   /**
    * All connectable nodes of this shape(does not include any child)
