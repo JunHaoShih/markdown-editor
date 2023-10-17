@@ -21,8 +21,7 @@ export function createDbTable(x: number, y: number): Shape {
   return {
     id: uuidv4(),
     type: 'dbTable',
-    x,
-    y,
+    position: { x, y },
     title: 'Table name',
     dbColumns: [],
     connectionNodes: [],

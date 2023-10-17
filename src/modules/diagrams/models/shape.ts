@@ -31,14 +31,7 @@ export interface Shape {
    * Shape type
    */
   type: ShapeType,
-  /**
-   * Position at X coordinate
-   */
-  x: number,
-  /**
-   * Position at Y coordinate
-   */
-  y: number,
+  position: Point,
   /**
    * Shape title
    */
@@ -46,11 +39,11 @@ export interface Shape {
   /**
    * Shape width
    */
-  width: number,
+  width?: number,
   /**
    * Shape height
    */
-  height: number,
+  height?: number,
   /**
    * Minimum width of shape
    */

@@ -142,10 +142,10 @@ function onMouseUp() {
   if (diagramStore.holdType === 'multiSelect') {
     diagramStore.selectedIds.length = 0;
     diagramStore.diagram.shapes.forEach((shape) => {
-      if (shape.x >= multiSelectTopLeftX.value
-        && shape.x <= multiSelectBottomRightX.value
-        && shape.y >= multiSelectTopLeftY.value
-        && shape.y <= multiSelectBottomRightY.value
+      if (shape.position.x >= multiSelectTopLeftX.value
+        && shape.position.x <= multiSelectBottomRightX.value
+        && shape.position.y >= multiSelectTopLeftY.value
+        && shape.position.y <= multiSelectBottomRightY.value
       ) {
         diagramStore.addSelectedId(shape.id);
       }

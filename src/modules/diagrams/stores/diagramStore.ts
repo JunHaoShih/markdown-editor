@@ -138,10 +138,10 @@ export const useDiagramStore = defineStore('diagram', {
           return;
         }
         if (details.delta?.x) {
-          targetShape.x += details.delta.x;
+          targetShape.position.x += details.delta.x;
         }
         if (details.delta?.y) {
-          targetShape.y += details.delta.y;
+          targetShape.position.y += details.delta.y;
         }
       });
     },

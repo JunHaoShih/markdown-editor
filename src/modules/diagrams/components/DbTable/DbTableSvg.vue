@@ -9,8 +9,8 @@
       :margin="3"
       :width="width"
       :height="height"
-      :x="shape.x"
-      :y="shape.y"
+      :x="shape.position.x"
+      :y="shape.position.y"
       stroke="grey"
       stroke-width="1"
       @on-resize="onResize"
@@ -22,8 +22,8 @@
       // title area
       <TextSvg
         v-model="shape.title"
-        :x="shape.x"
-        :y="shape.y"
+        :x="shape.position.x"
+        :y="shape.position.y"
         :width="width"
         :height="titleHeight"
         text-anchor="middle"
@@ -44,7 +44,7 @@
           :min-name-width="minNameWidth"
           :min-type-width="minTypeWidth"
           :min-label-width="minLabelWidth"
-          :x="shape.x"
+          :x="shape.position.x"
           :y="getRowStartY(index)"
           :width="width"
           :selected-ids="selectedIds"
@@ -52,8 +52,8 @@
         ></DbColumnSvg>
       </g>
       <line
-        :x1="shape.x" :y1="shape.y + height"
-        :x2="shape.x + width" :y2="shape.y + height"
+        :x1="shape.position.x" :y1="shape.position.y + height"
+        :x2="shape.position.x + width" :y2="shape.position.y + height"
         stroke="black"
         stroke-width="1"
       />
@@ -82,7 +82,7 @@
       <ConnectionHintSvg
         :selected="!!selectedIds.find((colId) => colId === col.id)"
         v-model="columns[index].connectionNodes"
-        :x="shape.x"
+        :x="shape.position.x"
         :y="getRowStartY(index)"
         :width="width"
         :height="col.height"
@@ -208,7 +208,7 @@ const width = computed(
 );
 
 function getRowStartY(index: number) {
-  return shape.value.y
+  return shape.value.position.y
     + titleHeight.value
     + columns.value
       .map((col) => col.height)
@@ -230,18 +230,18 @@ const height = computed(
  * Starting point(x) of action panel
  */
 const actionPanelX = computed(
-  () => shape.value.x + width.value + actionPanelOffset,
+  () => shape.value.position.x + width.value + actionPanelOffset,
 );
 
 function getActionBtnY(index: number) {
-  return shape.value.y + index * (actionBtnSideLength + actionBtnOffset);
+  return shape.value.position.y + index * (actionBtnSideLength + actionBtnOffset);
 }
 
 let originalX = 0;
 
 function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
   if (isFirst) {
-    originalX = shape.value.x;
+    originalX = shape.value.position.x;
     return;
   }
   if (newWidth && newPosition) {
@@ -250,9 +250,9 @@ function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number) {
       minNameWidth.value,
     );
     if (nameWidth.value > minNameWidth.value) {
-      shape.value.x = newPosition.x;
+      shape.value.position.x = newPosition.x;
     } else {
-      shape.value.x = originalX;
+      shape.value.position.x = originalX;
     }
   }
 }
