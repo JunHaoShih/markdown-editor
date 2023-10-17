@@ -33,7 +33,8 @@
         type="text"
         @blur="focusDiagramPanel"
         v-on:keyup.prevent.enter="focusDiagramPanel"
-        @keydown.stop.delete=""
+        @keydown.stop.delete
+        @mousedown.stop
       ></q-input>
     </foreignObject>
   </g>

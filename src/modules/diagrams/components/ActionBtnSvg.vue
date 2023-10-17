@@ -2,6 +2,7 @@
   <g
     :transform="`translate(${x}, ${y})`"
     @mouseup.stop
+    @mousedown.stop
   >
     <rect
       :width="width" :height="height" :rx="rx"

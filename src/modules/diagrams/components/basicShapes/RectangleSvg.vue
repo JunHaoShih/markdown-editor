@@ -18,7 +18,7 @@
       :bottom-resizable="true"
       :top-resizable="true"
     />
-    <g v-touch-pan.prevent.mouse="handleDrag">
+    <DragSlot :id="shape.id">
       <path
         :d="path"
         stroke="black"
@@ -34,7 +34,7 @@
         text-anchor="middle"
         vertical-align="center"
       />
-    </g>
+    </DragSlot>
     <ConnectionHintSvg
       :selected="isSelected"
       v-model="shape.connectionNodes"
@@ -50,6 +50,7 @@
 import { computed, ref } from 'vue';
 import TextSvg from '../TextSvg.vue';
 import ConnectionHintSvg from '../ConnectionHintSvg.vue';
+import DragSlot from '../DragSlot.vue';
 import SelectedSvg from '../SelectedSvg.vue';
 import ShapeSlot from '../ShapeSlot.vue';
 import { Point, Shape } from '../../models/shape';
@@ -134,20 +135,6 @@ function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number, new
     } else {
       shape.value.y = originalBottomY - shape.value.height;
     }
-  }
-}
-
-function handleDrag(details: {
-  delta?: {
-    x?: number,
-    y?: number,
-  },
-}) {
-  if (details.delta?.x) {
-    shape.value.x += details.delta.x;
-  }
-  if (details.delta?.y) {
-    shape.value.y += details.delta.y;
   }
 }
 </script>

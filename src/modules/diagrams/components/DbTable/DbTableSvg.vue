@@ -17,9 +17,8 @@
       :left-resizable="true"
       :right-resizable="true"
     />
-    <g
-      v-touch-pan.prevent.mouse="handleDrag"
-    >
+    <DragSlot :id="shape.id">
+
       // title area
       <TextSvg
         v-model="shape.title"
@@ -58,7 +57,7 @@
         stroke="black"
         stroke-width="1"
       />
-    </g>
+    </DragSlot>
     // Action panel
     <g
       v-if="isSelected"
@@ -98,6 +97,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DbColumnSvg from './DbColumnSvg.vue';
 import TextSvg from '../TextSvg.vue';
+import DragSlot from '../DragSlot.vue';
 import ConnectionHintSvg from '../ConnectionHintSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
 import ShapeSlot from '../ShapeSlot.vue';
@@ -225,20 +225,6 @@ const height = computed(
     .map((col) => col.height)
     .reduce((accumulator, current) => accumulator + current, 0),
 );
-
-function handleDrag(details: {
-  delta?: {
-    x?: number,
-    y?: number,
-  },
-}) {
-  if (details.delta?.x) {
-    shape.value.x += details.delta.x;
-  }
-  if (details.delta?.y) {
-    shape.value.y += details.delta.y;
-  }
-}
 
 /**
  * Starting point(x) of action panel

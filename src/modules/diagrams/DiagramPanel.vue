@@ -14,6 +14,7 @@
           @dragover="allowDrop"
           @drop="onDrop"
           @mousemove="onMouseMove"
+          @mousedown="onMouseDown"
           @mouseup="onMouseUp"
           @keydown.delete="onDeleteClicked"
           tabindex="-1"
@@ -47,13 +48,23 @@
               v-model="diagramStore.diagram.lines[index]"
             ></LineSvg>
           </template>
+          <rect
+            v-if="diagramStore.holdType === 'multiSelect'"
+            :x="multiSelectTopLeftX" :y="multiSelectTopLeftY"
+            :width="multiSelectBottomRightX - multiSelectTopLeftX"
+            :height="multiSelectBottomRightY - multiSelectTopLeftY"
+            fill="#29b6f2"
+            fill-opacity="0.2"
+            stroke="#29b6f2"
+            stroke-width="1"
+          />
         </svg>
       </template>
     </q-splitter>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
 import RectangleSvg from './components/basicShapes/RectangleSvg.vue';
@@ -87,6 +98,30 @@ function onDrop(ev: DragEvent) {
   }
 }
 
+const multiSelectTopLeftX = computed(
+  () => Math.min(diagramStore.holdFrom.x, diagramStore.holdTo.x),
+);
+
+const multiSelectTopLeftY = computed(
+  () => Math.min(diagramStore.holdFrom.y, diagramStore.holdTo.y),
+);
+
+const multiSelectBottomRightX = computed(
+  () => Math.max(diagramStore.holdFrom.x, diagramStore.holdTo.x),
+);
+
+const multiSelectBottomRightY = computed(
+  () => Math.max(diagramStore.holdFrom.y, diagramStore.holdTo.y),
+);
+
+function onMouseDown(evt: MouseEvent) {
+  const shiftedPoint = diagramStore.pointShift({
+    x: evt.x,
+    y: evt.y,
+  });
+  diagramStore.startHolding('multiSelect', shiftedPoint.x, shiftedPoint.y);
+}
+
 function onMouseMove(evt: MouseEvent) {
   diagramStore.movingByEvent(evt);
 }
@@ -101,10 +136,22 @@ function onMouseUp() {
         toAbsolute: diagramStore.holdTo,
         toNode: diagramStore.holdInfo.holdToId,
       });
+      diagramStore.selectedIds.length = 0;
     }
   }
+  if (diagramStore.holdType === 'multiSelect') {
+    diagramStore.selectedIds.length = 0;
+    diagramStore.diagram.shapes.forEach((shape) => {
+      if (shape.x >= multiSelectTopLeftX.value
+        && shape.x <= multiSelectBottomRightX.value
+        && shape.y >= multiSelectTopLeftY.value
+        && shape.y <= multiSelectBottomRightY.value
+      ) {
+        diagramStore.addSelectedId(shape.id);
+      }
+    });
+  }
   diagramStore.endHolding();
-  diagramStore.selectedIds.length = 0;
 }
 
 function onDeleteClicked() {

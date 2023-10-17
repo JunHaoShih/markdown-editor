@@ -125,5 +125,25 @@ export const useDiagramStore = defineStore('diagram', {
         this.selectedIds.push(id);
       }
     },
+
+    handleDrag(details: {
+      delta?: {
+        x?: number,
+        y?: number,
+      },
+    }) {
+      this.selectedIds.forEach((id) => {
+        const targetShape = this.diagram.shapes.find((shape) => shape.id === id);
+        if (!targetShape) {
+          return;
+        }
+        if (details.delta?.x) {
+          targetShape.x += details.delta.x;
+        }
+        if (details.delta?.y) {
+          targetShape.y += details.delta.y;
+        }
+      });
+    },
   },
 });

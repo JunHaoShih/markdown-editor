@@ -8,7 +8,7 @@
         :fill="selected ? '#29b6f2' : 'none'"
         :d="getArrow(node)"
         :transform="getTransform(node)"
-        @mousedown="setStartLocation(node)"
+        @mousedown.stop="setStartLocation(node)"
       />
       <circle
         :cx="node.point.x"

@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, watchEffect } from 'vue';
 import { useDiagramStore } from '../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
@@ -31,10 +31,11 @@ const isSelected = computed({
 });
 
 function addSelect() {
+  diagramStore.selectedIds.length = 0;
   diagramStore.addSelectedId(props.id);
 }
 
-watch(() => diagramStore.selectedIds.length, () => {
+watchEffect(() => {
   const target = diagramStore.selectedIds.find((id) => id === props.id);
   isSelected.value = !!target;
   if (target && props.onSelect) {
