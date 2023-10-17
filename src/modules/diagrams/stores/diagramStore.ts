@@ -24,7 +24,6 @@ export const useDiagramStore = defineStore('diagram', {
   state: (): DiagramStore => ({
     diagram: {
       shapes: [],
-      lines: [],
     },
     offsetX: 0,
     offsetY: 0,

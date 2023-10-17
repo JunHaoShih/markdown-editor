@@ -31,6 +31,9 @@ export interface Shape {
    * Shape type
    */
   type: ShapeType,
+  /**
+   * Shape position
+   */
   position: Point,
   /**
    * Shape title
@@ -64,19 +67,20 @@ export interface Shape {
    * Db table columns. Used only if type is 'dbTable'
    */
   dbColumns?: DbTableColumn[],
-}
-
-export interface Line {
-  id: string,
-  fromShapeId?: string | null,
-  toShapeId?: string | null,
+  /**
+   * Node id of starting connection node if shape is a line
+   */
   fromNode?: string | null,
+  /**
+   * Node id of ending connection node if shape is a line
+   */
   toNode?: string | null,
-  fromAbsolute?: Point | null,
+  /**
+   * Absolute position of ending connection node if shape is a line
+   */
   toAbsolute?: Point | null,
 }
 
 export interface Diagram {
   shapes: Shape[],
-  lines: Line[],
 }

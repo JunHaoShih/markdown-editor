@@ -39,13 +39,9 @@
               v-if="item.type === 'rectangle'"
               v-model="diagramStore.diagram.shapes[index]"
             ></RectangleSvg>
-          </template>
-          <template
-            v-for="(item, index) in diagramStore.diagram.lines"
-            v-bind:key="item.id"
-          >
             <LineSvg
-              v-model="diagramStore.diagram.lines[index]"
+              v-if="item.type === 'line'"
+              v-model="diagramStore.diagram.shapes[index]"
             ></LineSvg>
           </template>
           <rect
@@ -73,6 +69,7 @@ import { useDiagramStore } from './stores/diagramStore';
 import ShapePanel from './components/ShapePanel.vue';
 import { ShapeType } from './models/shape';
 import { createRectangle } from './services/basicShapeService';
+import { createLine } from './services/lineService';
 
 const splitterModel = ref(200);
 
@@ -129,13 +126,12 @@ function onMouseMove(evt: MouseEvent) {
 function onMouseUp() {
   if (diagramStore.holdType === 'connect') {
     if (diagramStore.holdInfo.holdToId) {
-      diagramStore.diagram.lines.push({
-        id: 'test',
+      diagramStore.diagram.shapes.push(createLine({
         fromAbsolute: diagramStore.holdFrom,
         fromNode: diagramStore.holdInfo.holdFromId,
         toAbsolute: diagramStore.holdTo,
         toNode: diagramStore.holdInfo.holdToId,
-      });
+      }));
       diagramStore.selectedIds.length = 0;
     }
   }

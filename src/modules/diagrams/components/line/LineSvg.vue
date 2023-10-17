@@ -10,17 +10,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Line } from '../../models/shape';
+import { Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
 
 const props = defineProps<{
-  modelValue: Line,
+  modelValue: Shape,
 }>();
 
 type Emit = {
-  (e: 'update:modelValue', value: Line): void
+  (e: 'update:modelValue', value: Shape): void
 }
 const emit = defineEmits<Emit>();
 
@@ -34,10 +34,7 @@ const fromPoint = computed(
     if (line.value.fromNode) {
       return diagramStore.connectionNode(line.value.fromNode);
     }
-    if (line.value.fromAbsolute) {
-      return line.value.fromAbsolute;
-    }
-    return { x: 0, y: 0 };
+    return line.value.position;
   },
 );
 
