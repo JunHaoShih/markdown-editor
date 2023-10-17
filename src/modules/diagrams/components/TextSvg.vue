@@ -15,6 +15,7 @@
       :y="textY"
       :font-weight="fontWeight"
       :text-anchor="textAnchor"
+      :font-size="fontSize"
     >
       {{ inputText }}
     </text>
@@ -53,11 +54,13 @@ const props = withDefaults(defineProps<{
   verticalAlign?: 'top' | 'center' | 'bottom'
   strokeWidth?: string,
   stroke?: string,
+  fontSize?: string,
 }>(), {
   textAnchor: 'start',
   verticalAlign: 'top',
   strokeWidth: '1',
   stroke: 'transparent',
+  fontSize: '12px',
 });
 
 type Emit = {
