@@ -1,7 +1,4 @@
 <template>
-  <g v-touch-pan.prevent.mouse="diagramStore.handleDrag">
-    <slot></slot>
-  </g>
   <template v-if="isSelected">
     <g v-touch-pan.prevent.mouse="diagramStore.handleDrag">
       <slot></slot>
