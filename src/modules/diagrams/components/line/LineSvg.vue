@@ -1,17 +1,33 @@
 <template>
-  <line
-    :x1="fromPoint.x"
-    :y1="fromPoint.y"
-    :x2="toPoint.x"
-    :y2="toPoint.y"
-    style="stroke:rgb(0, 0, 0);stroke-width:1"
-  />
+  <ShapeSlot
+    v-model="isSelected"
+    :id="line.id"
+  >
+    <line
+      v-if="isSelected"
+      :x1="fromPoint.x"
+      :y1="fromPoint.y"
+      :x2="toPoint.x"
+      :y2="toPoint.y"
+      style="stroke:rgb(10, 213, 240);stroke-width:3"
+    />
+    <line
+      :x1="fromPoint.x"
+      :y1="fromPoint.y"
+      :x2="toPoint.x"
+      :y2="toPoint.y"
+      style="stroke:rgb(0, 0, 0);stroke-width:1"
+    />
+  </ShapeSlot>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+import ShapeSlot from '../ShapeSlot.vue';
 import { Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
+
+const isSelected = ref(false);
 
 const diagramStore = useDiagramStore();
 
