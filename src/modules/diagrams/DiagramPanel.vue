@@ -59,7 +59,7 @@
             :x="diagramStore.selectedSquare.x" :y="diagramStore.selectedSquare.y"
             :width="diagramStore.selectedSquare.width"
             :height="diagramStore.selectedSquare.height"
-            fill="white"
+            fill="transparent"
             stroke="#29b6f2"
             stroke-width="1"
           />
