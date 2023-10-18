@@ -16,6 +16,7 @@
           :d="icon.path"
         />
       </svg>
+      <q-tooltip>{{ $t(`${icon.name}`) }}</q-tooltip>
     </div>
   </div>
 </template>

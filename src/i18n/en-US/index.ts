@@ -69,6 +69,10 @@ export default {
     diagram: 'Diagram',
     caption: 'Draw your diagrams',
   },
+  diagram: {
+    dbTable: 'Database table',
+    rectangle: 'Rectangle',
+  },
   base: {
     createAt: 'Create date',
     updateAt: 'Modified date',

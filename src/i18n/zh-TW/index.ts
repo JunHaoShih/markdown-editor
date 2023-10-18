@@ -69,6 +69,10 @@ export default {
     diagram: '圖表',
     caption: '繪製圖表',
   },
+  diagram: {
+    dbTable: '資料表',
+    rectangle: '矩形',
+  },
   base: {
     createAt: '建立日期',
     updateAt: '修改日期',
