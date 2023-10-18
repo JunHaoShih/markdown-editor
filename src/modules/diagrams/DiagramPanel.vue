@@ -136,9 +136,15 @@ function onMouseUp() {
   if (diagramStore.holdType === 'connect') {
     if (diagramStore.holdInfo.holdToId) {
       diagramStore.diagram.shapes.push(createLine({
-        fromAbsolute: diagramStore.holdFrom,
+        fromAbsolute: {
+          x: diagramStore.holdFrom.x,
+          y: diagramStore.holdFrom.y,
+        },
         fromNode: diagramStore.holdInfo.holdFromId,
-        toAbsolute: diagramStore.holdTo,
+        toAbsolute: {
+          x: diagramStore.holdTo.x,
+          y: diagramStore.holdTo.y,
+        },
         toNode: diagramStore.holdInfo.holdToId,
       }));
       diagramStore.selectedIds.length = 0;
