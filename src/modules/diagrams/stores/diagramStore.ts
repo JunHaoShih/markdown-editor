@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ConnectionNode, Diagram, Point } from '../models/shape';
 
-type HoldType = 'none' | 'connect' | 'multiSelect';
+type HoldType = 'none' | 'connect' | 'multiSelect' | 'drag';
 
 interface MouseHoldInfo {
   type: HoldType,
@@ -18,6 +18,14 @@ interface DiagramStore {
   offsetY: number,
   holdInfo: MouseHoldInfo,
   selectedIds: string[],
+  dragShift: Point,
+}
+
+interface Rectangle {
+  x: number,
+  y: number,
+  width: number,
+  height: number,
 }
 
 export const useDiagramStore = defineStore('diagram', {
@@ -40,6 +48,10 @@ export const useDiagramStore = defineStore('diagram', {
       },
     },
     selectedIds: [],
+    dragShift: {
+      x: 0,
+      y: 0,
+    },
   }),
   getters: {
     holdType: (state) => state.holdInfo.type,
@@ -64,6 +76,24 @@ export const useDiagramStore = defineStore('diagram', {
         })
         .find((node) => node.id === nodeId);
       return targetNode?.point ?? { x: 0, y: 0 };
+    },
+    selectedSquare: (state): Rectangle => {
+      const targetShapes = state.diagram.shapes
+        .filter((shape) => state.selectedIds.includes(shape.id));
+      const minX = Math.min(...targetShapes.map((shape) => shape.position.x));
+      const minY = Math.min(...targetShapes.map((shape) => shape.position.y));
+      const maxX = Math.max(
+        ...targetShapes.map((shape) => shape.position.x + (shape.width ?? 0)),
+      );
+      const maxY = Math.max(
+        ...targetShapes.map((shape) => shape.position.y + (shape.height ?? 0)),
+      );
+      return {
+        x: minX + state.dragShift.x,
+        y: minY + state.dragShift.y,
+        width: maxX - minX,
+        height: maxY - minY,
+      };
     },
   },
   actions: {
@@ -126,23 +156,40 @@ export const useDiagramStore = defineStore('diagram', {
     },
 
     handleDrag(details: {
+      isFirst?: boolean,
+      isFinal?: boolean,
       delta?: {
         x?: number,
         y?: number,
       },
     }) {
-      this.selectedIds.forEach((id) => {
-        const targetShape = this.diagram.shapes.find((shape) => shape.id === id);
-        if (!targetShape) {
-          return;
-        }
-        if (details.delta?.x) {
-          targetShape.position.x += details.delta.x;
-        }
-        if (details.delta?.y) {
-          targetShape.position.y += details.delta.y;
-        }
-      });
+      if (details.isFirst) {
+        this.dragShift.x = 0;
+        this.dragShift.y = 0;
+        this.holdInfo.type = 'drag';
+        return;
+      }
+      if (details.isFinal) {
+        this.selectedIds.forEach((id) => {
+          const targetShape = this.diagram.shapes.find((shape) => shape.id === id);
+          if (!targetShape) {
+            return;
+          }
+          if (targetShape.type === 'line') {
+            return;
+          }
+          targetShape.position.x += this.dragShift.x;
+          targetShape.position.y += this.dragShift.y;
+        });
+        this.holdInfo.type = 'none';
+        return;
+      }
+      if (details.delta?.x) {
+        this.dragShift.x += details.delta.x;
+      }
+      if (details.delta?.y) {
+        this.dragShift.y += details.delta.y;
+      }
     },
   },
 });

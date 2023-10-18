@@ -93,7 +93,9 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar';
-import { computed, ref } from 'vue';
+import {
+  computed, onBeforeMount, ref, watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import DbColumnSvg from './DbColumnSvg.vue';
 import TextSvg from '../TextSvg.vue';
@@ -439,6 +441,16 @@ const actionBtns = computed(
     return infos.filter((btnInfo) => btnInfo.display);
   },
 );
+
+watch(() => [width.value, height.value], () => {
+  shape.value.width = width.value;
+  shape.value.height = height.value;
+});
+
+onBeforeMount(() => {
+  shape.value.width = width.value;
+  shape.value.height = height.value;
+});
 </script>
 
 <style lang="scss" scoped>

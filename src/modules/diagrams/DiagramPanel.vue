@@ -54,6 +54,15 @@
             stroke="#29b6f2"
             stroke-width="1"
           />
+          <rect
+            v-if="diagramStore.holdType === 'drag'"
+            :x="diagramStore.selectedSquare.x" :y="diagramStore.selectedSquare.y"
+            :width="diagramStore.selectedSquare.width"
+            :height="diagramStore.selectedSquare.height"
+            fill="white"
+            stroke="#29b6f2"
+            stroke-width="1"
+          />
         </svg>
       </template>
     </q-splitter>
