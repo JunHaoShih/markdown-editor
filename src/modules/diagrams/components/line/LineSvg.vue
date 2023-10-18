@@ -65,4 +65,20 @@ const toPoint = computed(
     return { x: 0, y: 0 };
   },
 );
+
+watch(fromPoint, (newValue) => {
+  line.value.position.x = newValue.x;
+  line.value.position.y = newValue.y;
+}, {
+  deep: true,
+});
+
+watch(toPoint, (newValue) => {
+  line.value.toAbsolute = {
+    x: newValue.x,
+    y: newValue.y,
+  };
+}, {
+  deep: true,
+});
 </script>
