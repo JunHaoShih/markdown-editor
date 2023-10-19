@@ -13,7 +13,7 @@
       <circle
         :cx="node.point.x"
         :cy="node.point.y"
-        r="3"
+        r="6"
         :fill="isNodeHover ? '#29b6f2' : 'transparent'"
         @mouseover="isNodeHover = true"
         @mouseout="isNodeHover = false"
