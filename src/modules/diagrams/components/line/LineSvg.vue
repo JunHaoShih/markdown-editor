@@ -4,12 +4,12 @@
     :id="line.id"
   >
     <line
-      v-if="isSelected"
       :x1="fromPoint.x"
       :y1="fromPoint.y"
       :x2="toPoint.x"
       :y2="toPoint.y"
-      style="stroke:rgb(10, 213, 240);stroke-width:3"
+      stroke-width="5"
+      :stroke="isSelected ? 'rgb(10, 213, 240)' : 'transparent'"
     />
     <line
       :x1="fromPoint.x"
@@ -18,11 +18,25 @@
       :y2="toPoint.y"
       style="stroke:rgb(0, 0, 0);stroke-width:1"
     />
+    <circle
+      :cx="fromPoint.x"
+      :cy="fromPoint.y"
+      r="3"
+      :fill="isSelected ? 'black' : 'transparent'"
+    />
+    <circle
+      :cx="toPoint.x"
+      :cy="toPoint.y"
+      r="3"
+      :fill="isSelected ? 'black' : 'transparent'"
+    />
   </ShapeSlot>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import {
+  computed, ref, watch,
+} from 'vue';
 import ShapeSlot from '../ShapeSlot.vue';
 import { Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
@@ -46,38 +60,41 @@ const line = computed({
 });
 
 const fromPoint = computed(
-  () => {
-    if (line.value.fromNode) {
-      return diagramStore.connectionNode(line.value.fromNode);
-    }
-    return line.value.position;
-  },
+  () => line.value.position,
 );
 
 const toPoint = computed(
-  () => {
-    if (line.value.toNode) {
-      return diagramStore.connectionNode(line.value.toNode);
-    }
-    if (line.value.toAbsolute) {
-      return line.value.toAbsolute;
-    }
-    return { x: 0, y: 0 };
-  },
+  () => line.value.toAbsolute ?? { x: 0, y: 0 },
 );
 
-watch(fromPoint, (newValue) => {
-  line.value.position.x = newValue.x;
-  line.value.position.y = newValue.y;
+const fromNode = computed(
+  () => (line.value.fromNode ? diagramStore.connectionNode(line.value.fromNode) : undefined),
+);
+
+watch(fromNode, (newValue) => {
+  if (newValue) {
+    line.value.position.x = newValue.point.x;
+    line.value.position.y = newValue.point.y;
+  } else {
+    line.value.fromNode = '';
+  }
 }, {
   deep: true,
 });
 
-watch(toPoint, (newValue) => {
-  line.value.toAbsolute = {
-    x: newValue.x,
-    y: newValue.y,
-  };
+const toNode = computed(
+  () => (line.value.toNode ? diagramStore.connectionNode(line.value.toNode) : undefined),
+);
+
+watch(toNode, (newValue) => {
+  if (newValue) {
+    line.value.toAbsolute = {
+      x: newValue.point.x,
+      y: newValue.point.y,
+    };
+  } else {
+    line.value.toNode = '';
+  }
 }, {
   deep: true,
 });

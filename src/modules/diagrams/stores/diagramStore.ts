@@ -64,7 +64,7 @@ export const useDiagramStore = defineStore('diagram', {
     },
     holdFrom: (state) => state.holdInfo.holdFrom,
     holdTo: (state) => state.holdInfo.holdTo,
-    connectionNode: (state) => (nodeId: string): Point => {
+    connectionNode: (state) => (nodeId: string): ConnectionNode | undefined => {
       const targetNode = state.diagram.shapes
         .flatMap((shape) => {
           const nodes: ConnectionNode[] = [];
@@ -75,7 +75,7 @@ export const useDiagramStore = defineStore('diagram', {
           return nodes;
         })
         .find((node) => node.id === nodeId);
-      return targetNode?.point ?? { x: 0, y: 0 };
+      return targetNode;
     },
     selectedSquare: (state): Rectangle => {
       const targetShapes = state.diagram.shapes
@@ -105,6 +105,7 @@ export const useDiagramStore = defineStore('diagram', {
       this.holdInfo.holdFrom.x = x;
       this.holdInfo.holdFrom.y = y;
       this.holdInfo.type = type;
+      this.holdInfo.holdToId = '';
       if (fromId) {
         this.setFromNode(fromId);
       }
