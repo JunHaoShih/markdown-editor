@@ -3,6 +3,18 @@
     v-model="isSelected"
     :id="line.id"
   >
+    <defs>
+      <marker
+        id="arrow"
+        viewBox="0 0 10 10"
+        refX="10"
+        refY="5"
+        markerWidth="9"
+        markerHeight="9"
+        orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" />
+      </marker>
+    </defs>
     <line
       :x1="fromPoint.x"
       :y1="fromPoint.y"
@@ -17,6 +29,7 @@
       :x2="toPoint.x"
       :y2="toPoint.y"
       style="stroke:rgb(0, 0, 0);stroke-width:1"
+      marker-end="url(#arrow)"
     />
     <circle
       :cx="fromPoint.x"
