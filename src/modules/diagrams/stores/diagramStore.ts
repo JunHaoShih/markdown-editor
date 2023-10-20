@@ -1,15 +1,19 @@
 import { defineStore } from 'pinia';
 import { ConnectionNode, Diagram, Point } from '../models/shape';
 
-type HoldType = 'none' | 'connect' | 'multiSelect' | 'drag';
+export type HoldType = 'none' | 'connect' | 'reconnect' | 'multiSelect' | 'drag';
+
+type MovedType = 'from' | 'to' | 'none';
 
 interface MouseHoldInfo {
   type: HoldType,
   isHold: boolean,
+  movedNode: MovedType,
   holdFrom: Point,
   holdTo: Point,
   holdFromId?: string,
   holdToId?: string,
+  holdLineId?: string,
 }
 
 interface DiagramStore {
@@ -38,6 +42,7 @@ export const useDiagramStore = defineStore('diagram', {
     holdInfo: {
       type: 'none',
       isHold: false,
+      movedNode: 'none',
       holdFrom: {
         x: 0,
         y: 0,
@@ -101,36 +106,98 @@ export const useDiagramStore = defineStore('diagram', {
       this.offsetX = dom.left;
       this.offsetY = dom.top;
     },
+
+    /**
+     * Start connect new line
+     * @param x Starting x coordinate
+     * @param y Starting y coordinate
+     */
+    startConnect(x: number, y: number, fromId: string) {
+      this.holdInfo.holdFrom.x = x;
+      this.holdInfo.holdFrom.y = y;
+      this.holdInfo.type = 'connect';
+      this.holdInfo.movedNode = 'to';
+      this.holdInfo.holdToId = '';
+      this.holdInfo.holdLineId = '';
+      this.selectedIds.length = 0;
+      this.setFromNode(fromId);
+    },
+
+    startReconnectFrom(
+      movedType: MovedType,
+      lineId: string,
+      from: Point,
+      to: Point,
+      fromId?: string,
+      toId?: string,
+    ) {
+      this.holdInfo.movedNode = movedType;
+      this.holdInfo.holdLineId = lineId;
+
+      this.holdInfo.holdFrom.x = from.x;
+      this.holdInfo.holdFrom.y = from.y;
+
+      this.holdInfo.holdTo.x = to.x;
+      this.holdInfo.holdTo.y = to.y;
+
+      this.holdInfo.holdFromId = fromId;
+      this.holdInfo.holdToId = toId;
+      this.holdInfo.type = 'reconnect';
+      this.selectedIds.length = 0;
+    },
+
     startHolding(type: HoldType, x: number, y: number, fromId?: string) {
       this.holdInfo.holdFrom.x = x;
       this.holdInfo.holdFrom.y = y;
       this.holdInfo.type = type;
       this.holdInfo.holdToId = '';
+      this.holdInfo.holdLineId = '';
       if (fromId) {
         this.setFromNode(fromId);
       }
     },
-    moving(x: number, y: number) {
-      this.holdInfo.holdTo.x = x;
-      this.holdInfo.holdTo.y = y;
-    },
     movingByEvent(evt: MouseEvent) {
-      this.holdInfo.holdTo.x = evt.x - this.offsetX;
-      this.holdInfo.holdTo.y = evt.y - this.offsetY;
+      if (this.holdInfo.type === 'reconnect' && this.holdInfo.movedNode === 'from') {
+        this.holdInfo.holdFrom.x = evt.x - this.offsetX;
+        this.holdInfo.holdFrom.y = evt.y - this.offsetY;
+      } else {
+        this.holdInfo.holdTo.x = evt.x - this.offsetX;
+        this.holdInfo.holdTo.y = evt.y - this.offsetY;
+      }
     },
     endHolding() {
       this.holdInfo.type = 'none';
+      this.holdInfo.holdFromId = '';
+      this.holdInfo.holdToId = '';
+      this.holdInfo.holdLineId = '';
+      this.holdInfo.movedNode = 'none';
     },
     setFromNode(nodeId: string) {
       this.holdInfo.holdFromId = nodeId;
     },
-    setToNode(nodeId: string) {
-      this.holdInfo.holdToId = nodeId;
+
+    setConnectionNodeId(nodeId: string) {
+      if (this.holdInfo.movedNode === 'from') {
+        this.holdInfo.holdFromId = nodeId;
+      } else if (this.holdInfo.movedNode === 'to') {
+        this.holdInfo.holdToId = nodeId;
+      }
     },
-    unsetToNode(nodeId: string) {
-      if (this.holdInfo.holdToId === nodeId) {
+
+    unsetConnectionNodeId(nodeId: string) {
+      if (this.holdInfo.movedNode === 'from' && this.holdInfo.holdFromId === nodeId) {
+        this.holdInfo.holdFromId = undefined;
+      } else if (this.holdInfo.movedNode === 'to' && this.holdInfo.holdToId === nodeId) {
         this.holdInfo.holdToId = undefined;
       }
+    },
+
+    getHoldedLine() {
+      const index = this.diagram.shapes.findIndex((shape) => shape.id === this.holdInfo.holdLineId);
+      if (index === -1) {
+        return undefined;
+      }
+      return this.diagram.shapes[index];
     },
 
     /**

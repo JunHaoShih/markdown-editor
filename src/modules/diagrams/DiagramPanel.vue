@@ -20,11 +20,13 @@
           tabindex="-1"
         >
           <line
-            v-if="diagramStore.holdInfo.type === 'connect'"
+            v-if="diagramStore.holdInfo.type === 'connect'
+            || diagramStore.holdInfo.type === 'reconnect'"
             :x1="diagramStore.holdFrom.x"
             :y1="diagramStore.holdFrom.y"
             :x2="diagramStore.holdTo.x"
             :y2="diagramStore.holdTo.y"
+            stroke-dasharray="5,5"
             style="stroke:rgb(0, 0, 0);stroke-width:1"
           />
           <template
@@ -74,7 +76,7 @@ import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
 import RectangleSvg from './components/basicShapes/RectangleSvg.vue';
 import { createDbTable } from './services/dbTableService';
-import { useDiagramStore } from './stores/diagramStore';
+import { HoldType, useDiagramStore } from './stores/diagramStore';
 import ShapePanel from './components/ShapePanel.vue';
 import { ShapeType } from './models/shape';
 import { createRectangle } from './services/basicShapeService';
@@ -132,8 +134,9 @@ function onMouseMove(evt: MouseEvent) {
   diagramStore.movingByEvent(evt);
 }
 
-function onMouseUp() {
-  if (diagramStore.holdType === 'connect') {
+const mouseUpRecord: Record<HoldType, () => void> = {
+  none: () => { /** */ },
+  connect: () => {
     if (diagramStore.holdInfo.holdToId) {
       diagramStore.diagram.shapes.push(createLine({
         fromAbsolute: {
@@ -149,8 +152,19 @@ function onMouseUp() {
       }));
       diagramStore.selectedIds.length = 0;
     }
-  }
-  if (diagramStore.holdType === 'multiSelect') {
+  },
+  reconnect: () => {
+    const line = diagramStore.getHoldedLine();
+    if (!line) {
+      return;
+    }
+    if (diagramStore.holdInfo.movedNode === 'from') {
+      line.fromNode = diagramStore.holdInfo.holdFromId;
+    } else if (diagramStore.holdInfo.movedNode === 'to') {
+      line.toNode = diagramStore.holdInfo.holdToId;
+    }
+  },
+  multiSelect: () => {
     diagramStore.selectedIds.length = 0;
     diagramStore.diagram.shapes.forEach((shape) => {
       if (shape.position.x >= multiSelectTopLeftX.value
@@ -161,7 +175,12 @@ function onMouseUp() {
         diagramStore.addSelectedId(shape.id);
       }
     });
-  }
+  },
+  drag: () => { /** */ },
+};
+
+function onMouseUp() {
+  mouseUpRecord[diagramStore.holdType]();
   diagramStore.endHolding();
 }
 

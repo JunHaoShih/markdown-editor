@@ -8,7 +8,7 @@
         :fill="selected ? '#29b6f2' : 'none'"
         :d="getArrow(node)"
         :transform="getTransform(node)"
-        @mousedown.stop="setStartLocation(node)"
+        @mousedown.stop="startConnect(node)"
       />
       <circle
         :cx="node.point.x"
@@ -28,7 +28,7 @@
 import {
   computed, onBeforeMount, ref, watch,
 } from 'vue';
-import { ConnectionNode, Orient, Point } from '../models/shape';
+import { ConnectionNode, Orient } from '../models/shape';
 import { useDiagramStore } from '../stores/diagramStore';
 
 const offset = 20;
@@ -79,27 +79,23 @@ function getTransform(node: ConnectionNode) {
   return `rotate(${angles[node.orient]}, ${node.point.x}, ${node.point.y}) translate(${offset})`;
 }
 
-const startLocation = ref<Point>({
-  x: 0,
-  y: 0,
-});
-
-function setStartLocation(node: ConnectionNode) {
-  startLocation.value.x = node.point.x;
-  startLocation.value.y = node.point.y;
-  diagramStore.startHolding('connect', node.point.x, node.point.y, node.id);
-  diagramStore.selectedIds.length = 0;
+function startConnect(node: ConnectionNode) {
+  // diagramStore.startHolding('connect', node.point.x, node.point.y, node.id);
+  // diagramStore.selectedIds.length = 0;
+  diagramStore.startConnect(node.point.x, node.point.y, node.id);
 }
 
 function setToNode(node: ConnectionNode) {
-  if (diagramStore.holdType === 'connect') {
-    diagramStore.setToNode(node.id);
+  if (diagramStore.holdType === 'connect'
+    || diagramStore.holdType === 'reconnect') {
+    diagramStore.setConnectionNodeId(node.id);
   }
 }
 
 function unsetToNode(node: ConnectionNode) {
-  if (diagramStore.holdType === 'connect') {
-    diagramStore.unsetToNode(node.id);
+  if (diagramStore.holdType === 'connect'
+    || diagramStore.holdType === 'reconnect') {
+    diagramStore.unsetConnectionNodeId(node.id);
   }
 }
 

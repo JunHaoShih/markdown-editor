@@ -23,19 +23,21 @@
       :cy="fromPoint.y"
       r="3"
       :fill="isSelected ? 'black' : 'transparent'"
+      @mousedown.stop="startConnectFrom"
     />
     <circle
       :cx="toPoint.x"
       :cy="toPoint.y"
       r="3"
       :fill="isSelected ? 'black' : 'transparent'"
+      @mousedown.stop="startConnectTo"
     />
   </ShapeSlot>
 </template>
 
 <script setup lang="ts">
 import {
-  computed, ref, watch,
+  computed, onBeforeMount, ref, watch,
 } from 'vue';
 import ShapeSlot from '../ShapeSlot.vue';
 import { Shape } from '../../models/shape';
@@ -97,5 +99,24 @@ watch(toNode, (newValue) => {
   }
 }, {
   deep: true,
+});
+
+function startConnectFrom() {
+  diagramStore
+    .startReconnectFrom('from', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id);
+}
+
+function startConnectTo() {
+  diagramStore
+    .startReconnectFrom('to', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id);
+}
+
+onBeforeMount(() => {
+  if (toNode.value) {
+    line.value.toAbsolute = {
+      x: toNode.value.point.x,
+      y: toNode.value.point.y,
+    };
+  }
 });
 </script>
