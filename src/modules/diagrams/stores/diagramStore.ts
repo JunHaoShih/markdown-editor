@@ -16,12 +16,17 @@ interface MouseHoldInfo {
   holdLineId?: string,
 }
 
+export interface SelectStructure {
+  id: string,
+  children: SelectStructure[],
+}
+
 interface DiagramStore {
   diagram: Diagram,
   offsetX: number,
   offsetY: number,
   holdInfo: MouseHoldInfo,
-  selectedIds: string[],
+  selectedIds: SelectStructure[],
   dragShift: Point,
 }
 
@@ -84,7 +89,7 @@ export const useDiagramStore = defineStore('diagram', {
     },
     selectedSquare: (state): Rectangle => {
       const targetShapes = state.diagram.shapes
-        .filter((shape) => state.selectedIds.includes(shape.id));
+        .filter((shape) => state.selectedIds.map((selected) => selected.id).includes(shape.id));
       const minX = Math.min(...targetShapes.map((shape) => shape.position.x));
       const minY = Math.min(...targetShapes.map((shape) => shape.position.y));
       const maxX = Math.max(
@@ -217,9 +222,29 @@ export const useDiagramStore = defineStore('diagram', {
      * @param id Shape id what is selected
      */
     addSelectedId(id: string) {
-      const target = this.selectedIds.find((selectedId) => selectedId === id);
+      const target = this.selectedIds.find((selected) => selected.id === id);
       if (!target) {
-        this.selectedIds.push(id);
+        this.selectedIds.push({
+          id,
+          children: [],
+        });
+      }
+    },
+
+    /**
+     * Set id to selected list
+     * @param id Shape id what is selected
+     */
+    setSelectedId(id: string) {
+      const target = this.selectedIds.find((selected) => selected.id === id);
+      if (!target) {
+        this.selectedIds.push({
+          id,
+          children: [],
+        });
+      } else {
+        this.selectedIds[0] = target;
+        this.selectedIds.length = 1;
       }
     },
 
@@ -238,8 +263,8 @@ export const useDiagramStore = defineStore('diagram', {
         return;
       }
       if (details.isFinal) {
-        this.selectedIds.forEach((id) => {
-          const targetShape = this.diagram.shapes.find((shape) => shape.id === id);
+        this.selectedIds.forEach((selected) => {
+          const targetShape = this.diagram.shapes.find((shape) => shape.id === selected.id);
           if (!targetShape) {
             return;
           }

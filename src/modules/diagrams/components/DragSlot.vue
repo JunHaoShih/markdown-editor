@@ -22,6 +22,6 @@ const props = defineProps<{
 }>();
 
 const isSelected = computed(
-  () => !!diagramStore.selectedIds.find((id) => id === props.id),
+  () => !!diagramStore.selectedIds.find((selected) => selected.id === props.id),
 );
 </script>

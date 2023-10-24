@@ -46,6 +46,30 @@
               v-model="diagramStore.diagram.shapes[index]"
             ></LineSvg>
           </template>
+          <!-- Top shape svg -->
+          <template
+            v-for="(item, index) in diagramStore.diagram.shapes"
+            v-bind:key="item.id"
+          >
+            <DbTableFloatSvg
+              v-if="item.type === 'dbTable'"
+              v-model="diagramStore.diagram.shapes[index]"
+            ></DbTableFloatSvg>
+            <RectangleFloatSvg
+              v-if="item.type === 'rectangle'"
+              v-model="diagramStore.diagram.shapes[index]"
+            ></RectangleFloatSvg>
+          </template>
+          <!-- Top line svg -->
+          <template
+            v-for="(item, index) in diagramStore.diagram.shapes"
+            v-bind:key="item.id"
+          >
+            <LineFloatSvg
+              v-if="item.type === 'line'"
+              v-model="diagramStore.diagram.shapes[index]"
+            ></LineFloatSvg>
+          </template>
           <rect
             v-if="diagramStore.holdType === 'multiSelect'"
             :x="multiSelectTopLeftX" :y="multiSelectTopLeftY"
@@ -73,8 +97,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
+import DbTableFloatSvg from './components/dbTable/DbTableFloatSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
+import LineFloatSvg from './components/line/LineFloatSvg.vue';
 import RectangleSvg from './components/basicShapes/RectangleSvg.vue';
+import RectangleFloatSvg from './components/basicShapes/RectangleFloatSvg.vue';
 import { createDbTable } from './services/dbTableService';
 import { HoldType, useDiagramStore } from './stores/diagramStore';
 import ShapePanel from './components/ShapePanel.vue';
@@ -185,8 +212,8 @@ function onMouseUp() {
 }
 
 function onDeleteClicked() {
-  diagramStore.selectedIds.forEach((id) => {
-    const index = diagramStore.diagram.shapes.findIndex((shape) => shape.id === id);
+  diagramStore.selectedIds.forEach((selected) => {
+    const index = diagramStore.diagram.shapes.findIndex((shape) => shape.id === selected.id);
     if (index === -1) {
       return;
     }

@@ -31,12 +31,11 @@ const selectState = computed({
 });
 
 const isSelected = computed(
-  () => !!diagramStore.selectedIds.find((id) => id === props.id),
+  () => !!diagramStore.selectedIds.find((selected) => selected.id === props.id),
 );
 
 function addSelect() {
-  diagramStore.selectedIds.length = 0;
-  diagramStore.addSelectedId(props.id);
+  diagramStore.setSelectedId(props.id);
 }
 
 watch(isSelected, (newValue) => {

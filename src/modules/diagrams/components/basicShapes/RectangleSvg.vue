@@ -35,21 +35,12 @@
         vertical-align="center"
       />
     </DragSlot>
-    <ConnectionHintSvg
-      :selected="isSelected"
-      v-model="shape.connectionNodes"
-      :x="shape.position.x"
-      :y="shape.position.y"
-      :width="shapeWidth"
-      :height="shapeHeight"
-    />
   </ShapeSlot>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import TextSvg from '../TextSvg.vue';
-import ConnectionHintSvg from '../ConnectionHintSvg.vue';
 import DragSlot from '../DragSlot.vue';
 import SelectedSvg from '../SelectedSvg.vue';
 import ShapeSlot from '../ShapeSlot.vue';
