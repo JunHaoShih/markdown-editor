@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue';
+import { computed, watch } from 'vue';
 import { useDiagramStore } from '../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
@@ -16,32 +16,37 @@ const diagramStore = useDiagramStore();
 const props = defineProps<{
   modelValue: boolean,
   id: string,
-  onSelect?:() => void,
-  onUnselect?:() => void,
 }>();
 
 type Emit = {
   (e: 'update:modelValue', value: boolean): void
+  (e: 'onSelect'): void
+  (e: 'onUnselect'): void
 }
 const emit = defineEmits<Emit>();
 
-const isSelected = computed({
+const selectState = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 });
+
+const isSelected = computed(
+  () => !!diagramStore.selectedIds.find((id) => id === props.id),
+);
 
 function addSelect() {
   diagramStore.selectedIds.length = 0;
   diagramStore.addSelectedId(props.id);
 }
 
-watchEffect(() => {
-  const target = diagramStore.selectedIds.find((id) => id === props.id);
-  isSelected.value = !!target;
-  if (target && props.onSelect) {
-    props.onSelect();
-  } else if (!target && props.onUnselect) {
-    props.onUnselect();
+watch(isSelected, (newValue) => {
+  if (selectState.value !== newValue) {
+    selectState.value = newValue;
+  }
+  if (newValue) {
+    emit('onSelect');
+  } else {
+    emit('onUnselect');
   }
 });
 </script>

@@ -2,7 +2,7 @@
   <ShapeSlot
     v-model="isSelected"
     :id="shape.id"
-    :on-unselect="unselectAll"
+    @on-unselect="unselectAll"
   >
     <SelectedSvg
       v-if="isSelected"
