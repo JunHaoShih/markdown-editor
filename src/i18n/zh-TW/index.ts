@@ -72,6 +72,7 @@ export default {
   diagram: {
     dbTable: '資料表',
     rectangle: '矩形',
+    ellipse: '橢圓',
   },
   base: {
     createAt: '建立日期',

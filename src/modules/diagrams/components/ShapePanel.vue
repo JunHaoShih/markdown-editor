@@ -1,15 +1,15 @@
 <template>
-  <div class="tw-flex">
+  <div class="tw-flex tw-flex-row tw-flex-wrap">
     <div
       v-for="icon in icons"
       v-bind:key="icon.type"
       draggable="true"
       @dragstart="onDragStart($event, icon)"
-      class="tw-border-solid tw-border-2 tw-rounded-md tw-border-red-500 hover:tw-bg-gray-200"
+      class="tw-border-solid tw-border-2 tw-rounded-md tw-border-black hover:tw-bg-gray-200"
     >
       <svg
         :viewBox="icon.viewBox"
-        width="70"
+        width="60"
         height="40"
       >
         <path
@@ -25,7 +25,7 @@
 import { computed, onBeforeMount } from 'vue';
 import { IconInfo } from '../models/iconInfo';
 import { dbTableIcon } from '../services/dbTableService';
-import { ractangleIcon } from '../services/basicShapeService';
+import { ellipseIcon, ractangleIcon } from '../services/basicShapeService';
 import { ShapeType } from '../models/shape';
 
 interface ImageInfo {
@@ -48,6 +48,7 @@ const icons = computed(
   () => [
     dbTableIcon,
     ractangleIcon,
+    ellipseIcon,
   ],
 );
 

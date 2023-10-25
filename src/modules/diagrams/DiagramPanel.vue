@@ -41,6 +41,10 @@
               v-if="item.type === 'rectangle'"
               v-model="diagramStore.diagram.shapes[index]"
             ></RectangleSvg>
+            <EllipseSvg
+              v-if="item.type === 'ellipse'"
+              v-model="diagramStore.diagram.shapes[index]"
+            />
             <LineSvg
               v-if="item.type === 'line'"
               v-model="diagramStore.diagram.shapes[index]"
@@ -55,10 +59,10 @@
               v-if="item.type === 'dbTable'"
               v-model="diagramStore.diagram.shapes[index]"
             ></DbTableFloatSvg>
-            <RectangleFloatSvg
-              v-if="item.type === 'rectangle'"
+            <BasicFloatSvg
+              v-if="item.type === 'rectangle' || item.type === 'ellipse'"
               v-model="diagramStore.diagram.shapes[index]"
-            ></RectangleFloatSvg>
+            ></BasicFloatSvg>
           </template>
           <!-- Top line svg -->
           <template
@@ -100,13 +104,14 @@ import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import DbTableFloatSvg from './components/dbTable/DbTableFloatSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
 import LineFloatSvg from './components/line/LineFloatSvg.vue';
+import EllipseSvg from './components/basicShapes/EllipseSvg.vue';
 import RectangleSvg from './components/basicShapes/RectangleSvg.vue';
-import RectangleFloatSvg from './components/basicShapes/RectangleFloatSvg.vue';
+import BasicFloatSvg from './components/basicShapes/BasicFloatSvg.vue';
 import { createDbTable } from './services/dbTableService';
 import { HoldType, useDiagramStore } from './stores/diagramStore';
 import ShapePanel from './components/ShapePanel.vue';
 import { ShapeType } from './models/shape';
-import { createRectangle } from './services/basicShapeService';
+import { createEllipse, createRectangle } from './services/basicShapeService';
 import { createLine } from './services/lineService';
 
 const splitterModel = ref(200);
@@ -130,6 +135,8 @@ function onDrop(ev: DragEvent) {
     diagramStore.diagram.shapes.push(createDbTable(mousePoint.x, mousePoint.y));
   } else if (type === 'rectangle') {
     diagramStore.diagram.shapes.push(createRectangle(mousePoint.x, mousePoint.y));
+  } else if (type === 'ellipse') {
+    diagramStore.diagram.shapes.push(createEllipse(mousePoint.x, mousePoint.y));
   }
 }
 

@@ -72,6 +72,7 @@ export default {
   diagram: {
     dbTable: 'Database table',
     rectangle: 'Rectangle',
+    ellipse: 'Ellipse',
   },
   base: {
     createAt: 'Create date',
