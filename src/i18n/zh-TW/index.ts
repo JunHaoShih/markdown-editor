@@ -73,6 +73,7 @@ export default {
     dbTable: '資料表',
     rectangle: '矩形',
     ellipse: '橢圓',
+    circle: '圓形',
   },
   base: {
     createAt: '建立日期',

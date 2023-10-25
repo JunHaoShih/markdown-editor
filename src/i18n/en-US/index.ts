@@ -73,6 +73,7 @@ export default {
     dbTable: 'Database table',
     rectangle: 'Rectangle',
     ellipse: 'Ellipse',
+    circle: 'Circle',
   },
   base: {
     createAt: 'Create date',
