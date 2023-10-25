@@ -45,6 +45,10 @@
               v-if="item.type === 'ellipse'"
               v-model="diagramStore.diagram.shapes[index]"
             />
+            <CircleSvg
+              v-if="item.type === 'circle'"
+              v-model="diagramStore.diagram.shapes[index]"
+            />
             <LineSvg
               v-if="item.type === 'line'"
               v-model="diagramStore.diagram.shapes[index]"
@@ -60,7 +64,7 @@
               v-model="diagramStore.diagram.shapes[index]"
             ></DbTableFloatSvg>
             <BasicFloatSvg
-              v-if="item.type === 'rectangle' || item.type === 'ellipse'"
+              v-if="item.type !== 'dbTable'"
               v-model="diagramStore.diagram.shapes[index]"
             ></BasicFloatSvg>
           </template>
@@ -105,13 +109,14 @@ import DbTableFloatSvg from './components/dbTable/DbTableFloatSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
 import LineFloatSvg from './components/line/LineFloatSvg.vue';
 import EllipseSvg from './components/basicShapes/EllipseSvg.vue';
+import CircleSvg from './components/basicShapes/CircleSvg.vue';
 import RectangleSvg from './components/basicShapes/RectangleSvg.vue';
 import BasicFloatSvg from './components/basicShapes/BasicFloatSvg.vue';
 import { createDbTable } from './services/dbTableService';
 import { HoldType, useDiagramStore } from './stores/diagramStore';
 import ShapePanel from './components/ShapePanel.vue';
 import { ShapeType } from './models/shape';
-import { createEllipse, createRectangle } from './services/basicShapeService';
+import { createCircle, createEllipse, createRectangle } from './services/basicShapeService';
 import { createLine } from './services/lineService';
 
 const splitterModel = ref(200);
@@ -137,6 +142,8 @@ function onDrop(ev: DragEvent) {
     diagramStore.diagram.shapes.push(createRectangle(mousePoint.x, mousePoint.y));
   } else if (type === 'ellipse') {
     diagramStore.diagram.shapes.push(createEllipse(mousePoint.x, mousePoint.y));
+  } else if (type === 'circle') {
+    diagramStore.diagram.shapes.push(createCircle(mousePoint.x, mousePoint.y));
   }
 }
 

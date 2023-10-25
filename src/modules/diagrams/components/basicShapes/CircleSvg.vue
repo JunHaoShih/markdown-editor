@@ -19,11 +19,10 @@
       :top-resizable="true"
     />
     <DragSlot :id="shape.id">
-      <ellipse
+      <circle
         :cx="cx"
         :cy="cy"
-        :rx="rx"
-        :ry="ry"
+        :r="r"
         stroke="black"
         stroke-width="1"
         fill="transparent"
@@ -42,13 +41,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import TextSvg from '../TextSvg.vue';
 import DragSlot from '../DragSlot.vue';
 import SelectedSvg from '../SelectedSvg.vue';
 import ShapeSlot from '../ShapeSlot.vue';
 import { Shape } from '../../models/shape';
-import { ellipseConf } from '../../services/basicShapeService';
+import { circleConf } from '../../services/basicShapeService';
 import { useBasicSvgCalculation } from './basicSvgCalculation';
 
 const isSelected = ref(false);
@@ -67,9 +66,9 @@ const {
 } = useBasicSvgCalculation(
   () => props.modelValue,
   () => props.modelValue.width,
-  () => props.modelValue.height,
-  () => ellipseConf.minWidth,
-  () => ellipseConf.minHeight,
+  () => props.modelValue.width,
+  () => circleConf.minWidth,
+  () => circleConf.minHeight,
   emit,
 );
 
@@ -81,12 +80,12 @@ const cy = computed(
   () => shape.value.position.y + (shapeHeight.value / 2),
 );
 
-const rx = computed(
+const r = computed(
   () => shapeWidth.value / 2,
 );
 
-const ry = computed(
-  () => shapeHeight.value / 2,
-);
+watch(shapeWidth, (newValue) => {
+  shape.value.height = newValue;
+  console.log(`Width: ${shape.value.width}, Height: ${shape.value.height}`);
+});
 </script>
-./basicSvgCalculation

@@ -25,7 +25,7 @@
 import { computed, onBeforeMount } from 'vue';
 import { IconInfo } from '../models/iconInfo';
 import { dbTableIcon } from '../services/dbTableService';
-import { ellipseIcon, ractangleIcon } from '../services/basicShapeService';
+import { circleIcon, ellipseIcon, ractangleIcon } from '../services/basicShapeService';
 import { ShapeType } from '../models/shape';
 
 interface ImageInfo {
@@ -49,6 +49,7 @@ const icons = computed(
     dbTableIcon,
     ractangleIcon,
     ellipseIcon,
+    circleIcon,
   ],
 );
 

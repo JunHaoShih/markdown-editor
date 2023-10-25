@@ -107,6 +107,7 @@ const relocateNodes: Record<Orient, () => void> = {
     }
     node.point.x = props.x;
     node.point.y = props.y + (props.height / 2);
+    console.log(`Ass Width: ${props.width}, Height: ${props.height}`);
   },
   right: () => {
     const node = nodes.value.find((cn) => cn.orient === 'right');
