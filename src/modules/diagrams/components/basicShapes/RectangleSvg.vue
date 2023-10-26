@@ -61,12 +61,12 @@ const emit = defineEmits<Emit>();
 
 const {
   onResize, shapeWidth, shapeHeight, shape,
-} = useBasicSvgCalculation(
-  () => props.modelValue,
-  () => rectConf.minWidth,
-  () => rectConf.minHeight,
+} = useBasicSvgCalculation({
+  shape: () => props.modelValue,
+  defaultMinWidth: () => rectConf.minWidth,
+  defaultMinHeight: () => rectConf.minHeight,
   emit,
-);
+});
 
 const path = computed(
   () => `M ${shape.value.position.x} ${shape.value.position.y} \

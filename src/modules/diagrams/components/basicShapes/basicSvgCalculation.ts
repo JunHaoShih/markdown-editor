@@ -1,15 +1,15 @@
 import { computed } from 'vue';
 import { Point, Shape } from '../../models/shape';
 
-export const useBasicSvgCalculation = (
-  propModelValue: () => Shape,
+export const useBasicSvgCalculation = (shapeInfo: {
+  shape: () => Shape,
   defaultMinWidth: () => number,
   defaultMinHeight: () => number,
   emit: {
     (e: 'update:modelValue', value: Shape): void
   },
   aspectRatio?: () => boolean,
-) => {
+}) => {
   let originalX = 0;
 
   let originalY = 0;
@@ -19,8 +19,8 @@ export const useBasicSvgCalculation = (
   let originalRightX = 0;
 
   const shape = computed({
-    get: () => propModelValue(),
-    set: (value) => emit('update:modelValue', value),
+    get: () => shapeInfo.shape(),
+    set: (value) => shapeInfo.emit('update:modelValue', value),
   });
 
   const shapeWidth = computed(
@@ -32,14 +32,14 @@ export const useBasicSvgCalculation = (
   );
 
   const minWidth = computed({
-    get: (): number => shape.value.minWidth ?? defaultMinWidth(),
+    get: (): number => shape.value.minWidth ?? shapeInfo.defaultMinWidth(),
     set: (value) => {
       shape.value.minWidth = value;
     },
   });
 
   const minHeight = computed({
-    get: (): number => shape.value.minHeight ?? defaultMinHeight(),
+    get: (): number => shape.value.minHeight ?? shapeInfo.defaultMinHeight(),
     set: (value) => {
       shape.value.minHeight = value;
     },
@@ -107,7 +107,7 @@ export const useBasicSvgCalculation = (
       shape.value.position.x = originalX - xOffset;
     }
 
-    if (aspectRatio && aspectRatio()) {
+    if (shapeInfo.aspectRatio && shapeInfo.aspectRatio()) {
       if (finalWidth) {
         shape.value.height = finalWidth;
       }

@@ -64,12 +64,12 @@ const emit = defineEmits<Emit>();
 
 const {
   onResize, shapeWidth, shapeHeight, shape,
-} = useBasicSvgCalculation(
-  () => props.modelValue,
-  () => ellipseConf.minWidth,
-  () => ellipseConf.minHeight,
+} = useBasicSvgCalculation({
+  shape: () => props.modelValue,
+  defaultMinWidth: () => ellipseConf.minWidth,
+  defaultMinHeight: () => ellipseConf.minHeight,
   emit,
-);
+});
 
 const cx = computed(
   () => shape.value.position.x + (shapeWidth.value / 2),

@@ -63,13 +63,13 @@ const emit = defineEmits<Emit>();
 
 const {
   onResize, shapeWidth, shapeHeight, shape,
-} = useBasicSvgCalculation(
-  () => props.modelValue,
-  () => circleConf.minWidth,
-  () => circleConf.minHeight,
+} = useBasicSvgCalculation({
+  shape: () => props.modelValue,
+  defaultMinWidth: () => circleConf.minWidth,
+  defaultMinHeight: () => circleConf.minHeight,
   emit,
-  () => true,
-);
+  aspectRatio: () => true,
+});
 
 const cx = computed(
   () => shape.value.position.x + (shapeWidth.value / 2),
