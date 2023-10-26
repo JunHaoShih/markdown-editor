@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import TextSvg from '../TextSvg.vue';
 import DragSlot from '../DragSlot.vue';
 import SelectedSvg from '../SelectedSvg.vue';
@@ -65,11 +65,10 @@ const {
   onResize, shapeWidth, shapeHeight, shape,
 } = useBasicSvgCalculation(
   () => props.modelValue,
-  () => props.modelValue.width,
-  () => props.modelValue.width,
   () => circleConf.minWidth,
   () => circleConf.minHeight,
   emit,
+  () => true,
 );
 
 const cx = computed(
@@ -83,9 +82,4 @@ const cy = computed(
 const r = computed(
   () => shapeWidth.value / 2,
 );
-
-watch(shapeWidth, (newValue) => {
-  shape.value.height = newValue;
-  console.log(`Width: ${shape.value.width}, Height: ${shape.value.height}`);
-});
 </script>

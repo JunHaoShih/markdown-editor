@@ -3,13 +3,12 @@ import { Point, Shape } from '../../models/shape';
 
 export const useBasicSvgCalculation = (
   propModelValue: () => Shape,
-  width: () => number | undefined,
-  height: () => number | undefined,
   defaultMinWidth: () => number,
   defaultMinHeight: () => number,
   emit: {
     (e: 'update:modelValue', value: Shape): void
   },
+  aspectRatio?: () => boolean,
 ) => {
   let originalX = 0;
 
@@ -25,11 +24,11 @@ export const useBasicSvgCalculation = (
   });
 
   const shapeWidth = computed(
-    () => width() ?? 0,
+    () => shape.value.width ?? 0,
   );
 
   const shapeHeight = computed(
-    () => height() ?? 0,
+    () => shape.value.height ?? 0,
   );
 
   const minWidth = computed({
@@ -46,6 +45,22 @@ export const useBasicSvgCalculation = (
     },
   });
 
+  function getCoordinateOffset(info: {
+    currentLength: number,
+    minLength: number,
+    oldStartPosition: number,
+    newStartPosition: number,
+    oldEndPosition: number,
+  }): number {
+    if (info.currentLength > info.minLength) {
+      return info.oldStartPosition - info.newStartPosition;
+    }
+    if (info.oldStartPosition === info.newStartPosition) {
+      return 0;
+    }
+    return info.oldStartPosition - info.oldEndPosition + info.currentLength;
+  }
+
   function onResize(isFirst?: boolean, newPosition?: Point, newWidth?: number, newHeight?: number) {
     if (isFirst) {
       originalX = shape.value.position.x;
@@ -59,26 +74,53 @@ export const useBasicSvgCalculation = (
       return;
     }
 
+    let finalWidth = 0;
+    let xOffset = 0;
+
     if (newWidth) {
-      shape.value.width = Math.max(newWidth, minWidth.value);
-      if (shapeWidth.value > minWidth.value) {
-        shape.value.position.x = newPosition.x;
-      } else if (originalX === newPosition.x) {
-        shape.value.position.x = originalX;
-      } else {
-        shape.value.position.x = originalRightX - shapeWidth.value;
-      }
+      finalWidth = Math.max(newWidth, minWidth.value);
+      xOffset = getCoordinateOffset({
+        currentLength: finalWidth,
+        minLength: minWidth.value,
+        oldStartPosition: originalX,
+        newStartPosition: newPosition.x,
+        oldEndPosition: originalRightX,
+      });
     }
 
+    let finalHeight = 0;
+    let yOffset = 0;
+
     if (newHeight) {
-      shape.value.height = Math.max(newHeight, minHeight.value);
-      if (shapeHeight.value > minHeight.value) {
-        shape.value.position.y = newPosition.y;
-      } else if (originalY === newPosition.y) {
-        shape.value.position.y = originalY;
-      } else {
-        shape.value.position.y = originalBottomY - shapeHeight.value;
+      finalHeight = Math.max(newHeight, minHeight.value);
+      yOffset = getCoordinateOffset({
+        currentLength: finalHeight,
+        minLength: minHeight.value,
+        oldStartPosition: originalY,
+        newStartPosition: newPosition.y,
+        oldEndPosition: originalBottomY,
+      });
+    }
+
+    if (finalWidth) {
+      shape.value.width = finalWidth;
+      shape.value.position.x = originalX - xOffset;
+    }
+
+    if (aspectRatio && aspectRatio()) {
+      if (finalWidth) {
+        shape.value.height = finalWidth;
       }
+      if (!yOffset) {
+        return;
+      }
+      const newY = xOffset === 0
+        ? originalBottomY - finalWidth
+        : originalY - xOffset;
+      shape.value.position.y = newY;
+    } else if (finalHeight) {
+      shape.value.height = finalHeight;
+      shape.value.position.y = originalY - yOffset;
     }
   }
 

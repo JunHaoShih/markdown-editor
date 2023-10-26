@@ -63,8 +63,6 @@ const {
   onResize, shapeWidth, shapeHeight, shape,
 } = useBasicSvgCalculation(
   () => props.modelValue,
-  () => props.modelValue.width,
-  () => props.modelValue.height,
   () => rectConf.minWidth,
   () => rectConf.minHeight,
   emit,

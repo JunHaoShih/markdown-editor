@@ -66,8 +66,6 @@ const {
   onResize, shapeWidth, shapeHeight, shape,
 } = useBasicSvgCalculation(
   () => props.modelValue,
-  () => props.modelValue.width,
-  () => props.modelValue.height,
   () => ellipseConf.minWidth,
   () => ellipseConf.minHeight,
   emit,
