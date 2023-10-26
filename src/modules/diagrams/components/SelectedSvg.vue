@@ -68,7 +68,7 @@
       style="cursor: row-resize;"
     >
       <circle
-        :cx="(x + topRight.x) / 2"
+        :cx="(topLeft.x + topRight.x) / 2"
         :cy="y - (margin * 4)"
         r="5"
         fill="#29b6f2"
