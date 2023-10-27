@@ -1,5 +1,7 @@
 import { DbTableColumn } from './dbTableColumn';
 
+export type ArrowType = 'none' |'arrow' | 'zero2Many' | 'zero2One' | 'one2Many' | 'exactOne';
+
 export type ShapeType = 'dbTable' | 'line' | 'rectangle' | 'ellipse' | 'circle';
 
 export interface Point {
@@ -79,6 +81,14 @@ export interface Shape {
    * Absolute position of ending connection node if shape is a line
    */
   toAbsolute?: Point | null,
+  /**
+   * Starting arrow type
+   */
+  arrowStart?: ArrowType,
+  /**
+   * Ending arrow type
+   */
+  arrowEnd?: ArrowType,
 }
 
 export interface Diagram {

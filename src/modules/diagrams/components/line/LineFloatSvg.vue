@@ -15,11 +15,82 @@
     fill="#01bd22"
     @mousedown.stop="startConnectTo"
   />
+  <foreignObject
+    v-if="isSelected"
+    :x="actionPanelX"
+    :y="actionPanelY"
+    :width="1"
+    :height="1"
+    class="tw-overflow-visible"
+    @mouseup.stop
+    @mousedown.stop
+  >
+    <q-btn-dropdown
+      dense
+      class="glossy"
+      color="teal"
+      :label="$t('diagram.lineStart')"
+    >
+      <q-list>
+        <q-item
+          dense
+          v-for="marker in markers"
+          v-bind:key="marker.id"
+          clickable v-close-popup
+          @click="onArrowStartChanged(marker.id)"
+        >
+          <q-item-section avatar>
+            <q-avatar icon="folder" color="primary" text-color="white" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ $t(marker.name) }}</q-item-label>
+            <q-item-label caption>February 22, 2016</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-icon
+              v-if="marker.id === line.arrowStart"
+              name="info" color="amber"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
+    <q-btn-dropdown
+      dense
+      class="glossy"
+      color="teal"
+      :label="$t('diagram.lineEnd')"
+    >
+      <q-list>
+        <q-item
+          v-for="marker in markers"
+          v-bind:key="marker.id"
+          clickable v-close-popup
+          @click="onArrowEndChanged(marker.id)"
+        >
+          <q-item-section avatar>
+            <q-avatar icon="folder" color="primary" text-color="white" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ $t(marker.name) }}</q-item-label>
+            <q-item-label caption>February 22, 2016</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-icon
+              v-if="marker.id === line.arrowEnd"
+              name="info" color="amber"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
+  </foreignObject>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Shape } from '../../models/shape';
+import { markers } from './line';
+import { ArrowType, Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
@@ -66,5 +137,21 @@ function startConnectFrom() {
 function startConnectTo() {
   diagramStore
     .startReconnectFrom('to', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id);
+}
+
+const actionPanelX = computed(
+  () => Math.max(fromPoint.value.x, toPoint.value.x) + 30,
+);
+
+const actionPanelY = computed(
+  () => Math.min(fromPoint.value.y, toPoint.value.y),
+);
+
+function onArrowEndChanged(type: ArrowType) {
+  line.value.arrowEnd = type;
+}
+
+function onArrowStartChanged(type: ArrowType) {
+  line.value.arrowStart = type;
 }
 </script>

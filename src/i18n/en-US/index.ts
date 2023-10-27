@@ -74,6 +74,15 @@ export default {
     rectangle: 'Rectangle',
     ellipse: 'Ellipse',
     circle: 'Circle',
+    lineStart: 'Line start',
+    lineEnd: 'Line end',
+    arrows: {
+      arrow: 'Arrow',
+      zero2Many: 'Zero to many',
+      one2Many: 'One to many',
+      exactOne: 'Exact one',
+      zero2One: 'Zero to one',
+    },
   },
   base: {
     createAt: 'Create date',

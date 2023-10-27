@@ -5,14 +5,22 @@
   >
     <defs>
       <marker
-        id="arrow"
-        viewBox="0 0 10 10"
-        refX="10"
-        refY="5"
-        markerWidth="9"
-        markerHeight="9"
-        orient="auto-start-reverse">
-        <path d="M 0 0 L 10 5 L 0 10 z" />
+        v-for="marker in markers"
+        v-bind:key="marker.id"
+        :id="marker.id"
+        :viewBox="marker.viewBox"
+        :refX="marker.refX"
+        :refY="marker.refY"
+        :markerWidth="marker.markerWidth"
+        :markerHeight="marker.markerHeight"
+        :orient="marker.orient"
+      >
+        <path
+          :fill="marker.path.fill"
+          :stroke="marker.path.stroke"
+          :stroke-width="marker.path.strokeWidth"
+          :d="marker.path.d"
+        />
       </marker>
     </defs>
     <line
@@ -29,7 +37,8 @@
       :x2="toPoint.x"
       :y2="toPoint.y"
       style="stroke:rgb(0, 0, 0);stroke-width:1"
-      marker-end="url(#arrow)"
+      :marker-start="line.arrowStart ? `url(#${line.arrowStart})` : ''"
+      :marker-end="line.arrowEnd ? `url(#${line.arrowEnd})` : ''"
     />
   </ShapeSlot>
 </template>
@@ -38,6 +47,7 @@
 import {
   computed, onBeforeMount, ref, watch,
 } from 'vue';
+import { markers } from './line';
 import ShapeSlot from '../ShapeSlot.vue';
 import { Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';

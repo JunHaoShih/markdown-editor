@@ -74,6 +74,15 @@ export default {
     rectangle: '矩形',
     ellipse: '橢圓',
     circle: '圓形',
+    lineStart: '線起點',
+    lineEnd: '線終點',
+    arrows: {
+      arrow: '箭頭',
+      zero2Many: '零到多',
+      one2Many: '一到多',
+      exactOne: '唯一',
+      zero2One: '零到一',
+    },
   },
   base: {
     createAt: '建立日期',

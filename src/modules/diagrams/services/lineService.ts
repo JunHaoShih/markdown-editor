@@ -17,5 +17,7 @@ export function createLine(info: {
     toAbsolute: info.toAbsolute,
     fromNode: info.fromNode,
     toNode: info.toNode,
+    arrowStart: 'one2Many',
+    arrowEnd: 'arrow',
   };
 }
