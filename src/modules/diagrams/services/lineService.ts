@@ -19,5 +19,10 @@ export function createLine(info: {
     toNode: info.toNode,
     arrowStart: 'one2Many',
     arrowEnd: 'arrow',
+    lineInfo: {
+      type: 'diagnal',
+      startDistance: 30,
+      endDistance: 30,
+    },
   };
 }

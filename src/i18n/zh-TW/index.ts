@@ -83,6 +83,12 @@ export default {
       exactOne: '唯一',
       zero2One: '零到一',
     },
+    lineType: '線類型',
+    lines: {
+      straight: '直線',
+      diagnal: '斜角線',
+      rightAngle: '直角線',
+    },
   },
   base: {
     createAt: '建立日期',

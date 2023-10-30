@@ -1,4 +1,4 @@
-import { ArrowType } from '../../models/shape';
+import { ArrowType, LineType } from '../../models/shape';
 
 interface Path {
   fill?: string,
@@ -96,5 +96,25 @@ export const markers: Marker[] = [
       strokeWidth: 8,
       d: 'M30 2a28 28 0 101 0zM80 3v54',
     },
+  },
+];
+
+interface LineDisplay {
+  id: LineType,
+  name: string,
+}
+
+export const lineDisplays: LineDisplay[] = [
+  {
+    id: 'straight',
+    name: 'diagram.lines.straight',
+  },
+  {
+    id: 'diagnal',
+    name: 'diagram.lines.diagnal',
+  },
+  {
+    id: 'rightAngle',
+    name: 'diagram.lines.rightAngle',
   },
 ];

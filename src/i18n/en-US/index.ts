@@ -83,6 +83,12 @@ export default {
       exactOne: 'Exact one',
       zero2One: 'Zero to one',
     },
+    lineType: 'Line type',
+    lines: {
+      straight: 'Straight',
+      diagnal: 'Diagnal',
+      rightAngle: 'Right angle',
+    },
   },
   base: {
     createAt: 'Create date',

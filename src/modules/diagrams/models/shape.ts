@@ -4,6 +4,8 @@ export type ArrowType = 'none' |'arrow' | 'zero2Many' | 'zero2One' | 'one2Many' 
 
 export type ShapeType = 'dbTable' | 'line' | 'rectangle' | 'ellipse' | 'circle';
 
+export type LineType = 'straight' | 'diagnal' | 'rightAngle';
+
 export interface Point {
   x: number,
   y: number,
@@ -20,6 +22,12 @@ interface SizeInfo {
   minWidth?: number,
   height?: number,
   minHeight?: number,
+}
+
+export interface LineInfo {
+  type: LineType,
+  startDistance: number,
+  endDistance: number,
 }
 
 export interface Shape {
@@ -87,6 +95,10 @@ export interface Shape {
    * Ending arrow type
    */
   arrowEnd?: ArrowType,
+  /**
+   * Line information
+   */
+  lineInfo?: LineInfo,
 }
 
 export interface Diagram {

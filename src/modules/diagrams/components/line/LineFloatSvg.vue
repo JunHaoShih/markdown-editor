@@ -55,6 +55,7 @@
         </q-item>
       </q-list>
     </q-btn-dropdown>
+
     <q-btn-dropdown
       dense
       class="glossy"
@@ -84,13 +85,43 @@
         </q-item>
       </q-list>
     </q-btn-dropdown>
+
+<q-btn-dropdown
+  dense
+  class="glossy"
+  color="teal"
+  :label="$t('diagram.lineType')"
+>
+  <q-list>
+    <q-item
+      v-for="lineDisplay in lineDisplays"
+      v-bind:key="lineDisplay.id"
+      clickable v-close-popup
+      @click="onLineTypeChanged(lineDisplay.id)"
+    >
+      <q-item-section avatar>
+        <q-avatar icon="folder" color="primary" text-color="white" />
+      </q-item-section>
+      <q-item-section>
+        <q-item-label>{{ $t(lineDisplay.name) }}</q-item-label>
+        <q-item-label caption>February 22, 2016</q-item-label>
+      </q-item-section>
+      <q-item-section side>
+        <q-icon
+          v-if="lineDisplay.id === lineInfo.type"
+          name="info" color="amber"
+        />
+      </q-item-section>
+    </q-item>
+  </q-list>
+</q-btn-dropdown>
   </foreignObject>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { markers } from './line';
-import { ArrowType, Shape } from '../../models/shape';
+import { lineDisplays, markers } from './line';
+import { ArrowType, LineType, Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
@@ -107,6 +138,17 @@ const emit = defineEmits<Emit>();
 const line = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
+});
+
+const lineInfo = computed({
+  get: () => line.value.lineInfo ?? {
+    type: 'diagnal',
+    startDistance: 30,
+    endDistance: 30,
+  },
+  set: (value) => {
+    line.value.lineInfo = value;
+  },
 });
 
 const isSelected = computed(
@@ -153,5 +195,9 @@ function onArrowEndChanged(type: ArrowType) {
 
 function onArrowStartChanged(type: ArrowType) {
   line.value.arrowStart = type;
+}
+
+function onLineTypeChanged(type: LineType) {
+  lineInfo.value.type = type;
 }
 </script>
