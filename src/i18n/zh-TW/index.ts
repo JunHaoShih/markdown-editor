@@ -87,7 +87,7 @@ export default {
     lines: {
       straight: '直線',
       diagnal: '斜角線',
-      rightAngle: '直角線',
+      orthogonal: '正交線',
     },
   },
   base: {

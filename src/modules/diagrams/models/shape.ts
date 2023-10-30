@@ -4,7 +4,7 @@ export type ArrowType = 'none' |'arrow' | 'zero2Many' | 'zero2One' | 'one2Many' 
 
 export type ShapeType = 'dbTable' | 'line' | 'rectangle' | 'ellipse' | 'circle';
 
-export type LineType = 'straight' | 'diagnal' | 'rightAngle';
+export type LineType = 'straight' | 'diagnal' | 'orthogonal';
 
 export interface Point {
   x: number,

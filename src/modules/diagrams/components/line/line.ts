@@ -114,7 +114,7 @@ export const lineDisplays: LineDisplay[] = [
     name: 'diagram.lines.diagnal',
   },
   {
-    id: 'rightAngle',
-    name: 'diagram.lines.rightAngle',
+    id: 'orthogonal',
+    name: 'diagram.lines.orthogonal',
   },
 ];

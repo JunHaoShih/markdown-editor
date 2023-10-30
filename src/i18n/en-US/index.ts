@@ -87,7 +87,7 @@ export default {
     lines: {
       straight: 'Straight',
       diagnal: 'Diagnal',
-      rightAngle: 'Right angle',
+      orthogonal: 'Orthogonal',
     },
   },
   base: {
