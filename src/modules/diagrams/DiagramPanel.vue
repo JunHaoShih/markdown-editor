@@ -204,6 +204,10 @@ const mouseUpRecord: Record<HoldType, () => void> = {
     } else if (diagramStore.holdInfo.movedNode === 'to') {
       line.toNode = diagramStore.holdInfo.holdToId;
     }
+    diagramStore.selectedIds.push({
+      id: line.id,
+      children: [],
+    });
   },
   multiSelect: () => {
     diagramStore.selectedIds.length = 0;
