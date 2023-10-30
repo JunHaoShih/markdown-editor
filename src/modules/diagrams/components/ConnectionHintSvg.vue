@@ -28,14 +28,14 @@
 import {
   computed, onBeforeMount, ref, watch,
 } from 'vue';
-import { ConnectionNode, Orient } from '../models/shape';
+import { ConnectionNode } from '../models/shape';
 import { useDiagramStore } from '../stores/diagramStore';
 
 const offset = 20;
 
-const arrowWidth = 20;
+const arrowWidth = 16;
 
-const arrowHeight = 16;
+const arrowHeight = 20;
 
 const isNodeHover = ref(false);
 
@@ -62,26 +62,17 @@ const nodes = computed({
 
 function getArrow(node: ConnectionNode) {
   return `M ${node.point.x} ${node.point.y} \
-  V ${node.point.y - (arrowHeight / 2)} \
-  L ${node.point.x + arrowWidth} ${node.point.y} \
-  L ${node.point.x} ${node.point.y + (arrowHeight / 2)} \
-  V ${node.point.y}`;
+  H ${node.point.x - (arrowWidth / 2)} \
+  L ${node.point.x} ${node.point.y - arrowHeight} \
+  L ${node.point.x + (arrowWidth / 2)} ${node.point.y} \
+  H ${node.point.x}`;
 }
 
-const angles: Record<Orient, string> = {
-  left: '180',
-  right: '0',
-  bottom: '90',
-  top: '270',
-};
-
 function getTransform(node: ConnectionNode) {
-  return `rotate(${angles[node.orient]}, ${node.point.x}, ${node.point.y}) translate(${offset})`;
+  return `rotate(${node.orient}, ${node.point.x}, ${node.point.y}) translate(0,${-offset})`;
 }
 
 function startConnect(node: ConnectionNode) {
-  // diagramStore.startHolding('connect', node.point.x, node.point.y, node.id);
-  // diagramStore.selectedIds.length = 0;
   diagramStore.startConnect(node.point.x, node.point.y, node.id);
 }
 
@@ -99,51 +90,46 @@ function unsetToNode(node: ConnectionNode) {
   }
 }
 
-const relocateNodes: Record<Orient, () => void> = {
-  left: () => {
-    const node = nodes.value.find((cn) => cn.orient === 'left');
+const relocateNodes: { (): void }[] = [
+  () => {
+    const node = nodes.value.find((cn) => cn.orient === 270);
     if (!node) {
       return;
     }
     node.point.x = props.x;
     node.point.y = props.y + (props.height / 2);
   },
-  right: () => {
-    const node = nodes.value.find((cn) => cn.orient === 'right');
+  () => {
+    const node = nodes.value.find((cn) => cn.orient === 90);
     if (!node) {
       return;
     }
     node.point.x = props.x + props.width;
     node.point.y = props.y + (props.height / 2);
   },
-  top: () => {
-    const node = nodes.value.find((cn) => cn.orient === 'top');
+  () => {
+    const node = nodes.value.find((cn) => cn.orient === 0);
     if (!node) {
       return;
     }
     node.point.x = props.x + (props.width / 2);
     node.point.y = props.y;
   },
-  bottom: () => {
-    const node = nodes.value.find((cn) => cn.orient === 'bottom');
+  () => {
+    const node = nodes.value.find((cn) => cn.orient === 180);
     if (!node) {
       return;
     }
     node.point.x = props.x + (props.width / 2);
     node.point.y = props.y + props.height;
   },
-};
+];
 
 watch(() => [props.x, props.y, props.width, props.height], () => {
-  nodes.value.forEach((node) => {
-    relocateNodes[node.orient]();
-  });
+  relocateNodes.forEach((relocate) => relocate());
 });
 
 onBeforeMount(() => {
-  relocateNodes.left();
-  relocateNodes.right();
-  relocateNodes.top();
-  relocateNodes.bottom();
+  relocateNodes.forEach((relocate) => relocate());
 });
 </script>

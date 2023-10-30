@@ -22,22 +22,22 @@ export function createRectangle(x: number, y: number): Shape {
     connectionNodes: [
       {
         id: uuidv4(),
-        orient: 'left',
+        orient: 270,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'right',
+        orient: 90,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'top',
+        orient: 0,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'bottom',
+        orient: 180,
         point: { x: 0, y: 0 },
       },
     ],
@@ -83,22 +83,22 @@ export function createEllipse(x: number, y: number): Shape {
     connectionNodes: [
       {
         id: uuidv4(),
-        orient: 'left',
+        orient: 270,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'right',
+        orient: 90,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'top',
+        orient: 0,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'bottom',
+        orient: 180,
         point: { x: 0, y: 0 },
       },
     ],
@@ -146,22 +146,22 @@ export function createCircle(x: number, y: number): Shape {
     connectionNodes: [
       {
         id: uuidv4(),
-        orient: 'left',
+        orient: 270,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'right',
+        orient: 90,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'top',
+        orient: 0,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'bottom',
+        orient: 180,
         point: { x: 0, y: 0 },
       },
     ],

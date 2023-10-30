@@ -47,12 +47,12 @@ export function createDbTableColumn(): DbTableColumn {
     connectionNodes: [
       {
         id: uuidv4(),
-        orient: 'left',
+        orient: 270,
         point: { x: 0, y: 0 },
       },
       {
         id: uuidv4(),
-        orient: 'right',
+        orient: 90,
         point: { x: 0, y: 0 },
       },
     ],

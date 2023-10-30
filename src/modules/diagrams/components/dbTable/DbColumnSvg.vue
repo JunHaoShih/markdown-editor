@@ -133,7 +133,6 @@ import TextSvg from '../TextSvg.vue';
 import BooleanSvg from '../BooleanSvg.vue';
 import SelectedSvg from '../SelectedSvg.vue';
 import { DbTableColumn } from '../../models/dbTableColumn';
-import { Orient } from '../../models/shape';
 
 const props = defineProps<{
   modelValue: DbTableColumn,
@@ -213,45 +212,43 @@ function getRowBottomPath() {
   return `M ${startX} ${startY} H ${startX + props.width}`;
 }
 
-const relocateNodes: Record<Orient, () => void> = {
-  left: () => {
-    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'left');
+const relocateNodes: { (): void }[] = [
+  () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 270);
     if (!node) {
       return;
     }
     node.point.x = props.x;
     node.point.y = props.y + (dbColumn.value.height / 2);
   },
-  right: () => {
-    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'right');
+  () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 90);
     if (!node) {
       return;
     }
     node.point.x = props.x + props.width;
     node.point.y = props.y + (dbColumn.value.height / 2);
   },
-  top: () => {
-    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'top');
+  () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 0);
     if (!node) {
       return;
     }
     node.point.x = props.x + (props.width / 2);
     node.point.y = props.y;
   },
-  bottom: () => {
-    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 'bottom');
+  () => {
+    const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 180);
     if (!node) {
       return;
     }
     node.point.x = props.x + (props.width / 2);
     node.point.y = props.y + dbColumn.value.height;
   },
-};
+];
 
 watch(() => [props.x, props.y, props.width], () => {
-  dbColumn.value.connectionNodes.forEach((node) => {
-    relocateNodes[node.orient]();
-  });
+  relocateNodes.forEach((relocate) => relocate());
 });
 
 function onSelected() {
@@ -259,9 +256,6 @@ function onSelected() {
 }
 
 onBeforeMount(() => {
-  relocateNodes.left();
-  relocateNodes.right();
-  relocateNodes.top();
-  relocateNodes.bottom();
+  relocateNodes.forEach((relocate) => relocate());
 });
 </script>

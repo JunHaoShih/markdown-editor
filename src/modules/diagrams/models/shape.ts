@@ -9,12 +9,10 @@ export interface Point {
   y: number,
 }
 
-export type Orient = 'left' | 'top' | 'bottom' | 'right';
-
 export interface ConnectionNode {
   id: string,
   point: Point,
-  orient: Orient,
+  orient: number,
 }
 
 interface SizeInfo {
