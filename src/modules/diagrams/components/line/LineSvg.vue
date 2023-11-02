@@ -37,6 +37,14 @@
         :to-node="toNode"
       />
     </template>
+    <template v-if="lineInfo.type === 'orthogonal'">
+      <OrthogonalLine
+        :line="modelValue"
+        :is-selected="isSelected"
+        :from-node="fromNode"
+        :to-node="toNode"
+      />
+    </template>
   </ShapeSlot>
 </template>
 
@@ -46,6 +54,7 @@ import {
 } from 'vue';
 import { markers } from './line';
 import StraightLine from './StraightLine.vue';
+import OrthogonalLine from './OrthogonalLine.vue';
 import DiagnalLine from './DiagnalLine.vue';
 import ShapeSlot from '../ShapeSlot.vue';
 import { Shape } from '../../models/shape';
