@@ -26,6 +26,7 @@
       :y="getRowStartY(index)"
       :width="width"
       :height="col.height"
+      :shape-id="shape.id"
     />
   </template>
 </template>

@@ -11,7 +11,9 @@ interface MouseHoldInfo {
   movedNode: MovedType,
   holdFrom: Point,
   holdTo: Point,
+  holdFromShape?: string,
   holdFromId?: string,
+  holdToShape?: string,
   holdToId?: string,
   holdLineId?: string,
 }
@@ -116,16 +118,20 @@ export const useDiagramStore = defineStore('diagram', {
      * Start connect new line
      * @param x Starting x coordinate
      * @param y Starting y coordinate
+     * @param fromId from which node
+     * @param shapeId from which shape
      */
-    startConnect(x: number, y: number, fromId: string) {
+    startConnect(x: number, y: number, fromId: string, shapeId: string) {
       this.holdInfo.holdFrom.x = x;
       this.holdInfo.holdFrom.y = y;
+      this.holdInfo.holdFromShape = shapeId;
       this.holdInfo.type = 'connect';
       this.holdInfo.movedNode = 'to';
       this.holdInfo.holdToId = '';
       this.holdInfo.holdLineId = '';
+      this.holdInfo.holdToShape = '';
       this.selectedIds.length = 0;
-      this.setFromNode(fromId);
+      this.holdInfo.holdFromId = fromId;
     },
 
     startReconnectFrom(
@@ -135,6 +141,8 @@ export const useDiagramStore = defineStore('diagram', {
       to: Point,
       fromId?: string,
       toId?: string,
+      fromShape?: string,
+      toShape?: string,
     ) {
       this.holdInfo.movedNode = movedType;
       this.holdInfo.holdLineId = lineId;
@@ -147,20 +155,20 @@ export const useDiagramStore = defineStore('diagram', {
 
       this.holdInfo.holdFromId = fromId;
       this.holdInfo.holdToId = toId;
+      this.holdInfo.holdFromShape = fromShape;
+      this.holdInfo.holdToShape = toShape;
       this.holdInfo.type = 'reconnect';
       this.selectedIds.length = 0;
     },
 
-    startHolding(type: HoldType, x: number, y: number, fromId?: string) {
+    startHolding(type: HoldType, x: number, y: number) {
       this.holdInfo.holdFrom.x = x;
       this.holdInfo.holdFrom.y = y;
       this.holdInfo.type = type;
       this.holdInfo.holdToId = '';
       this.holdInfo.holdLineId = '';
-      if (fromId) {
-        this.setFromNode(fromId);
-      }
     },
+
     movingByEvent(evt: MouseEvent) {
       if (this.holdInfo.type === 'reconnect' && this.holdInfo.movedNode === 'from') {
         this.holdInfo.holdFrom.x = evt.x - this.offsetX;
@@ -170,30 +178,34 @@ export const useDiagramStore = defineStore('diagram', {
         this.holdInfo.holdTo.y = evt.y - this.offsetY;
       }
     },
+
     endHolding() {
       this.holdInfo.type = 'none';
+      this.holdInfo.holdFromShape = '';
       this.holdInfo.holdFromId = '';
+      this.holdInfo.holdToShape = '';
       this.holdInfo.holdToId = '';
       this.holdInfo.holdLineId = '';
       this.holdInfo.movedNode = 'none';
     },
-    setFromNode(nodeId: string) {
-      this.holdInfo.holdFromId = nodeId;
-    },
 
-    setConnectionNodeId(nodeId: string) {
+    setConnectionNodeId(nodeId: string, shapeId: string) {
       if (this.holdInfo.movedNode === 'from') {
         this.holdInfo.holdFromId = nodeId;
+        this.holdInfo.holdFromShape = shapeId;
       } else if (this.holdInfo.movedNode === 'to') {
         this.holdInfo.holdToId = nodeId;
+        this.holdInfo.holdToShape = shapeId;
       }
     },
 
     unsetConnectionNodeId(nodeId: string) {
       if (this.holdInfo.movedNode === 'from' && this.holdInfo.holdFromId === nodeId) {
         this.holdInfo.holdFromId = undefined;
+        this.holdInfo.holdFromShape = undefined;
       } else if (this.holdInfo.movedNode === 'to' && this.holdInfo.holdToId === nodeId) {
         this.holdInfo.holdToId = undefined;
+        this.holdInfo.holdToShape = undefined;
       }
     },
 

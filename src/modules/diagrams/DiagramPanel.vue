@@ -185,11 +185,13 @@ const mouseUpRecord: Record<HoldType, () => void> = {
           y: diagramStore.holdFrom.y,
         },
         fromNode: diagramStore.holdInfo.holdFromId,
+        fromShape: diagramStore.holdInfo.holdFromShape,
         toAbsolute: {
           x: diagramStore.holdTo.x,
           y: diagramStore.holdTo.y,
         },
         toNode: diagramStore.holdInfo.holdToId,
+        toShape: diagramStore.holdInfo.holdToShape,
       }));
       diagramStore.selectedIds.length = 0;
     }

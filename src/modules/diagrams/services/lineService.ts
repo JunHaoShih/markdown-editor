@@ -6,6 +6,8 @@ export function createLine(info: {
   toAbsolute: Point,
   fromNode?: string | null,
   toNode?: string | null,
+  fromShape?: string,
+  toShape?: string,
 }): Shape {
   return {
     id: uuidv4(),
@@ -17,6 +19,8 @@ export function createLine(info: {
     toAbsolute: info.toAbsolute,
     fromNode: info.fromNode,
     toNode: info.toNode,
+    fromShapeId: info.fromShape,
+    toShapeId: info.toShape,
     arrowStart: 'one2Many',
     arrowEnd: 'arrow',
     lineInfo: {

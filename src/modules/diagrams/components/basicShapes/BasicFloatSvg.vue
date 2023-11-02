@@ -6,6 +6,7 @@
     :y="shape.position.y"
     :width="shapeWidth"
     :height="shapeHeight"
+    :shape-id="shape.id"
   />
 </template>
 

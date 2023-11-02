@@ -48,6 +48,7 @@ const props = defineProps<{
   y: number,
   width: number,
   height: number,
+  shapeId: string,
 }>();
 
 type Emit = {
@@ -73,13 +74,13 @@ function getTransform(node: ConnectionNode) {
 }
 
 function startConnect(node: ConnectionNode) {
-  diagramStore.startConnect(node.point.x, node.point.y, node.id);
+  diagramStore.startConnect(node.point.x, node.point.y, node.id, props.shapeId);
 }
 
 function setToNode(node: ConnectionNode) {
   if (diagramStore.holdType === 'connect'
     || diagramStore.holdType === 'reconnect') {
-    diagramStore.setConnectionNodeId(node.id);
+    diagramStore.setConnectionNodeId(node.id, props.shapeId);
   }
 }
 

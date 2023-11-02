@@ -76,9 +76,17 @@ export interface Shape {
    */
   dbColumns?: DbTableColumn[],
   /**
+   * Shape id this line connect from
+   */
+  fromShapeId?: string,
+  /**
    * Node id of starting connection node if shape is a line
    */
   fromNode?: string | null,
+  /**
+   * Shape id this line connect to
+   */
+  toShapeId?: string,
   /**
    * Node id of ending connection node if shape is a line
    */

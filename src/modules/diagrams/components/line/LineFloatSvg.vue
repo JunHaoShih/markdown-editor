@@ -173,12 +173,12 @@ const toNode = computed(
 
 function startConnectFrom() {
   diagramStore
-    .startReconnectFrom('from', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id);
+    .startReconnectFrom('from', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id, line.value.fromShapeId, line.value.toShapeId);
 }
 
 function startConnectTo() {
   diagramStore
-    .startReconnectFrom('to', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id);
+    .startReconnectFrom('to', line.value.id, fromPoint.value, toPoint.value, fromNode.value?.id, toNode.value?.id, line.value.fromShapeId, line.value.toShapeId);
 }
 
 const actionPanelX = computed(
