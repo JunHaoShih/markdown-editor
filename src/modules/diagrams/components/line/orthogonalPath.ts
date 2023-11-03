@@ -4,10 +4,13 @@ class GraphNode<T> {
   // eslint-disable-next-line no-use-before-define
   adjacents: GraphNode<T>[] = [];
 
+  weight: number;
+
   comparator: (value1: T, value2: T) => number;
 
-  constructor(data: T, comparator: (value1: T, value2: T) => number) {
+  constructor(data: T, comparator: (value1: T, value2: T) => number, weight?: number) {
     this.data = data;
+    this.weight = weight ?? 0;
     this.comparator = comparator;
   }
 
@@ -25,36 +28,34 @@ class GraphNode<T> {
 }
 
 class Graph<T> {
-  root: GraphNode<T>;
-
-  nodes: Map<T, GraphNode<T>> = new Map<T, GraphNode<T>>();
+  // nodes: Map<T, GraphNode<T>> = new Map<T, GraphNode<T>>();
+  readonly nodes: GraphNode<T>[] = [];
 
   comparator: (value1: T, value2: T) => number;
 
-  constructor(data: T, comparator: (value1: T, value2: T) => number) {
-    this.root = new GraphNode<T>(data, comparator);
+  constructor(comparator: (value1: T, value2: T) => number) {
     this.comparator = comparator;
   }
 
   public add(data: T): GraphNode<T> {
-    const existNode = this.nodes.get(data);
+    const existNode = this.find(data);
     if (existNode) {
       return existNode;
     }
     const newNode = new GraphNode(data, this.comparator);
-    this.nodes.set(data, newNode);
+    this.nodes.push(newNode);
     return newNode;
   }
 
   public remove(data: T) {
-    const targetNode = this.nodes.get(data);
-    if (!targetNode) {
+    const targetIndex = this.findIndex(data);
+    if (targetIndex === -1) {
       return null;
     }
+    const targetNode = this.nodes.splice(targetIndex, 1)[0];
     this.nodes.forEach((node) => {
       node.removeAdjacent(targetNode.data);
     });
-    this.nodes.delete(data);
     return targetNode;
   }
 
@@ -65,12 +66,24 @@ class Graph<T> {
   }
 
   public removeEdge(from: T, to: T) {
-    const fromNode = this.nodes.get(from);
-    const toNode = this.nodes.get(to);
+    const fromNode = this.find(from);
+    const toNode = this.find(to);
 
     if (fromNode && toNode) {
       fromNode.removeAdjacent(to);
     }
+  }
+
+  public find(data: T) {
+    return this.nodes.find((node) => this.comparator(node.data, data));
+  }
+
+  public findIndex(data: T) {
+    return this.nodes.findIndex((node) => this.comparator(node.data, data));
+  }
+
+  public has(data: T): boolean {
+    return !!this.find(data);
   }
 
   private dfs(visitMap: Map<T, boolean>, node: GraphNode<T>) {
@@ -97,6 +110,11 @@ interface Rectangle {
   y: number,
   width: number,
   height: number,
+}
+
+interface Point {
+  x: number,
+  y: number,
 }
 
 /**
@@ -162,17 +180,21 @@ class Boundary {
   }
 
   static createByAttributes(attributes: {
-    x: number, y: number, width: number, height: number,
+    x: number, y: number, x2: number, y2: number,
   }): Boundary {
     const {
-      x, y, width, height,
+      x, y, x2, y2,
     } = attributes;
     return new Boundary({
       x,
       y,
-      width,
-      height,
+      width: x2 - x,
+      height: y2 - y,
     });
+  }
+
+  public contains(p: Point): boolean {
+    return p.x >= this.x && p.x <= this.x2 && p.y >= this.y && p.y <= this.y2;
   }
 
   /**
@@ -184,8 +206,8 @@ class Boundary {
     return Boundary.createByAttributes({
       x: this.x - borderWidth,
       y: this.y - borderWidth,
-      width: this.width + borderWidth,
-      height: this.height + borderWidth,
+      x2: this.x2 + borderWidth,
+      y2: this.y2 + borderWidth,
     });
   }
 
@@ -211,9 +233,48 @@ class Boundary {
     return Boundary.createByAttributes({
       x: Math.min(this.x, this.x2, boundary.x, boundary.x2),
       y: Math.min(this.y, this.y2, boundary.y, boundary.y2),
-      width: Math.max(this.x, this.x2, boundary.x, boundary.x2),
-      height: Math.max(this.y, this.y2, boundary.y, boundary.y2),
+      x2: Math.max(this.x, this.x2, boundary.x, boundary.x2),
+      y2: Math.max(this.y, this.y2, boundary.y, boundary.y2),
     });
+  }
+
+  get center(): Point {
+    return {
+      x: this.x + this.width / 2,
+      y: this.y + this.height / 2,
+    };
+  }
+
+  get topRight(): Point {
+    return { x: this.x2, y: this.y };
+  }
+
+  get bottomRight(): Point {
+    return { x: this.x2, y: this.y2 };
+  }
+
+  get bottomLeft(): Point {
+    return { x: this.x, y: this.y2 };
+  }
+
+  get topLeft(): Point {
+    return { x: this.x, y: this.y };
+  }
+
+  get right(): Point {
+    return { x: this.x2, y: this.center.y };
+  }
+
+  get top(): Point {
+    return { x: this.center.x, y: this.y };
+  }
+
+  get bottom(): Point {
+    return { x: this.center.x, y: this.y2 };
+  }
+
+  get left(): Point {
+    return { x: this.x, y: this.center.y };
   }
 }
 
@@ -267,11 +328,161 @@ class Grid {
 
     return null;
   }
+
+  public toPoints(boundaries: Boundary[]): Point[] {
+    const points: Point[] = [];
+
+    this.grid.forEach((rows, rowIndex) => {
+      const isFirstRow = rowIndex === 0;
+      const isLastRow = rowIndex === this.rows - 1;
+
+      rows.forEach((boundary, columnIndex) => {
+        const isFirstColumn = columnIndex === 0;
+        const isLastColumn = columnIndex === this.columns - 1;
+        const topLeft = isFirstRow && isFirstColumn;
+        const topRight = isFirstRow && isLastColumn;
+        const bottomLeft = isLastRow && isLastColumn;
+        const bottomRight = isLastRow && isFirstColumn;
+
+        if (topLeft || topRight || bottomLeft || bottomRight) {
+          points.push(
+            boundary.topLeft,
+            boundary.topRight,
+            boundary.bottomLeft,
+            boundary.bottomRight,
+          );
+        } else if (isFirstRow) {
+          points.push(boundary.topLeft, boundary.top, boundary.topRight);
+        } else if (isLastRow) {
+          points.push(boundary.bottomRight, boundary.bottom, boundary.bottomLeft);
+        } else if (isFirstColumn) {
+          points.push(boundary.topLeft, boundary.left, boundary.bottomLeft);
+        } else if (isLastColumn) {
+          points.push(boundary.topRight, boundary.right, boundary.bottomRight);
+        } else {
+          points.push(
+            boundary.topLeft,
+            boundary.top,
+            boundary.topRight,
+            boundary.right,
+            boundary.bottomRight,
+            boundary.bottom,
+            boundary.bottomLeft,
+            boundary.left,
+            boundary.center,
+          );
+        }
+      });
+    });
+
+    const result = Grid.reducePoints(points)
+      .filter(
+        (point) => boundaries.filter(
+          (boundary) => boundary.contains(point),
+        ).length > 0,
+      );
+
+    return result;
+  }
+
+  private static reducePoints(points: Point[]): Point[] {
+    const result: Point[] = [];
+    const map = new Map<number, number[]>();
+
+    points.forEach((point) => {
+      const { x, y } = point;
+      const arr = map.get(y) || map.set(y, []).get(y);
+
+      if (arr && arr.indexOf(x) < 0) {
+        arr.push(x);
+      }
+    });
+
+    map.forEach((xs, y) => {
+      xs.forEach((x) => {
+        result.push({ x, y });
+      });
+    });
+
+    return result;
+  }
 }
 
-interface Point {
-  x: number,
-  y: number,
+class Rulers {
+  private readonly verticals: number[] = [];
+
+  private readonly horizontals: number[] = [];
+
+  public addVertical(x: number) {
+    this.verticals.push(x);
+  }
+
+  public addHorizontal(y: number) {
+    this.horizontals.push(y);
+  }
+
+  public addBoundary(boundary: Boundary) {
+    this.verticals.push(boundary.x);
+    this.verticals.push(boundary.x2);
+    this.horizontals.push(boundary.y);
+    this.horizontals.push(boundary.y2);
+  }
+
+  public toGrid(boundary: Boundary): Grid {
+    const grid = new Grid();
+
+    this.verticals.sort((a, b) => a - b);
+    this.horizontals.sort((a, b) => a - b);
+
+    let previousX = boundary.x;
+    let previousY = boundary.y;
+    this.horizontals.forEach((y, row) => {
+      this.verticals.forEach((x, column) => {
+        grid.set(row, column, Boundary.createByAttributes({
+          x: previousX,
+          y: previousY,
+          x2: x,
+          y2: y,
+        }));
+        previousX = x;
+      });
+
+      // Add last cell of the row
+      grid.set(row, this.verticals.length, Boundary.createByAttributes({
+        x: previousX,
+        y: previousY,
+        x2: boundary.x2,
+        y2: y,
+      }));
+      previousX = boundary.x;
+      previousY = y;
+    });
+
+    // Last row of cells
+    this.verticals.forEach((x, column) => {
+      grid.set(this.horizontals.length, column, Boundary.createByAttributes({
+        x: previousX,
+        y: previousY,
+        x2: x,
+        y2: boundary.y2,
+      }));
+      previousX = boundary.x;
+    });
+
+    // Last cell of last row
+    grid.set(
+      this.horizontals.length,
+      this.verticals.length,
+      Boundary.createByAttributes({
+        x: previousX,
+        y: previousY,
+        x2: boundary.x2,
+        y2: boundary.y2,
+      }),
+    );
+
+    return grid;
+  }
 }
 
 interface PointData {
@@ -299,15 +510,89 @@ function hasCollision(boundarys: Boundary[]): boolean {
   return false;
 }
 
+/**
+ * Parse angle degree to radian
+ * @param degrees The degree you want to parse
+ */
+function toRadians(degrees: number) {
+  return degrees * (Math.PI / 180);
+}
+
+/**
+ * Rotate 2d vector with rotation matrix
+ * @param vector target vector
+ * @param radians rotate radians
+ */
+function rotate2dVector(vector: number[], radians: number) {
+  const newVector: number[] = [];
+  const x = vector[0] * Math.cos(radians) - vector[1] * Math.sin(radians);
+  const y = vector[0] * Math.sin(radians) + vector[1] * Math.cos(radians);
+
+  newVector.push(x, y);
+  return newVector;
+}
+
+function createGraph(points: Point[]): Graph<Point> {
+  const graph = new Graph<Point>((a, b) => ((a.x === b.x && a.y === b.y) ? 0 : 1));
+
+  const hotXs: number[] = [];
+  const hotYs: number[] = [];
+  points.forEach((point) => {
+    const { x, y } = point;
+    if (hotXs.indexOf(x) < 0) hotXs.push(x);
+    if (hotYs.indexOf(y) < 0) hotYs.push(y);
+    graph.add(point);
+  });
+
+  hotXs.sort((a, b) => a - b);
+  hotYs.sort((a, b) => a - b);
+
+  const inHotIndex = (p: Point): boolean => graph.has(p);
+
+  for (let i = 0; i < hotYs.length; i += 1) {
+    for (let j = 0; j < hotXs.length; j += 1) {
+      const b: Point = {
+        x: hotXs[j],
+        y: hotYs[i],
+      };
+
+      // eslint-disable-next-line no-continue
+      if (!inHotIndex(b)) continue;
+
+      if (j > 0) {
+        const a: Point = {
+          x: hotXs[j - 1],
+          y: hotYs[i],
+        };
+
+        if (inHotIndex(a)) {
+          graph.addEdge(a, b);
+          graph.addEdge(b, a);
+        }
+      }
+
+      if (i > 0) {
+        const a: Point = {
+          x: hotXs[j],
+          y: hotYs[i - 1],
+        };
+
+        if (inHotIndex(a)) {
+          graph.addEdge(a, b);
+          graph.addEdge(b, a);
+        }
+      }
+    }
+  }
+  return graph;
+}
+
 export function findPath(info: PathFindingInfo) {
   const {
     blocks, fromPoint, toPoint, globalBounds, globalBoundsMargin,
   } = info;
-  const dots: Point[] = [];
-  const verticalRulers: number[] = [];
-  const horizontalRulers: number[] = [];
-  const isFromVertical = fromPoint.orient === 0 || fromPoint.orient === 180;
-  const isToVertical = toPoint.orient === 0 || toPoint.orient === 180;
+  const points: Point[] = [];
+  const rulers = new Rulers();
   const { blockMargin } = info;
 
   const boundaries = blocks.map((block) => Boundary.create(block));
@@ -330,28 +615,35 @@ export function findPath(info: PathFindingInfo) {
   const finalOuterBoundary = Boundary.createByAttributes({
     x: Math.max(expandedUnionBoundary.x, outerBoundary.x),
     y: Math.max(expandedUnionBoundary.y, outerBoundary.y),
-    width: Math.min(expandedUnionBoundary.x2, outerBoundary.x2),
-    height: Math.min(expandedUnionBoundary.y2, outerBoundary.y2),
+    x2: Math.min(expandedUnionBoundary.x2, outerBoundary.x2),
+    y2: Math.min(expandedUnionBoundary.y2, outerBoundary.y2),
   });
 
   // Add edges to rulers
   finalBoundaries.forEach((boundary) => {
-    verticalRulers.push(boundary.x);
-    verticalRulers.push(boundary.x2);
-    horizontalRulers.push(boundary.y);
-    horizontalRulers.push(boundary.y2);
+    rulers.addBoundary(boundary);
   });
 
-  // Rulers at origins of shapes
-  (isFromVertical ? verticalRulers : horizontalRulers)
-    .push(isFromVertical ? fromPoint.point.x : fromPoint.point.y);
-  (isToVertical ? verticalRulers : horizontalRulers)
-    .push(isToVertical ? toPoint.point.x : toPoint.point.y);
+  // Rulers at starting and ending point
+  const isFromVertical = fromPoint.orient === 0 || fromPoint.orient === 180;
+  const isToVertical = toPoint.orient === 0 || toPoint.orient === 180;
+
+  if (isFromVertical) {
+    rulers.addVertical(fromPoint.point.x);
+  } else {
+    rulers.addHorizontal(fromPoint.point.y);
+  }
+
+  if (isToVertical) {
+    rulers.addVertical(toPoint.point.x);
+  } else {
+    rulers.addHorizontal(toPoint.point.y);
+  }
 
   // Points of shape antennas
   [fromPoint, toPoint].forEach((pointData) => {
     const { point } = pointData;
-    const add = (dx: number, dy: number) => dots.push({
+    const add = (dx: number, dy: number) => points.push({
       x: point.x + dx,
       y: point.y + dy,
     });
@@ -361,11 +653,28 @@ export function findPath(info: PathFindingInfo) {
       case 90: add(finalBlockMargin, 0); break;
       case 180: add(0, finalBlockMargin); break;
       case 270: add(-finalBlockMargin, 0); break;
-      default: add(0, -finalBlockMargin); break;
+      default: throw new Error(`Invalid orient: ${pointData.orient}`);
     }
   });
 
   // Sort rulers
-  verticalRulers.sort((a, b) => a - b);
-  horizontalRulers.sort((a, b) => a - b);
+  const gridPoints = rulers
+    .toGrid(finalOuterBoundary)
+    .toPoints(finalBoundaries);
+
+  points.push(...gridPoints);
+
+  const graph = createGraph(points);
+
+  const fromVector = rotate2dVector([0, -blockMargin], toRadians(fromPoint.orient));
+  const fromExtrudePoint = {
+    x: fromPoint.point.x + fromVector[0],
+    y: fromPoint.point.y + fromVector[1],
+  };
+
+  const toVector = rotate2dVector([0, -blockMargin], toRadians(toPoint.orient));
+  const toExtrudePoint = {
+    x: toPoint.point.x + toVector[0],
+    y: toPoint.point.y + toVector[1],
+  };
 }
