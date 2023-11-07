@@ -1,29 +1,40 @@
+interface Edge<T> {
+  node: T,
+  weight: number,
+}
+
 class GraphNode<T> {
   data: T;
 
   // eslint-disable-next-line no-use-before-define
-  adjacents: GraphNode<T>[] = [];
+  adjacents: Edge<GraphNode<T>>[] = [];
 
-  weight: number;
+  // eslint-disable-next-line no-use-before-define
+  shortestPath: GraphNode<T>[] = [];
+
+  weight = Number.MAX_SAFE_INTEGER;
 
   comparator: (value1: T, value2: T) => number;
 
   constructor(data: T, comparator: (value1: T, value2: T) => number, weight?: number) {
     this.data = data;
-    this.weight = weight ?? 0;
+    // this.weight = weight ?? 0;
     this.comparator = comparator;
   }
 
-  public addAdjacent(node: GraphNode<T>) {
-    this.adjacents.push(node);
+  public addAdjacent(node: GraphNode<T>, weight: number) {
+    this.adjacents.push({
+      node,
+      weight,
+    });
   }
 
   public removeAdjacent(data: T): GraphNode<T> | null {
-    const index = this.adjacents.findIndex((node) => this.comparator(node.data, data) === 0);
+    const index = this.adjacents.findIndex((edge) => this.comparator(edge.node.data, data) === 0);
     if (index === -1) {
       return null;
     }
-    return this.adjacents.splice(index, 1)[0];
+    return this.adjacents.splice(index, 1)[0].node;
   }
 }
 
@@ -59,10 +70,10 @@ class Graph<T> {
     return targetNode;
   }
 
-  public addEdge(from: T, to: T) {
+  public addEdge(from: T, to: T, weight: number) {
     const fromNode = this.add(from);
     const toNode = this.add(to);
-    fromNode.addAdjacent(toNode);
+    fromNode.addAdjacent(toNode, weight);
   }
 
   public removeEdge(from: T, to: T) {
@@ -88,9 +99,9 @@ class Graph<T> {
 
   private dfs(visitMap: Map<T, boolean>, node: GraphNode<T>) {
     visitMap.set(node.data, true);
-    node.adjacents.forEach((adj) => {
-      if (!visitMap.has(adj.data)) {
-        this.dfs(visitMap, adj);
+    node.adjacents.forEach((edge) => {
+      if (!visitMap.has(edge.node.data)) {
+        this.dfs(visitMap, edge.node);
       }
     });
   }
@@ -529,6 +540,15 @@ function rotate2dVector(vector: number[], radians: number) {
   return newVector;
 }
 
+/**
+ * Computes distance between two points
+ * @param a
+ * @param b
+ */
+function distance(a: Point, b: Point): number {
+  return Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
+}
+
 function createGraph(points: Point[]): Graph<Point> {
   const graph = new Graph<Point>((a, b) => ((a.x === b.x && a.y === b.y) ? 0 : 1));
 
@@ -563,8 +583,8 @@ function createGraph(points: Point[]): Graph<Point> {
         };
 
         if (inHotIndex(a)) {
-          graph.addEdge(a, b);
-          graph.addEdge(b, a);
+          graph.addEdge(a, b, distance(a, b));
+          graph.addEdge(b, a, distance(a, b));
         }
       }
 
@@ -575,13 +595,93 @@ function createGraph(points: Point[]): Graph<Point> {
         };
 
         if (inHotIndex(a)) {
-          graph.addEdge(a, b);
-          graph.addEdge(b, a);
+          graph.addEdge(a, b, distance(a, b));
+          graph.addEdge(b, a, distance(a, b));
         }
       }
     }
   }
   return graph;
+}
+
+function getLowestDistanceNode(unsettledNodes: Set<GraphNode<Point>>): GraphNode<Point> {
+  let lowestDistanceNode: GraphNode<Point> = {} as GraphNode<Point>;
+  let lowestDistance = Number.MAX_SAFE_INTEGER;
+  unsettledNodes.forEach((node) => {
+    const nodeDistance = node.weight;
+    if (nodeDistance < lowestDistance) {
+      lowestDistance = nodeDistance;
+      lowestDistanceNode = node;
+    }
+  });
+  return lowestDistanceNode;
+}
+
+function calculateMinimumDistance(
+  evaluationNode: GraphNode<Point>,
+  edgeWeigh: number,
+  sourceNode: GraphNode<Point>,
+) {
+  const sourceDistance = sourceNode.weight;
+  /* const comingDirection = PointGraph.inferPathDirection(sourceNode);
+  const goingDirection = PointGraph.directionOfNodes(sourceNode, evaluationNode);
+  const changingDirection = comingDirection
+    && goingDirection && comingDirection !== goingDirection;
+  const extraWeigh = changingDirection ? (edgeWeigh + 1) ** 2 : 0; */
+  const extraWeigh = 0;
+
+  if (sourceDistance + edgeWeigh + extraWeigh < evaluationNode.weight) {
+    evaluationNode.weight = sourceDistance + edgeWeigh + extraWeigh;
+    const shortestPath: GraphNode<Point>[] = [...sourceNode.shortestPath];
+    shortestPath.push(sourceNode);
+    evaluationNode.shortestPath = shortestPath;
+  }
+}
+
+function calculateShortestPathFromSource(
+  graph: Graph<Point>,
+  source: GraphNode<Point>,
+): Graph<Point> {
+  source.weight = 0;
+
+  const settledNodes: Set<GraphNode<Point>> = new Set();
+  const unsettledNodes: Set<GraphNode<Point>> = new Set();
+
+  unsettledNodes.add(source);
+
+  while (unsettledNodes.size !== 0) {
+    const currentNode = getLowestDistanceNode(unsettledNodes);
+    unsettledNodes.delete(currentNode);
+
+    currentNode.adjacents.forEach((edge) => {
+      if (settledNodes.has(edge.node)) {
+        return;
+      }
+      calculateMinimumDistance(edge.node, edge.weight, currentNode);
+      unsettledNodes.add(edge.node);
+    });
+
+    settledNodes.add(currentNode);
+  }
+
+  return graph;
+}
+
+function getShortestPath(graph: Graph<Point>, origin: Point, destination: Point): Point[] {
+  const originNode = graph.find(origin);
+  const destinationNode = graph.find(destination);
+
+  if (!originNode) {
+    throw new Error(`Origin node {${origin.x},${origin.y}} not found`);
+  }
+
+  if (!destinationNode) {
+    throw new Error(`Origin node {${origin.x},${origin.y}} not found`);
+  }
+
+  calculateShortestPathFromSource(graph, originNode);
+
+  return destinationNode.shortestPath.map((n) => n.data);
 }
 
 export function findOrthogonalPath(info: PathFindingInfo) {
@@ -702,6 +802,9 @@ export function findOrthogonalPath(info: PathFindingInfo) {
     x: toPoint.point.x + toVector[0],
     y: toPoint.point.y + toVector[1],
   };
+
+  const path = getShortestPath(graph, fromExtrudePoint, toExtrudePoint);
+  console.log(path.length);
 
   return points;
 }
