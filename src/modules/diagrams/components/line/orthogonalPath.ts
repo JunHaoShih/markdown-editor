@@ -19,7 +19,7 @@ class GraphNode<T> {
   }
 
   public removeAdjacent(data: T): GraphNode<T> | null {
-    const index = this.adjacents.findIndex((node) => this.comparator(node.data, data));
+    const index = this.adjacents.findIndex((node) => this.comparator(node.data, data) === 0);
     if (index === -1) {
       return null;
     }
@@ -75,11 +75,11 @@ class Graph<T> {
   }
 
   public find(data: T) {
-    return this.nodes.find((node) => this.comparator(node.data, data));
+    return this.nodes.find((node) => this.comparator(node.data, data) === 0);
   }
 
   public findIndex(data: T) {
-    return this.nodes.findIndex((node) => this.comparator(node.data, data));
+    return this.nodes.findIndex((node) => this.comparator(node.data, data) === 0);
   }
 
   public has(data: T): boolean {
@@ -375,12 +375,9 @@ class Grid {
       });
     });
 
-    const result = Grid.reducePoints(points)
-      .filter(
-        (point) => boundaries.filter(
-          (boundary) => boundary.contains(point),
-        ).length > 0,
-      );
+    const obstacleCollision = (p: Point) => boundaries.filter((o) => o.contains(p)).length > 0;
+
+    const result = Grid.reducePoints(points).filter((p) => !obstacleCollision(p));
 
     return result;
   }
@@ -466,7 +463,7 @@ class Rulers {
         x2: x,
         y2: boundary.y2,
       }));
-      previousX = boundary.x;
+      previousX = x;
     });
 
     // Last cell of last row
@@ -587,7 +584,7 @@ function createGraph(points: Point[]): Graph<Point> {
   return graph;
 }
 
-export function findPath(info: PathFindingInfo) {
+export function findOrthogonalPath(info: PathFindingInfo) {
   const {
     blocks, fromPoint, toPoint, globalBounds, globalBoundsMargin,
   } = info;
@@ -597,6 +594,36 @@ export function findPath(info: PathFindingInfo) {
 
   const boundaries = blocks.map((block) => Boundary.create(block));
   const expandedBoundaries = boundaries.map((boundary) => boundary.expand(blockMargin));
+  /* const boundaryA = Boundary.create(blockA);
+  const boundaryB = Boundary.create(blockB);
+
+  let expandedA = boundaryA.expand(blockMargin);
+  let expandedB = boundaryB.expand(blockMargin);
+
+  // Check bounding boxes collision
+  if (expandedA.collideWidth(expandedB)) {
+    blockMargin = 0;
+    expandedA = boundaryA;
+    expandedB = boundaryB;
+  }
+
+  const expandedUnionBoundary = expandedA
+    .union(expandedB)
+    .expand(globalBoundsMargin);
+
+  const outerBoundary = Boundary.create(globalBounds);
+  // Curated bounds to stick to
+  const bounds = Boundary.createByAttributes({
+    x: Math.max(expandedUnionBoundary.x, outerBoundary.x),
+    y: Math.max(expandedUnionBoundary.y, outerBoundary.y),
+    x2: Math.min(expandedUnionBoundary.x2, outerBoundary.x2),
+    y2: Math.min(expandedUnionBoundary.y2, outerBoundary.y2),
+  });
+
+  // Add edges to rulers
+  [expandedA, expandedB].forEach((b) => {
+    rulers.addBoundary(b);
+  }); */
 
   const isCollided = hasCollision(expandedBoundaries);
 
@@ -610,7 +637,6 @@ export function findPath(info: PathFindingInfo) {
   ).expand(globalBoundsMargin);
 
   const outerBoundary = Boundary.create(globalBounds);
-
   // Curated bounds to stick to
   const finalOuterBoundary = Boundary.createByAttributes({
     x: Math.max(expandedUnionBoundary.x, outerBoundary.x),
@@ -658,23 +684,24 @@ export function findPath(info: PathFindingInfo) {
   });
 
   // Sort rulers
-  const gridPoints = rulers
-    .toGrid(finalOuterBoundary)
-    .toPoints(finalBoundaries);
+  const grid = rulers.toGrid(finalOuterBoundary);
+  const gridPoints = grid.toPoints(finalBoundaries);
 
   points.push(...gridPoints);
 
   const graph = createGraph(points);
 
-  const fromVector = rotate2dVector([0, -blockMargin], toRadians(fromPoint.orient));
+  const fromVector = rotate2dVector([0, -finalBlockMargin], toRadians(fromPoint.orient));
   const fromExtrudePoint = {
     x: fromPoint.point.x + fromVector[0],
     y: fromPoint.point.y + fromVector[1],
   };
 
-  const toVector = rotate2dVector([0, -blockMargin], toRadians(toPoint.orient));
+  const toVector = rotate2dVector([0, -finalBlockMargin], toRadians(toPoint.orient));
   const toExtrudePoint = {
     x: toPoint.point.x + toVector[0],
     y: toPoint.point.y + toVector[1],
   };
+
+  return points;
 }
