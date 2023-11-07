@@ -12,6 +12,22 @@
     :marker-start="line.arrowStart ? `url(#${line.arrowStart})` : ''"
     :marker-end="line.arrowEnd ? `url(#${line.arrowEnd})` : ''"
   />
+  <circle
+    v-for="(testPoint, index) in testPoints"
+    v-bind:key="index"
+    :cx="testPoint.x"
+    :cy="testPoint.y"
+    r="3"
+    fill="red"
+  />
+  <circle
+    v-for="(testPoint, index) in test2Points"
+    v-bind:key="index"
+    :cx="testPoint.x"
+    :cy="testPoint.y"
+    r="3"
+    fill="green"
+  />
 </template>
 
 <script setup lang="ts">
@@ -21,6 +37,7 @@ import {
 import { ConnectionNode, Point, Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 import { OrthogonalConnector } from './ortho-connector';
+import { findOrthogonalPath } from './orthogonalPath';
 
 const diagramStore = useDiagramStore();
 
@@ -124,6 +141,10 @@ function getSide(degree: number): 'top' | 'bottom' | 'left' | 'right' {
   return 'top';
 }
 
+const testPoints = ref<Point[]>([]);
+
+const test2Points = ref<Point[]>([]);
+
 function findPath() {
   const from = diagramStore.diagram.shapes.find((shape) => shape.id === props.line.fromShapeId);
   if (!from) {
@@ -166,6 +187,7 @@ function findPath() {
 
   const fromSide = getSide(startDegrees.value);
   const toSide = getSide(endDegrees.value);
+
   const result = OrthogonalConnector.route({
     pointA: { shape: shapeA, side: fromSide, distance: 0.5 },
     pointB: { shape: shapeB, side: toSide, distance: 0.5 },
@@ -201,6 +223,41 @@ function findPath() {
       globalBoundsMargin: 20,
       globalBounds: boundary,
     });
+
+  testPoints.value = finalResult;
+
+  test2Points.value = findOrthogonalPath({
+    blocks: [
+      {
+        x: from.position.x,
+        y: from.position.y,
+        width: from.width ?? 0,
+        height: from.height ?? 0,
+      },
+      {
+        x: to.position.x,
+        y: to.position.y,
+        width: to.width ?? 0,
+        height: to.height ?? 0,
+      },
+    ],
+    fromPoint: {
+      orient: props.fromNode?.orient ?? 0,
+      point: fromPoint.value,
+    },
+    toPoint: {
+      orient: props.toNode?.orient ?? 0,
+      point: toPoint.value,
+    },
+    blockMargin: 0,
+    globalBoundsMargin: 20,
+    globalBounds: {
+      x: boundaryX - (5 * margin),
+      y: boundaryY - (5 * margin),
+      width: boundaryX2 - boundaryX + (20 * margin),
+      height: boundaryY2 - boundaryY + (20 * margin),
+    },
+  });
 
   pathNodes.value.length = 0;
   finalResult.forEach((pt) => {
