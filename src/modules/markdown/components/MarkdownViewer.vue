@@ -1,21 +1,24 @@
 <template>
   <div>
-    <div v-html="markdown"></div>
+    <div ref="mdRef" v-html="markdown"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {
-  computed, onMounted, onUpdated,
+  computed, onMounted, ref,
 } from 'vue';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { v4 as uuidv4 } from 'uuid';
 
 const $q = useQuasar();
 
 const i18n = useI18n();
+
+const mdRef = ref<HTMLElement>();
 
 const copyIcon = '<i class="q-icon notranslate material-icons" aria-hidden="true" role="img">content_copy</i>';
 
@@ -35,9 +38,10 @@ const mdText = computed({
 
 const md: MarkdownIt = new MarkdownIt({
   highlight: (str, lang) => {
+    const uuid = uuidv4();
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return `<pre class="hljs"><button class="action-btn">${copyIcon}</button><code>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+        return `<pre class="hljs"><button class="action-btn" data-clipboard-target=${uuid}>${copyIcon}</button><code id=${uuid}>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
       } catch (__) { /* empty */ }
     }
 
@@ -45,41 +49,54 @@ const md: MarkdownIt = new MarkdownIt({
   },
 });
 
+const defaultLinkRender = md.renderer.rules.link_open
+  || ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
+
+md.renderer.rules.link_open = ((tokens, idx, options, env, self) => {
+  // If you are sure other plugins can't add `target` - drop check below
+  const aIndex = tokens[idx].attrIndex('target');
+
+  if (aIndex < 0) {
+    tokens[idx].attrPush(['target', '_blank']); // add new attribute
+  } else {
+    tokens[idx].attrSet('target', '_blank');// replace value of existing attr
+  }
+
+  // pass token to default renderer.
+  return defaultLinkRender(tokens, idx, options, env, self);
+});
+
 const markdown = computed(
   () => md.render(mdText.value),
 );
 
-function addCopyEvent() {
-  const highlights = document.querySelectorAll('pre.hljs');
-  highlights.forEach((div) => {
-    const btn = div.querySelector('button');
-    btn?.addEventListener('click', () => {
-      if (div.children.length !== 2) {
-        $q.notify({
-          type: 'error',
-          message: i18n.t('unknownError'),
-        });
-        return;
-      }
+function copyCLicked(evt: MouseEvent) {
+  let target = evt.target as HTMLElement | null;
+  if (!target) {
+    return;
+  }
+  if (target.tagName.toLowerCase() === 'i') {
+    target = target.parentElement;
+  }
+  const clipboardTargetId = target?.getAttribute('data-clipboard-target');
 
-      const text = div.children[1].textContent;
-      if (text) {
-        navigator.clipboard.writeText(text);
-        $q.notify({
-          type: 'success',
-          message: i18n.t('actions.copyToClipboard'),
-        });
-      }
+  if (clipboardTargetId) {
+    const textToCopy = document.getElementById(clipboardTargetId)?.textContent;
+
+    if (!textToCopy) {
+      return;
+    }
+
+    navigator.clipboard.writeText(textToCopy);
+    $q.notify({
+      type: 'success',
+      message: i18n.t('actions.copyToClipboard'),
     });
-  });
+  }
 }
 
-onUpdated(() => {
-  addCopyEvent();
-});
-
 onMounted(() => {
-  addCopyEvent();
+  mdRef.value?.addEventListener('click', copyCLicked);
 });
 </script>
 
