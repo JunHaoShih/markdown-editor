@@ -9,16 +9,10 @@ class GraphNode<T> {
   // eslint-disable-next-line no-use-before-define
   adjacents: Edge<GraphNode<T>>[] = [];
 
-  // eslint-disable-next-line no-use-before-define
-  shortestPath: GraphNode<T>[] = [];
-
-  weight = Number.MAX_SAFE_INTEGER;
-
   comparator: (value1: T, value2: T) => number;
 
-  constructor(data: T, comparator: (value1: T, value2: T) => number, weight?: number) {
+  constructor(data: T, comparator: (value1: T, value2: T) => number) {
     this.data = data;
-    // this.weight = weight ?? 0;
     this.comparator = comparator;
   }
 
@@ -549,8 +543,8 @@ function distance(a: Point, b: Point): number {
   return Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
 }
 
-function createGraph(points: Point[]): Graph<Point> {
-  const graph = new Graph<Point>((a, b) => ((a.x === b.x && a.y === b.y) ? 0 : 1));
+function createGraph(points: Point[], comparator: (a: Point, b: Point) => number): Graph<Point> {
+  const graph = new Graph<Point>(comparator);
 
   const hotXs: number[] = [];
   const hotYs: number[] = [];
@@ -604,13 +598,26 @@ function createGraph(points: Point[]): Graph<Point> {
   return graph;
 }
 
-function getLowestDistanceNode(unsettledNodes: Set<GraphNode<Point>>): GraphNode<Point> {
+interface Distance<T> {
+  vertex: T,
+  distance: number,
+  previousVertex: T | null,
+}
+
+function getLowestDistanceNode(
+  unsettledNodes: Set<GraphNode<Point>>,
+  distances: Distance<Point>[],
+  comparator: (a: Point, b: Point) => number,
+): GraphNode<Point> {
   let lowestDistanceNode: GraphNode<Point> = {} as GraphNode<Point>;
   let lowestDistance = Number.MAX_SAFE_INTEGER;
   unsettledNodes.forEach((node) => {
-    const nodeDistance = node.weight;
-    if (nodeDistance < lowestDistance) {
-      lowestDistance = nodeDistance;
+    const nodeDistance = distances.find((dist) => comparator(dist.vertex, node.data) === 0);
+    if (!nodeDistance) {
+      throw Error('Find no distance');
+    }
+    if (nodeDistance.distance < lowestDistance) {
+      lowestDistance = nodeDistance.distance;
       lowestDistanceNode = node;
     }
   });
@@ -621,29 +628,47 @@ function calculateMinimumDistance(
   evaluationNode: GraphNode<Point>,
   edgeWeigh: number,
   sourceNode: GraphNode<Point>,
+  distances: Distance<Point>[],
+  comparator: (a: Point, b: Point) => number,
 ) {
-  const sourceDistance = sourceNode.weight;
-  const previousNode = sourceNode.shortestPath.length === 0
-    ? null : sourceNode.shortestPath[sourceNode.shortestPath.length - 1];
-  const isFromVertical = !previousNode
+  const sourceDist = distances.find((dist) => comparator(dist.vertex, sourceNode.data) === 0);
+  if (!sourceDist) {
+    throw Error('Find no distance');
+  }
+
+  const evalIndex = distances
+    .findIndex((dist) => comparator(dist.vertex, evaluationNode.data) === 0);
+  if (evalIndex < 0) {
+    throw Error('Find no distance');
+  }
+
+  const evalDist = distances[evalIndex];
+
+  const isFromVertical = !sourceDist.previousVertex
     ? null
-    : previousNode.data.x === sourceNode.data.x;
+    : sourceDist.vertex.x === sourceDist.previousVertex.x;
   const isToVertical = evaluationNode.data.x === sourceNode.data.x;
   const extraWeigh = isFromVertical !== isToVertical ? edgeWeigh * 0.8 : 0;
 
-  if (sourceDistance + edgeWeigh + extraWeigh < evaluationNode.weight) {
-    evaluationNode.weight = sourceDistance + edgeWeigh + extraWeigh;
-    const shortestPath: GraphNode<Point>[] = [...sourceNode.shortestPath];
-    shortestPath.push(sourceNode);
-    evaluationNode.shortestPath = shortestPath;
+  if (sourceDist.distance + edgeWeigh + extraWeigh < evalDist.distance) {
+    evalDist.distance = sourceDist.distance + edgeWeigh + extraWeigh;
+    evalDist.previousVertex = sourceDist.vertex;
   }
 }
 
 function calculateShortestPathFromSource(
   graph: Graph<Point>,
   source: GraphNode<Point>,
-): Graph<Point> {
-  source.weight = 0;
+  comparator: (a: Point, b: Point) => number,
+): Distance<Point>[] {
+  const distances: Distance<Point>[] = [];
+  graph.nodes.forEach((node) => {
+    distances.push({
+      vertex: node.data,
+      distance: comparator(node.data, source.data) === 0 ? 0 : Number.MAX_SAFE_INTEGER,
+      previousVertex: null,
+    });
+  });
 
   const settledNodes: Set<GraphNode<Point>> = new Set();
   const unsettledNodes: Set<GraphNode<Point>> = new Set();
@@ -651,24 +676,29 @@ function calculateShortestPathFromSource(
   unsettledNodes.add(source);
 
   while (unsettledNodes.size !== 0) {
-    const currentNode = getLowestDistanceNode(unsettledNodes);
+    const currentNode = getLowestDistanceNode(unsettledNodes, distances, comparator);
     unsettledNodes.delete(currentNode);
 
     currentNode.adjacents.forEach((edge) => {
       if (settledNodes.has(edge.node)) {
         return;
       }
-      calculateMinimumDistance(edge.node, edge.weight, currentNode);
+      calculateMinimumDistance(edge.node, edge.weight, currentNode, distances, comparator);
       unsettledNodes.add(edge.node);
     });
 
     settledNodes.add(currentNode);
   }
 
-  return graph;
+  return distances;
 }
 
-function getShortestPath(graph: Graph<Point>, origin: Point, destination: Point): Point[] {
+function getShortestPath(
+  graph: Graph<Point>,
+  origin: Point,
+  destination: Point,
+  comparator: (a: Point, b: Point) => number,
+): Point[] {
   const originNode = graph.find(origin);
   const destinationNode = graph.find(destination);
 
@@ -680,9 +710,23 @@ function getShortestPath(graph: Graph<Point>, origin: Point, destination: Point)
     throw new Error(`Origin node {${origin.x},${origin.y}} not found`);
   }
 
-  calculateShortestPathFromSource(graph, originNode);
+  const distances = calculateShortestPathFromSource(graph, originNode, comparator);
 
-  return destinationNode.shortestPath.map((n) => n.data);
+  let end = distances.find((dist) => comparator(dist.vertex, destination) === 0);
+
+  const path: Point[] = [];
+
+  while (end && comparator(end.vertex, origin) !== 0) {
+    path.push(end.vertex);
+    const previous = end.previousVertex;
+    // No previous means it has no path between origin and destination
+    if (!previous) {
+      return [];
+    }
+    end = distances.find((dist) => comparator(dist.vertex, previous) === 0);
+  }
+
+  return path.reverse();
 }
 
 function reducePath(points: Point[]): Point[] {
@@ -718,36 +762,6 @@ export function findOrthogonalPath(info: PathFindingInfo) {
 
   const boundaries = blocks.map((block) => Boundary.create(block));
   const expandedBoundaries = boundaries.map((boundary) => boundary.expand(blockMargin));
-  /* const boundaryA = Boundary.create(blockA);
-  const boundaryB = Boundary.create(blockB);
-
-  let expandedA = boundaryA.expand(blockMargin);
-  let expandedB = boundaryB.expand(blockMargin);
-
-  // Check bounding boxes collision
-  if (expandedA.collideWidth(expandedB)) {
-    blockMargin = 0;
-    expandedA = boundaryA;
-    expandedB = boundaryB;
-  }
-
-  const expandedUnionBoundary = expandedA
-    .union(expandedB)
-    .expand(globalBoundsMargin);
-
-  const outerBoundary = Boundary.create(globalBounds);
-  // Curated bounds to stick to
-  const bounds = Boundary.createByAttributes({
-    x: Math.max(expandedUnionBoundary.x, outerBoundary.x),
-    y: Math.max(expandedUnionBoundary.y, outerBoundary.y),
-    x2: Math.min(expandedUnionBoundary.x2, outerBoundary.x2),
-    y2: Math.min(expandedUnionBoundary.y2, outerBoundary.y2),
-  });
-
-  // Add edges to rulers
-  [expandedA, expandedB].forEach((b) => {
-    rulers.addBoundary(b);
-  }); */
 
   const isCollided = hasCollision(expandedBoundaries);
 
@@ -813,7 +827,9 @@ export function findOrthogonalPath(info: PathFindingInfo) {
 
   points.push(...gridPoints);
 
-  const graph = createGraph(points);
+  const comparator = (a: Point, b: Point) => ((a.x === b.x && a.y === b.y) ? 0 : 1);
+
+  const graph = createGraph(points, comparator);
 
   const fromVector = rotate2dVector([0, -finalBlockMargin], toRadians(fromPoint.orient));
   const fromExtrudePoint = {
@@ -827,7 +843,7 @@ export function findOrthogonalPath(info: PathFindingInfo) {
     y: toPoint.point.y + toVector[1],
   };
 
-  const path = getShortestPath(graph, fromExtrudePoint, toExtrudePoint);
+  const path = getShortestPath(graph, fromExtrudePoint, toExtrudePoint, comparator);
   return path.length > 0 ? reducePath([fromPoint.point, ...path, toPoint.point]) : [];
 
   // return points;
