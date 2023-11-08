@@ -623,12 +623,13 @@ function calculateMinimumDistance(
   sourceNode: GraphNode<Point>,
 ) {
   const sourceDistance = sourceNode.weight;
-  /* const comingDirection = PointGraph.inferPathDirection(sourceNode);
-  const goingDirection = PointGraph.directionOfNodes(sourceNode, evaluationNode);
-  const changingDirection = comingDirection
-    && goingDirection && comingDirection !== goingDirection;
-  const extraWeigh = changingDirection ? (edgeWeigh + 1) ** 2 : 0; */
-  const extraWeigh = 0;
+  const previousNode = sourceNode.shortestPath.length === 0
+    ? null : sourceNode.shortestPath[sourceNode.shortestPath.length - 1];
+  const isFromVertical = !previousNode
+    ? null
+    : previousNode.data.x === sourceNode.data.x;
+  const isToVertical = evaluationNode.data.x === sourceNode.data.x;
+  const extraWeigh = isFromVertical !== isToVertical ? edgeWeigh * 0.8 : 0;
 
   if (sourceDistance + edgeWeigh + extraWeigh < evaluationNode.weight) {
     evaluationNode.weight = sourceDistance + edgeWeigh + extraWeigh;
@@ -682,6 +683,29 @@ function getShortestPath(graph: Graph<Point>, origin: Point, destination: Point)
   calculateShortestPathFromSource(graph, originNode);
 
   return destinationNode.shortestPath.map((n) => n.data);
+}
+
+function reducePath(points: Point[]): Point[] {
+  if (points.length <= 2) {
+    return points;
+  }
+
+  const reducedPath: Point[] = [points[0]];
+
+  for (let i = 1; i < points.length - 1; i += 1) {
+    const previous = points[i - 1];
+    const current = points[i];
+    const next = points[i + 1];
+
+    const sameHorizontalLine = previous.y === current.y && current.y === next.y;
+    const sameVerticalLine = previous.x === current.x && current.x === next.x;
+    if (!sameHorizontalLine && !sameVerticalLine) {
+      reducedPath.push(current);
+    }
+  }
+  reducedPath.push(points[points.length - 1]);
+
+  return reducedPath;
 }
 
 export function findOrthogonalPath(info: PathFindingInfo) {
@@ -804,7 +828,7 @@ export function findOrthogonalPath(info: PathFindingInfo) {
   };
 
   const path = getShortestPath(graph, fromExtrudePoint, toExtrudePoint);
-  console.log(path.length);
+  return path.length > 0 ? reducePath([fromPoint.point, ...path, toPoint.point]) : [];
 
-  return points;
+  // return points;
 }

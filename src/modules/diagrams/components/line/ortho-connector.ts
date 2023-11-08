@@ -822,7 +822,6 @@ export class OrthogonalConnector {
     this.byproduct.connections = connections;
 
     const path = getShortestPath(graph, origin, destination);
-    console.log(path.length);
 
     if (path.length > 0) {
       return simplifyPath([start, ...getShortestPath(graph, origin, destination), end]);

@@ -260,7 +260,7 @@ function findPath() {
   });
 
   pathNodes.value.length = 0;
-  finalResult.forEach((pt) => {
+  test2Points.value.forEach((pt) => {
     pathNodes.value.push({
       x: pt.x,
       y: pt.y,
