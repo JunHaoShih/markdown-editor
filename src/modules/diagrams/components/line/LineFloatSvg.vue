@@ -121,7 +121,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { lineDisplays, markers } from './line';
-import { ArrowType, LineType, Shape } from '../../models/shape';
+import {
+  ArrowType, LineInfo, LineType, Shape,
+} from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
@@ -141,10 +143,11 @@ const line = computed({
 });
 
 const lineInfo = computed({
-  get: () => line.value.lineInfo ?? {
+  get: (): LineInfo => line.value.lineInfo ?? {
     type: 'diagnal',
     startDistance: 30,
     endDistance: 30,
+    paths: [],
   },
   set: (value) => {
     line.value.lineInfo = value;

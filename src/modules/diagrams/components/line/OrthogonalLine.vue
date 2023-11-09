@@ -16,27 +16,51 @@
 
 <script setup lang="ts">
 import {
-  computed, onBeforeMount, ref, watch,
+  computed, onBeforeMount, watch,
 } from 'vue';
 import { findOrthogonalPath } from 'src/services/pathFinding';
-import { ConnectionNode, Point, Shape } from '../../models/shape';
+import {
+  ConnectionNode, LineInfo, Point, Shape,
+} from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 
 const diagramStore = useDiagramStore();
 
 const props = defineProps<{
-  line: Shape,
+  modelValue: Shape,
   isSelected: boolean,
   fromNode?: ConnectionNode,
   toNode?: ConnectionNode,
 }>();
 
+type Emit = {
+  (e: 'update:modelValue', value: Shape): void
+}
+const emit = defineEmits<Emit>();
+
+const line = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value),
+});
+
+const lineInfo = computed({
+  get: (): LineInfo => line.value.lineInfo ?? {
+    type: 'diagnal',
+    startDistance: 30,
+    endDistance: 30,
+    paths: [],
+  },
+  set: (value) => {
+    line.value.lineInfo = value;
+  },
+});
+
 const fromPoint = computed(
-  () => props.line.position,
+  () => line.value.position,
 );
 
 const toPoint = computed(
-  () => props.line.toAbsolute ?? { x: 0, y: 0 },
+  () => line.value.toAbsolute ?? { x: 0, y: 0 },
 );
 
 /**
@@ -83,33 +107,30 @@ const endDegrees = computed(
   },
 );
 
-const pathNodes = ref<Point[]>([]);
-
 const path = computed(
   () => {
-    if (pathNodes.value.length === 0) {
+    if (lineInfo.value.paths.length === 0) {
       return '';
     }
-    const startPoint = pathNodes.value[0];
+    const startPoint = lineInfo.value.paths[0];
     const start = `M ${startPoint.x} ${startPoint.y}`;
-    // const start = `M ${fromPoint.value.x} ${fromPoint.value.y}`;
-    const endPoint = pathNodes.value[pathNodes.value.length - 1];
+    const endPoint = lineInfo.value.paths[lineInfo.value.paths.length - 1];
     const end = `L ${endPoint.x} ${endPoint.y}`;
 
     let midPath = '';
-    for (let i = 1; i < pathNodes.value.length - 1; i += 1) {
-      midPath += `L ${pathNodes.value[i].x} ${pathNodes.value[i].y} `;
+    for (let i = 1; i < lineInfo.value.paths.length - 1; i += 1) {
+      midPath += `L ${lineInfo.value.paths[i].x} ${lineInfo.value.paths[i].y} `;
     }
     return `${start} ${midPath} ${end}`;
   },
 );
 
 function findPath() {
-  const from = diagramStore.diagram.shapes.find((shape) => shape.id === props.line.fromShapeId);
+  const from = diagramStore.diagram.shapes.find((shape) => shape.id === line.value.fromShapeId);
   if (!from) {
     return;
   }
-  const to = diagramStore.diagram.shapes.find((shape) => shape.id === props.line.toShapeId);
+  const to = diagramStore.diagram.shapes.find((shape) => shape.id === line.value.toShapeId);
   if (!to) {
     return;
   }
@@ -190,9 +211,9 @@ function findPath() {
       globalBounds: boundary,
     });
 
-  pathNodes.value.length = 0;
+  lineInfo.value.paths.length = 0;
   finalResult2.forEach((pt) => {
-    pathNodes.value.push({
+    lineInfo.value.paths.push({
       x: pt.x,
       y: pt.y,
     });
@@ -200,7 +221,7 @@ function findPath() {
 }
 
 watch(() => [
-  props.line.position, props.line.toAbsolute, startDegrees.value, endDegrees.value,
+  line.value.position, line.value.toAbsolute, startDegrees.value, endDegrees.value,
 ], () => {
   findPath();
 }, {

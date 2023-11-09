@@ -39,7 +39,7 @@
     </template>
     <template v-if="lineInfo.type === 'orthogonal'">
       <OrthogonalLine
-        :line="modelValue"
+        v-model="line"
         :is-selected="isSelected"
         :from-node="fromNode"
         :to-node="toNode"
@@ -57,7 +57,7 @@ import StraightLine from './StraightLine.vue';
 import OrthogonalLine from './OrthogonalLine.vue';
 import DiagnalLine from './DiagnalLine.vue';
 import ShapeSlot from '../ShapeSlot.vue';
-import { Shape } from '../../models/shape';
+import { LineInfo, Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
 
 const isSelected = ref(false);
@@ -79,10 +79,11 @@ const line = computed({
 });
 
 const lineInfo = computed({
-  get: () => line.value.lineInfo ?? {
+  get: (): LineInfo => line.value.lineInfo ?? {
     type: 'diagnal',
     startDistance: 30,
     endDistance: 30,
+    paths: [],
   },
   set: (value) => {
     line.value.lineInfo = value;

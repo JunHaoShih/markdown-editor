@@ -27,6 +27,7 @@ export function createLine(info: {
       type: 'diagnal',
       startDistance: 30,
       endDistance: 30,
+      paths: [],
     },
   };
 }

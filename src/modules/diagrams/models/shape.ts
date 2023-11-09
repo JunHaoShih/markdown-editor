@@ -28,6 +28,7 @@ export interface LineInfo {
   type: LineType,
   startDistance: number,
   endDistance: number,
+  paths: Point[],
 }
 
 export interface Shape {

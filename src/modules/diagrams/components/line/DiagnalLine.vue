@@ -16,7 +16,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ConnectionNode, Point, Shape } from '../../models/shape';
+import {
+  ConnectionNode, LineInfo, Point, Shape,
+} from '../../models/shape';
 
 const props = defineProps<{
   line: Shape,
@@ -26,10 +28,11 @@ const props = defineProps<{
 }>();
 
 const lineInfo = computed(
-  () => props.line.lineInfo ?? {
+  (): LineInfo => props.line.lineInfo ?? {
     type: 'diagnal',
     startDistance: 30,
     endDistance: 30,
+    paths: [],
   },
 );
 
