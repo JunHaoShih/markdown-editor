@@ -845,6 +845,4 @@ export function findOrthogonalPath(info: PathFindingInfo) {
 
   const path = getShortestPath(graph, fromExtrudePoint, toExtrudePoint, comparator);
   return path.length > 0 ? reducePath([fromPoint.point, ...path, toPoint.point]) : [];
-
-  // return points;
 }

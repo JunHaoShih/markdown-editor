@@ -18,9 +18,9 @@
 import {
   computed, onBeforeMount, ref, watch,
 } from 'vue';
+import { findOrthogonalPath } from 'src/services/pathFinding';
 import { ConnectionNode, Point, Shape } from '../../models/shape';
 import { useDiagramStore } from '../../stores/diagramStore';
-import { findOrthogonalPath } from './orthogonalPath';
 
 const diagramStore = useDiagramStore();
 
