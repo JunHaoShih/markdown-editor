@@ -2,6 +2,12 @@
   <path
     :d="path"
     fill="none"
+    stroke-width="12"
+    stroke="transparent"
+  />
+  <path
+    :d="path"
+    fill="none"
     stroke-width="5"
     :stroke="isSelected ? 'rgb(10, 213, 240)' : 'transparent'"
   />

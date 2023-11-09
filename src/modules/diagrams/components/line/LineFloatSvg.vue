@@ -116,11 +116,20 @@
       </q-list>
     </q-btn-dropdown>
   </foreignObject>
+  <template v-if="isSelected">
+    <LineMoveDot
+      v-for="(pathPoint, index) in resizePoints"
+      :key="pathPoint.index"
+      :info="resizePoints[index]"
+      @update-dots="updateDots"
+    />
+  </template>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { lineDisplays, markers } from './line';
+import LineMoveDot, { MoveDotInfo } from './LineMoveDot.vue';
 import {
   ArrowType, LineInfo, LineType, Shape,
 } from '../../models/shape';
@@ -154,6 +163,35 @@ const lineInfo = computed({
   },
 });
 
+const resizePoints = computed(
+  () => {
+    const points: MoveDotInfo[] = [];
+    for (let i = 1; i < lineInfo.value.paths.length; i += 1) {
+      const previous = lineInfo.value.paths[i - 1];
+      const next = lineInfo.value.paths[i];
+      points.push({
+        index: i,
+        previous,
+        next,
+      });
+    }
+    return points;
+  },
+);
+
+function updateDots(dotInfo: MoveDotInfo) {
+  //
+  lineInfo.value.paths = lineInfo.value.paths.map((p, index) => {
+    if (index === dotInfo.index - 1) {
+      return dotInfo.previous;
+    }
+    if (index === dotInfo.index) {
+      return dotInfo.next;
+    }
+    return p;
+  });
+}
+
 const isSelected = computed(
   () => !!diagramStore.selectedIds.find((selected) => selected.id === line.value.id),
 );
@@ -185,11 +223,19 @@ function startConnectTo() {
 }
 
 const actionPanelX = computed(
-  () => Math.max(fromPoint.value.x, toPoint.value.x) + 30,
+  () => Math.max(
+    fromPoint.value.x,
+    toPoint.value.x,
+    ...lineInfo.value.paths.map((p) => p.x),
+  ) + 30,
 );
 
 const actionPanelY = computed(
-  () => Math.min(fromPoint.value.y, toPoint.value.y),
+  () => Math.min(
+    fromPoint.value.y,
+    toPoint.value.y,
+    ...lineInfo.value.paths.map((p) => p.y),
+  ),
 );
 
 function onArrowEndChanged(type: ArrowType) {
