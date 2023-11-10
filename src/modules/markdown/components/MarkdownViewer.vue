@@ -158,6 +158,8 @@ onMounted(() => {
 :deep(h5),
 :deep(h6)
   line-height: 1
+  margin-top: 16px
+  margin-bottom: 16px
 
 :deep(h1)
   font-size: 2em
@@ -167,8 +169,6 @@ onMounted(() => {
 :deep(h2:after)
   content: ''
   display: block
-  position: relative
-  top: 0.33em
   border-bottom: 1px solid hsla(0,0%,50%,.33)
 
 :deep(h2)
