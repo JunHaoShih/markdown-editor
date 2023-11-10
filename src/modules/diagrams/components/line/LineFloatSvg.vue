@@ -16,7 +16,7 @@
     @mousedown.stop="startConnectTo"
   />
   <foreignObject
-    v-if="isSelected"
+    v-if="isSelected && !isMultiSelect"
     :x="actionPanelX"
     :y="actionPanelY"
     :width="1"
@@ -195,6 +195,8 @@ function updateDots(dotInfo: MoveDotInfo) {
 const isSelected = computed(
   () => !!diagramStore.selectedIds.find((selected) => selected.id === line.value.id),
 );
+
+const isMultiSelect = computed(() => diagramStore.selectedIds.length > 1);
 
 const fromPoint = computed(
   () => line.value.position,

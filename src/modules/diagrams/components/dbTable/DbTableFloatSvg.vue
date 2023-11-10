@@ -1,6 +1,6 @@
 <template>
   <g
-    v-if="isSelected"
+    v-if="isSelected && !isMultiSelect"
   >
     <ActionBtnSvg
       v-for="(btnInfo, index) in actionBtns"
@@ -74,6 +74,8 @@ const diagramStore = useDiagramStore();
 const isSelected = computed(
   () => !!diagramStore.selectedIds.find((selected) => selected.id === shape.value.id),
 );
+
+const isMultiSelect = computed(() => diagramStore.selectedIds.length > 1);
 
 const selectedIds = computed(
   () => diagramStore.selectedIds
