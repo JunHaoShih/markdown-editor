@@ -164,6 +164,8 @@ export const useDiagramStore = defineStore('diagram', {
     startHolding(type: HoldType, x: number, y: number) {
       this.holdInfo.holdFrom.x = x;
       this.holdInfo.holdFrom.y = y;
+      this.holdInfo.holdTo.x = x;
+      this.holdInfo.holdTo.y = y;
       this.holdInfo.type = type;
       this.holdInfo.holdToId = '';
       this.holdInfo.holdLineId = '';

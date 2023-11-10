@@ -172,7 +172,9 @@ function onMouseDown(evt: MouseEvent) {
 }
 
 function onMouseMove(evt: MouseEvent) {
-  diagramStore.movingByEvent(evt);
+  if (diagramStore.holdType !== 'none') {
+    diagramStore.movingByEvent(evt);
+  }
 }
 
 const mouseUpRecord: Record<HoldType, () => void> = {
