@@ -235,6 +235,8 @@ watch(() => [
 });
 
 onBeforeMount(() => {
-  findPath();
+  if (lineInfo.value.paths.length === 0) {
+    findPath();
+  }
 });
 </script>
