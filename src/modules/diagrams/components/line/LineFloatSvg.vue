@@ -39,17 +39,13 @@
           clickable v-close-popup
           @click="onArrowStartChanged(marker.id)"
         >
-          <q-item-section avatar>
-            <q-avatar icon="folder" color="primary" text-color="white" />
-          </q-item-section>
           <q-item-section>
             <q-item-label>{{ $t(marker.name) }}</q-item-label>
-            <q-item-label caption>February 22, 2016</q-item-label>
           </q-item-section>
           <q-item-section side>
             <q-icon
               v-if="marker.id === line.arrowStart"
-              name="info" color="amber"
+              name="check" color="green"
             />
           </q-item-section>
         </q-item>
@@ -64,22 +60,19 @@
     >
       <q-list>
         <q-item
+          dense
           v-for="marker in markers"
           v-bind:key="marker.id"
           clickable v-close-popup
           @click="onArrowEndChanged(marker.id)"
         >
-          <q-item-section avatar>
-            <q-avatar icon="folder" color="primary" text-color="white" />
-          </q-item-section>
           <q-item-section>
             <q-item-label>{{ $t(marker.name) }}</q-item-label>
-            <q-item-label caption>February 22, 2016</q-item-label>
           </q-item-section>
           <q-item-section side>
             <q-icon
               v-if="marker.id === line.arrowEnd"
-              name="info" color="amber"
+              name="check" color="green"
             />
           </q-item-section>
         </q-item>
@@ -94,22 +87,19 @@
     >
       <q-list>
         <q-item
+          dense
           v-for="lineDisplay in lineDisplays"
           v-bind:key="lineDisplay.id"
           clickable v-close-popup
           @click="onLineTypeChanged(lineDisplay.id)"
         >
-          <q-item-section avatar>
-            <q-avatar icon="folder" color="primary" text-color="white" />
-          </q-item-section>
           <q-item-section>
             <q-item-label>{{ $t(lineDisplay.name) }}</q-item-label>
-            <q-item-label caption>February 22, 2016</q-item-label>
           </q-item-section>
           <q-item-section side>
             <q-icon
               v-if="lineDisplay.id === lineInfo.type"
-              name="info" color="amber"
+              name="check" color="green"
             />
           </q-item-section>
         </q-item>
