@@ -14,12 +14,12 @@
 
 // declare a class which applies it
 .mona-space-radon {
-  font-family: 'MonaspaceRadon';
+  font-family: MonaspaceRadon, monospace;
   font-feature-settings: "calt", "dlig", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08";
 }
 
 @font-face {
-  font-family: 'MonaspaceKrypton';
+  font-family: MonaspaceKrypton, monospace;
   src: url(./fonts/MonaspaceKrypton-Regular.woff);
 }
 
