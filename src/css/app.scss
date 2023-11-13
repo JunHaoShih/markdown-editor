@@ -5,6 +5,30 @@
 
 // app global css in SCSS form
 
+// Monaspace Radon
+@font-face {
+  font-family: MonaspaceRadon;
+  src: url(./fonts/MonaspaceRadon-Regular.woff);
+  font-size: 12px;
+}
+
+// declare a class which applies it
+.mona-space-radon {
+  font-family: 'MonaspaceRadon';
+  font-feature-settings: "calt", "dlig", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08";
+}
+
+@font-face {
+  font-family: 'MonaspaceKrypton';
+  src: url(./fonts/MonaspaceKrypton-Regular.woff);
+}
+
+// declare a class which applies it
+.mona-space-krypton {
+  font-family: 'MonaspaceKrypton';
+  font-feature-settings: "calt", "dlig", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08";
+}
+
 .main-panel {
   max-width: 1400px;
   margin: auto;
