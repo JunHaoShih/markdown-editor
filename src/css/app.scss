@@ -1,4 +1,33 @@
+// Add Tailwind
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
 // app global css in SCSS form
+
+// Monaspace Radon
+@font-face {
+  font-family: MonaspaceRadon;
+  src: url(./fonts/MonaspaceRadon-Regular.woff);
+  font-size: 12px;
+}
+
+// declare a class which applies it
+.mona-space-radon {
+  font-family: MonaspaceRadon, monospace;
+  font-feature-settings: "calt", "dlig", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08";
+}
+
+@font-face {
+  font-family: MonaspaceKrypton;
+  src: url(./fonts/MonaspaceKrypton-Regular.woff);
+}
+
+// declare a class which applies it
+.mona-space-krypton {
+  font-family: MonaspaceKrypton, monospace;
+  font-feature-settings: "calt", "dlig", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08";
+}
 
 .main-panel {
   max-width: 1400px;
@@ -148,6 +177,12 @@
   background-color: $grey-2;
   color: $dark;
   border-radius: 15px;
+}
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
 }
 
 /* scroll bar */

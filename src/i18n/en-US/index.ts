@@ -65,6 +65,31 @@ export default {
     fileMissing: 'File does not exist',
     deleteSuccess: 'Delete success',
   },
+  diagramPage: {
+    diagram: 'Diagram',
+    caption: 'Draw your diagrams',
+  },
+  diagram: {
+    dbTable: 'Database table',
+    rectangle: 'Rectangle',
+    ellipse: 'Ellipse',
+    circle: 'Circle',
+    lineStart: 'Line start',
+    lineEnd: 'Line end',
+    arrows: {
+      arrow: 'Arrow',
+      zero2Many: 'Zero to many',
+      one2Many: 'One to many',
+      exactOne: 'Exact one',
+      zero2One: 'Zero to one',
+    },
+    lineType: 'Line type',
+    lines: {
+      straight: 'Straight',
+      diagnal: 'Diagnal',
+      orthogonal: 'Orthogonal',
+    },
+  },
   base: {
     createAt: 'Create date',
     updateAt: 'Modified date',

@@ -41,7 +41,7 @@ const md: MarkdownIt = new MarkdownIt({
     const uuid = uuidv4();
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return `<pre class="hljs"><button class="action-btn" data-clipboard-target=${uuid}>${copyIcon}</button><code id=${uuid}>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+        return `<pre class="hljs"><button class="action-btn" data-clipboard-target=${uuid}>${copyIcon}</button><code class="mona-space-radon" id=${uuid}>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
       } catch (__) { /* empty */ }
     }
 
@@ -158,6 +158,8 @@ onMounted(() => {
 :deep(h5),
 :deep(h6)
   line-height: 1
+  margin-top: 16px
+  margin-bottom: 16px
 
 :deep(h1)
   font-size: 2em
@@ -167,8 +169,6 @@ onMounted(() => {
 :deep(h2:after)
   content: ''
   display: block
-  position: relative
-  top: 0.33em
   border-bottom: 1px solid hsla(0,0%,50%,.33)
 
 :deep(h2)

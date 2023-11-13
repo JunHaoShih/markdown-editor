@@ -65,6 +65,31 @@ export default {
     fileMissing: '檔案不存在',
     deleteSuccess: '刪除成功',
   },
+  diagramPage: {
+    diagram: '圖表',
+    caption: '繪製圖表',
+  },
+  diagram: {
+    dbTable: '資料表',
+    rectangle: '矩形',
+    ellipse: '橢圓',
+    circle: '圓形',
+    lineStart: '線起點',
+    lineEnd: '線終點',
+    arrows: {
+      arrow: '箭頭',
+      zero2Many: '零到多',
+      one2Many: '一到多',
+      exactOne: '唯一',
+      zero2One: '零到一',
+    },
+    lineType: '線類型',
+    lines: {
+      straight: '直線',
+      diagnal: '斜角線',
+      orthogonal: '正交線',
+    },
+  },
   base: {
     createAt: '建立日期',
     updateAt: '修改日期',

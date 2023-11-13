@@ -62,6 +62,8 @@ onMounted(() => {
         verticalScrollbarSize: 10,
         horizontalSliderSize: 10,
       },
+      fontFamily: 'MonaspaceKrypton',
+      fontLigatures: "'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08', 'calt', 'dlig'",
     });
 
     editor.onDidChangeModelContent(() => {

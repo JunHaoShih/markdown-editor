@@ -26,6 +26,9 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/trashBin/TrashBinPage.vue'),
         props: true,
       },
+      {
+        path: 'diagram', component: () => import('pages/diagram/DiagramPage.vue'),
+      },
     ],
   },
   {
