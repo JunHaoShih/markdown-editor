@@ -41,7 +41,7 @@ const md: MarkdownIt = new MarkdownIt({
     const uuid = uuidv4();
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return `<pre class="hljs"><button class="action-btn" data-clipboard-target=${uuid}>${copyIcon}</button><code id=${uuid}>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+        return `<pre class="hljs"><button class="action-btn" data-clipboard-target=${uuid}>${copyIcon}</button><code class="mona-space-radon" id=${uuid}>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
       } catch (__) { /* empty */ }
     }
 
