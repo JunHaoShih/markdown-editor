@@ -10,6 +10,7 @@
           <MarkdownEditor
             splitter-class="editor-body"
             v-model="mdText"
+            type="split"
           ></MarkdownEditor>
         </q-page>
       </q-page-container>

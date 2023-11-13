@@ -34,6 +34,17 @@
           {{ $t('markdownPage.discardChange') }}
         </q-tooltip>
       </q-btn>
+      <q-btn
+        icon="download"
+        class="action-btn q-pa-sm"
+        text-color="primary"
+        :loading="saving"
+        @click="onDownload"
+      >
+        <q-tooltip>
+          {{ $t('markdownPage.download') }}
+        </q-tooltip>
+      </q-btn>
       <q-space/>
       <q-btn
         icon="edit"
@@ -149,6 +160,16 @@ async function onDiscardClicked() {
   }).onOk(() => {
     mdEdit.value = mdSource.value.content;
   });
+}
+
+function onDownload() {
+  const blob = new Blob([mdSource.value.content], { type: 'text/plain' });
+  const aRef = document.createElement('a');
+  const label = folderTreeStore.fileName;
+  const fileName = label ? `${label}.md` : 'temp.md';
+  aRef.download = fileName;
+  aRef.href = window.URL.createObjectURL(blob);
+  aRef.click();
 }
 
 watch(() => props.id, async (newValue, oldValue) => {
