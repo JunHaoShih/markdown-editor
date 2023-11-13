@@ -199,4 +199,5 @@ onMounted(() => {
   margin-top: -2px
   opacity: 0.5
   right: 0
+  padding: 2px 5px 2px 5px
 </style>
