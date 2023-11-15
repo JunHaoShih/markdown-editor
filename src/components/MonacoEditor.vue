@@ -19,6 +19,7 @@ let editor: monaco.editor.IStandaloneCodeEditor;
 
 const props = defineProps<{
   modelValue: string,
+  isDark: boolean,
 }>();
 
 type Emit = {
@@ -64,6 +65,7 @@ onMounted(() => {
       },
       fontFamily: 'MonaspaceKrypton',
       fontLigatures: "'ss01', 'ss02', 'ss03', 'ss04', 'ss05', 'ss06', 'ss07', 'ss08', 'calt', 'dlig'",
+      theme: props.isDark ? 'vs-dark' : 'vs',
     });
 
     editor.onDidChangeModelContent(() => {

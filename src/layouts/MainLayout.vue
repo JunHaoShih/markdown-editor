@@ -1,5 +1,7 @@
 <template>
-  <q-layout view="hHh Lpr lFf">
+  <q-layout
+    view="hHh Lpr lFf"
+    :class="darkStore.isDark ? 'tw-dark tw-bg-darkBg' : ''">
     <q-header elevated>
       <TitleBar
         title="Markdown Editor"
@@ -57,18 +59,22 @@
       mini-to-overlay
       bordered
       :mini="true"
+      class="tw-bg-white dark:tw-bg-darkBg"
     >
       <q-scroll-area style="width: inherit; height: calc(100vh - 55px);">
-        <q-list>
+        <q-list
+          class="tw-text-black dark:tw-text-stone-200"
+        >
           <q-item-label
             header
           >
-          {{ $t('menu') }}
+            {{ $t('menu') }}
           </q-item-label>
           <NavItem
             v-for="link in essentialLinks"
             :key="link.title"
             :navNode="link"
+            :is-dark="darkStore.isDark"
           />
         </q-list>
       </q-scroll-area>
@@ -95,12 +101,15 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import TitleBar from 'src/components/TitleBar.vue';
 import NavItem, { NavNode } from 'src/components/NavItem.vue';
+import { useDarkStore } from 'src/stores/darkModeStore';
 
 const i18n = useI18n();
 
 const router = useRouter();
 
 const authStore = useAuthStore();
+
+const darkStore = useDarkStore();
 
 let initialDrawerWidth = 0;
 

@@ -11,6 +11,7 @@
             splitter-class="editor-body"
             v-model="mdText"
             type="split"
+            :is-dark="darkStore.isDark"
           ></MarkdownEditor>
         </q-page>
       </q-page-container>
@@ -21,9 +22,12 @@
 <script setup lang="ts">
 import TitleBar from 'src/components/TitleBar.vue';
 import MarkdownEditor from 'src/modules/markdown/components/MarkdownEditor.vue';
+import { useDarkStore } from 'src/stores/darkModeStore';
 import { ref } from 'vue';
 
 const mdText = ref('');
+
+const darkStore = useDarkStore();
 </script>
 
 <style lang="sass" scoped>

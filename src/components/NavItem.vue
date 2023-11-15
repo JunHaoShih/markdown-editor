@@ -4,6 +4,7 @@
     clickable
     tag="a"
     :to="navNode.to"
+    :active-class="isDark ? 'tw-text-primaryDark' : 'tw-text-primary'"
   >
     <q-item-section v-if="navNode.icon" avatar>
       <q-icon :name="navNode.icon" />
@@ -15,7 +16,7 @@
       </q-item-label>
       <q-item-label
         v-if="navNode.caption"
-        caption
+        class="tw-text-xs"
       >
         {{ navNode.caption }}
       </q-item-label>
@@ -35,6 +36,7 @@
       v-for="child in navNode.children"
       :key="child.title"
       :navNode="child"
+      :is-dark="isDark"
     />
   </q-expansion-item>
 </template>
@@ -54,6 +56,7 @@ export interface NavNode{
 
 const props = defineProps<{
   navNode: NavNode,
+  isDark: boolean,
 }>();
 
 const router = useRouter();

@@ -3,11 +3,13 @@
     <q-splitter
       v-model="splitterModel"
       unit="px"
-      class="outer-max"
+      class="outer-max tw-bg-white dark:tw-bg-darkBg"
+      :dark="darkStore.isDark"
     >
       <template v-slot:before>
         <WorkspaceTree
           :id="id"
+          :is-dark="darkStore.isDark"
           class="q-mx-sm"
         ></WorkspaceTree>
       </template>
@@ -20,9 +22,12 @@
 
 <script setup lang="ts">
 import WorkspaceTree from 'src/modules/folderViews/components/WorkspaceTree.vue';
+import { useDarkStore } from 'src/stores/darkModeStore';
 import { ref } from 'vue';
 
 const splitterModel = ref(350);
+
+const darkStore = useDarkStore();
 
 withDefaults(defineProps<{
   id?: string,
@@ -33,5 +38,5 @@ withDefaults(defineProps<{
 
 <style lang="sass" scoped>
 .outer-max
-  height: calc(100vh - 55px)
+  height: calc(100vh - 50px)
 </style>

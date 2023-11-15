@@ -1,6 +1,7 @@
 <template>
   <div class="q-pa-sm">
-    <q-breadcrumbs class="text-primary" active-color="black">
+    <q-breadcrumbs class="tw-text-primary dark:tw-text-primaryDark"
+      :active-color="darkStore.isDark ? 'grey-4' : 'grey-10'">
       <q-breadcrumbs-el
         v-for="breadCrumb in folderTreeStore.breadCrumbs"
         :key="breadCrumb.id"
@@ -9,7 +10,10 @@
         :to="`/workspace/${breadCrumb.id}`"
       />
     </q-breadcrumbs>
-    <q-separator color="black" class="q-my-sm"/>
+    <q-separator
+      :color="darkStore.isDark ? 'grey-4' : 'grey-10'"
+      class="q-my-sm"
+    />
     <div class="q-gutter-sm row">
       <q-btn
         :disable="mdSource.content === mdEdit"
@@ -67,6 +71,7 @@
         :style="repo.id === id ? '' : 'display: none'"
         v-model="repo.edit"
         :type="editorType"
+        :is-dark="darkStore.isDark"
       >
       </MarkdownEditor>
     </div>
@@ -89,6 +94,7 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { Markdown } from 'src/modules/markdown/models/markdown';
 import { Timestamp } from '@firebase/firestore';
+import { useDarkStore } from 'src/stores/darkModeStore';
 
 const $q = useQuasar();
 
@@ -101,6 +107,8 @@ const markdownsStore = useMarkdownsStore();
 const folderTreeStore = useFolderTreeStore();
 
 const authStore = useAuthStore();
+
+const darkStore = useDarkStore();
 
 const editorType = ref<EditorType>('split');
 

@@ -9,12 +9,14 @@
         <MonacoEditor
           v-model="mdText"
           class="main-panel q-pt-xs q-pr-sm"
+          :is-dark="isDark"
         ></MonacoEditor>
       </template>
       <template v-slot:after>
         <markdown-viewer
           v-model="mdText"
           class="q-ma-sm"
+          :is-dark="isDark"
         />
       </template>
     </q-splitter>
@@ -38,6 +40,7 @@ const limits = ref<QSplitter['limits']>([0, Infinity]);
 const props = withDefaults(defineProps<{
   modelValue: string,
   type: EditorType,
+  isDark: boolean,
 }>(), {});
 
 type Emit = {

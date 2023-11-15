@@ -1,12 +1,28 @@
 <template>
   <div>
-    <q-toolbar class="bg-dark q-electron-drag">
+    <q-toolbar class="tw-bg-black q-electron-drag">
       <slot name="front"></slot>
       <q-toolbar-title>
         {{ title }}
       </q-toolbar-title>
 
       <q-space />
+
+      <q-btn
+        v-if="darkStore.isDark"
+        dense
+        flat
+        icon="dark_mode"
+        @click="darkStore.colorScheme = 'light'"
+      />
+
+      <q-btn
+        v-if="!darkStore.isDark"
+        dense
+        flat
+        icon="light_mode"
+        @click="darkStore.colorScheme = 'dark'"
+      />
 
       <slot name="end"></slot>
 
@@ -20,11 +36,14 @@
 </template>
 
 <script setup lang="ts">
+import { useDarkStore } from 'src/stores/darkModeStore';
 import { onBeforeMount, ref } from 'vue';
 
 type MaximizeState = 'crop_square' | 'filter_none';
 
 const maximizeState = ref<MaximizeState>('crop_square');
+
+const darkStore = useDarkStore();
 
 defineProps<{
   title: string,

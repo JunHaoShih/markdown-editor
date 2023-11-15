@@ -14,6 +14,7 @@
     </q-btn>
     <q-separator
       class="q-ma-sm"
+      :dark="isDark"
     />
     <q-tree
       dense
@@ -22,10 +23,11 @@
       node-key="id"
       v-model:selected="selectedNodeKey"
       v-model:expanded="expandedKeys"
-      selected-color="primary"
+      :selected-color="isDark ? 'blue-5' : 'primary'"
       :duration="0"
       no-selection-unset
       style="width: max-content;"
+      :dark="isDark"
     >
       <template v-slot:default-header="prop">
         <div :class="prop.node.marked ? 'filter-marked' : ''">
@@ -206,6 +208,7 @@ const trashBinView = ref<TrashBin>({
 
 const props = defineProps<{
   id: string,
+  isDark: boolean,
 }>();
 
 watch(() => props.id, (newValue) => {
