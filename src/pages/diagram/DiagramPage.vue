@@ -1,5 +1,7 @@
 <template>
-  <DiagramPanel></DiagramPanel>
+  <DiagramPanel
+    class="tw-bg-white"
+  />
 </template>
 
 <script setup lang="ts">

@@ -4,7 +4,7 @@
     clickable
     tag="a"
     :to="navNode.to"
-    :active-class="isDark ? 'tw-text-primaryDark' : 'tw-text-primary'"
+    :active-class="isDark ? 'tw-text-primary-400' : 'tw-text-primary-600'"
   >
     <q-item-section v-if="navNode.icon" avatar>
       <q-icon :name="navNode.icon" />

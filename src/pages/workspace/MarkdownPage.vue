@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-sm">
-    <q-breadcrumbs class="tw-text-primary dark:tw-text-primaryDark"
+    <q-breadcrumbs class="tw-text-primary-600 dark:tw-text-primary-400"
       :active-color="darkStore.isDark ? 'grey-4' : 'grey-10'">
       <q-breadcrumbs-el
         v-for="breadCrumb in folderTreeStore.breadCrumbs"
