@@ -82,12 +82,12 @@
           />
           <p class="tw-text-sm tw-font-light tw-text-gray-500 dark:tw-text-gray-400">
             {{ $t('loginPage.registerHint') }}
-            <a href="/register"
+            <router-link to="/register"
               class="tw-font-medium tw-text-primary-600 hover:tw-underline
               dark:tw-text-primary-500"
             >
               {{ $t('loginPage.createAccount') }}
-            </a>
+            </router-link>
           </p>
         </q-form>
       </div>

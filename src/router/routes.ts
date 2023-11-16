@@ -42,7 +42,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/register',
-    component: () => import('pages/RegisterPage.vue'),
+    component: () => import('layouts/LoginLayout.vue'),
+    children: [
+      {
+        path: '', component: () => import('pages/RegisterPage.vue'),
+      },
+    ],
   },
   {
     path: '/editor',
