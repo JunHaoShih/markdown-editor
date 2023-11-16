@@ -23,7 +23,7 @@
       node-key="id"
       v-model:selected="selectedNodeKey"
       v-model:expanded="expandedKeys"
-      :selected-color="isDark ? 'blue-5' : 'primary'"
+      selected-color="primary"
       :duration="0"
       no-selection-unset
       style="width: max-content;"
@@ -45,6 +45,8 @@
         <q-menu
           touch-position
           context-menu
+          class="dark:tw-bg-stone-800"
+          :dark="isDark"
         >
           <q-list dense style="min-width: 100px">
             <q-item
