@@ -13,7 +13,7 @@
     </a>
     <div
       class="tw-w-full tw-bg-white tw-rounded-lg tw-shadow dark:tw-border md:tw-mt-0
-      sm:tw-max-w-md xl:tw-p-0 dark:tw-bg-darkBg dark:tw-border-gray-500"
+      sm:tw-max-w-md xl:tw-p-0 dark:tw-border-gray-500"
     >
       <div class="tw-p-6 tw-space-y-4 md:tw-space-y-6 sm:tw-p-8 dark:tw-bg-stone-800 tw-rounded-lg">
         <h5

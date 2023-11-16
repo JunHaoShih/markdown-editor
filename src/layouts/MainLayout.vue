@@ -1,7 +1,5 @@
 <template>
-  <q-layout
-    view="hHh Lpr lFf"
-    :class="darkStore.isDark ? 'tw-dark tw-bg-darkBg' : ''">
+  <q-layout view="hHh Lpr lFf">
     <q-header elevated>
       <TitleBar
         title="Markdown Editor"
@@ -20,30 +18,33 @@
           <q-btn round>
             <template v-slot:default>
               <q-avatar icon="account_circle" class="q-electron-drag--exception">
-                <q-menu>
-                  <q-item clickable v-close-popup>
-                    <q-item-section avatar>
-                      <q-avatar icon="account_circle">
-                      </q-avatar>
-                    </q-item-section>
-                    <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <!-- language -->
-                  <q-item clickable v-close-popup>
-                    <q-item-section
-                      @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
-                  </q-item>
-                  <q-item clickable v-close-popup>
-                    <q-item-section
-                      @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <!-- logout -->
-                  <q-item clickable v-close-popup>
-                    <q-item-section
-                      @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
-                  </q-item>
+                <q-menu :dark="darkStore.isDark">
+                  <q-list
+                    class="tw-bg-white tw-text-gray-900 dark:tw-bg-stone-800 dark:tw-text-stone-300"
+                  >
+                    <q-item clickable v-close-popup>
+                      <q-item-section avatar>
+                        <q-icon name="account_circle" />
+                      </q-item-section>
+                      <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
+                    </q-item>
+                    <q-separator class="dark:tw-bg-stone-200" />
+                    <!-- language -->
+                    <q-item clickable v-close-popup>
+                      <q-item-section
+                        @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup>
+                      <q-item-section
+                        @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
+                    </q-item>
+                    <q-separator class="dark:tw-bg-stone-200" />
+                    <!-- logout -->
+                    <q-item clickable v-close-popup>
+                      <q-item-section
+                        @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
+                    </q-item>
+                  </q-list>
                 </q-menu>
               </q-avatar>
             </template>
