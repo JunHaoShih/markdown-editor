@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-sm">
-    <q-breadcrumbs class="tw-text-primary-600 dark:tw-text-primary-400"
+    <q-breadcrumbs class="tw-text-primary-600"
       :active-color="darkStore.isDark ? 'grey-4' : 'grey-10'">
       <q-breadcrumbs-el
         v-for="breadCrumb in folderTreeStore.breadCrumbs"
@@ -72,6 +72,7 @@
         v-model="repo.edit"
         :type="editorType"
         :is-dark="darkStore.isDark"
+        splitter-class="tw-h-[calc(100vh-140px)]"
       >
       </MarkdownEditor>
     </div>

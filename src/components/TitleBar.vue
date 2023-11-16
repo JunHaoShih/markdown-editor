@@ -14,6 +14,7 @@
         dense
         flat
         icon="dark_mode"
+        class="tw-text-primary-600"
         @click="darkStore.colorScheme = 'light'"
       />
 
@@ -22,6 +23,7 @@
         dense
         flat
         icon="light_mode"
+        class="tw-text-amber-600"
         @click="darkStore.colorScheme = 'dark'"
       />
 

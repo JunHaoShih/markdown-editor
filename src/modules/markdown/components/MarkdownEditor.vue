@@ -2,13 +2,13 @@
   <div>
     <q-splitter
       v-model="splitterModel"
-      class="main-panel"
+      :class="`${splitterClass}`"
       :limits="limits"
     >
       <template v-slot:before>
         <MonacoEditor
           v-model="mdText"
-          class="main-panel q-pt-xs q-pr-sm"
+          :class="`${splitterClass} q-pt-xs q-pr-sm`"
           :is-dark="isDark"
         ></MonacoEditor>
       </template>
@@ -41,6 +41,7 @@ const props = withDefaults(defineProps<{
   modelValue: string,
   type: EditorType,
   isDark: boolean,
+  splitterClass: string,
 }>(), {});
 
 type Emit = {
