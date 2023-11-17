@@ -3,7 +3,8 @@
     <div
       ref="mdRef"
       v-html="markdown"
-      class="tw-text-black dark:tw-text-stone-200"
+      class="tw-text-black dark:tw-text-stone-200
+        result-html"
     ></div>
   </div>
 </template>
@@ -30,6 +31,10 @@ const props = defineProps<{
   modelValue: string,
   isDark: boolean,
 }>();
+
+const colorTheme = computed(
+  () => (props.isDark ? '#333333' : '#f9f9f9'),
+);
 
 type Emit = {
   (e: 'update:modelValue', value: string): void,
@@ -106,10 +111,106 @@ onMounted(() => {
 </script>
 
 <style lang="sass" scoped>
-.main-panel
-  height: calc( 100vh - 50px )
-
 /* markdown styles */
+
+/* main */
+:deep(.result-html)
+  padding: 2px 10px
+  overflow: auto
+  display: block
+
+/* ul ol */
+:deep(ul),
+:deep(ol)
+  margin-top: 0
+  margin-bottom: 0
+
+:deep(ul)
+  display: block
+  list-style-type: disc
+  margin-block-start: 1em
+  margin-block-end: 1em
+  margin-inline-start: opx
+  margin-inline-end: 0px
+  padding-inline-start: 25px
+
+:deep(ul ul)
+  list-style-type: circle
+
+:deep(ul ul ul)
+  list-style-type: square
+
+:deep(ol)
+  display: block
+  list-style-type: decimal
+  margin-block-start: 1em
+  margin-block-end: 1em
+  margin-inline-start: opx
+  margin-inline-end: 0px
+  padding-inline-start: 25px
+
+/* blockquote style */
+:deep(blockquote)
+  display: block
+  margin-block-start: 1em
+  margin-block-end: 1em
+  margin-inline-start: 40px
+  margin-inline-end: 40px
+  padding: 5px 15px
+  margin: 0 0 0px
+  font-size: 17.5px
+  border-left: 5px solid #c792ea
+
+/* li style */
+:deep(li)
+  display: list-item
+  text-align: -webkit-match-parent
+
+:deep(li:marker)
+  unicode-bidi: isolate
+  font-variant-numeric: tabular-nums
+  text-transform: none
+  text-indent: 0px !important
+  text-align: start !important
+  text-align-last: start !important
+
+/* img style */
+:deep(img)
+  max-width: 35%
+  vertical-align: middle
+  border: 0
+  overflow-clip-margin: content-box
+  overflow: clip
+
+/* p style */
+:deep(p)
+  display: block
+  margin-block-start: 1em
+  margin-block-end: 1em
+  margin-inline-start: 0px
+  margin-inline-end: 0px
+  margin: 0 0 10px
+
+:deep(b),
+:deep(strong)
+  font-weight: bold
+
+/* link style */
+:deep(a)
+  color: #428bca
+  text-decoration-line: underline
+  background: transparent
+
+:deep(a:visited)
+  color: #1f64a1
+
+/* hr style */
+:deep(hr)
+  margin-top: 20px
+  margin-bottom: 20px
+  border: 0
+  border-top: 1px solid rgba(128, 128, 128, 0.33)
+
 :deep(code)
   color: #c7254e
   background-color: #f9f2f4
@@ -155,6 +256,10 @@ onMounted(() => {
 :deep(td)
   padding: 8px
   border: 1px solid hsla(0,0%,50%,.33)
+
+:deep(tbody > tr:nth-child(odd) > td),
+:deep(tbody > tr:nth-child(odd) > th)
+  background-color: v-bind(colorTheme)
 
 :deep(h1),
 :deep(h2),
