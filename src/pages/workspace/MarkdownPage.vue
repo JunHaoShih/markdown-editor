@@ -72,7 +72,7 @@
         v-model="repo.edit"
         :type="editorType"
         :is-dark="darkStore.isDark"
-        splitter-class="tw-h-[calc(100vh-140px)]"
+        splitter-class="tw-h-[calc(100vh-145px)]"
       >
       </MarkdownEditor>
     </div>

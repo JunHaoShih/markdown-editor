@@ -64,8 +64,3 @@ watch(() => props.type, (newValue) => {
   }
 });
 </script>
-
-<style lang="sass" scoped>
-.main-panel
-  height: calc( 100vh - 150px )
-</style>

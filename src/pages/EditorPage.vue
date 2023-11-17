@@ -1,7 +1,7 @@
 <template>
   <div>
     <MarkdownEditor
-      splitter-class="tw-h-[calc(100vh-75px)]"
+      splitter-class="tw-h-[calc(100vh-50px)]"
       v-model="mdText"
       type="split"
       :is-dark="darkStore.isDark"
