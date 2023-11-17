@@ -166,7 +166,7 @@ onMounted(() => {
   display: list-item
   text-align: -webkit-match-parent
 
-:deep(li:marker)
+:deep(li::marker)
   unicode-bidi: isolate
   font-variant-numeric: tabular-nums
   text-transform: none
