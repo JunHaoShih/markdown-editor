@@ -12,7 +12,7 @@ export const useMarkdownsStore = defineStore('markdownCache', () => {
   const repos = ref<MarkdownRepository[]>([]);
 
   const hasUnsaved = computed(
-    () => repos.value.find((repo) => repo.source.content !== repo.edit),
+    () => !!repos.value.find((repo) => repo.source.content !== repo.edit),
   );
 
   const unsavedIds = computed(

@@ -1,13 +1,16 @@
 <template>
-  <div>
+  <div class="tw-bg-white dark:tw-bg-darkBg">
     <q-table
       :title="$t('trashBinPage.trashBin')"
       :rows="trashBinView.content"
       :columns="defaultColumns"
       :pagination="pagination"
-      class="main-panel sticky-header-table "
+      class="main-panel "
       table-class="outer-max"
+      table-header-class="tw-sticky tw-top-0 tw-bg-white dark:tw-bg-darkBg tw-z-10"
+      card-class="tw-bg-white dark:tw-bg-darkBg tw-text-black dark:tw-text-stone-200"
       dense
+      :dark="darkStore.isDark"
     >
       <!-- action buttons -->
       <template v-slot:body-cell-actions="props">
@@ -89,6 +92,7 @@ import { getTrashBin, setDefaultTrashBin, setTrashBin } from 'src/modules/folder
 import { Markdown } from 'src/modules/markdown/models/markdown';
 import { deleteMarkdown, getDeletedMarkdowns } from 'src/modules/markdown/services/markdownService';
 import { getValidName } from 'src/services/fileNameService';
+import { useDarkStore } from 'src/stores/darkModeStore';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -98,6 +102,8 @@ const $q = useQuasar();
 const i18n = useI18n();
 
 const router = useRouter();
+
+const darkStore = useDarkStore();
 
 const folderView = ref<FolderView>({
   name: '',
@@ -142,7 +148,6 @@ function getAllChildren(folderItem: FolderItem): FolderItem[] {
 }
 
 function onDeleteClicked(folderItem: FolderItem) {
-  // TODO implement delete machanics
   $q.dialog({
     dark: true,
     title: i18n.t('trashBinPage.permanentDelete'),
@@ -225,7 +230,7 @@ const defaultColumns = computed(
       name: 'actions', label: i18n.t('action'), field: '', align: 'center', style: 'width: 60px',
     },
     {
-      name: 'icon', label: '', field: '', align: 'left', sortable: true,
+      name: 'icon', label: '', field: '', align: 'center', sortable: true,
     },
     {
       name: 'name', label: i18n.t('folderItems.name'), field: 'name', align: 'left', sortable: true,
@@ -253,5 +258,5 @@ function getDateStr(date?: Date): string {
 
 <style lang="sass" scoped>
 :deep(.outer-max)
-  height: calc( 100vh - 130px )
+  height: calc( 100vh - 125px )
 </style>

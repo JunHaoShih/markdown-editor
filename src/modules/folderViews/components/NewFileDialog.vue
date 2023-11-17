@@ -5,12 +5,13 @@
     transition-show="rotate"
     transition-hide="rotate"
   >
-    <q-card style="min-width: 700px">
+    <q-card dark class="dark:tw-bg-stone-800 tw-w-full md:tw-w-3/5 lg:tw-w-2/4">
       <q-form @submit="submit">
         <q-card-section
-          class="bg-dark text-white row items-center"
+          class="tw-bg-stone-900 tw-text-white tw-flex tw-flex-row tw-items-center"
         >
-          <div class="text-h6">
+          <div class="tw-font-bold tw-leading-tight tw-tracking-tight tw-text-gray-300
+            tw-text-xl">
             {{ title }}
           </div>
           <q-space/>
@@ -24,13 +25,16 @@
         </q-card-section>
         <q-separator />
         <q-card-section
-          class="scroll dialog-inner-max"
+          class="tw-w-full"
         >
           <q-input
             v-model="inputFileName"
             autofocus
             dense
             filled
+            label-color="tw-text-gray-900 dark:tw-text-stone-300"
+            input-class="tw-text-gray-900 dark:tw-text-stone-300"
+            class="dark:tw-bg-stone-700 tw-rounded-md"
             type="text"
             :rules="[
               val => !isFileNameDuplicated || $t('folderViews.fileNameExist'),
@@ -41,12 +45,18 @@
             hide-bottom-space
           />
         </q-card-section>
-        <q-separator />
+
+        <q-separator class="dark:tw-bg-stone-400" />
+
         <q-card-actions
           align="right"
-          class="text-primary"
+          class="tw-text-primary-600"
         >
-          <q-btn flat :label="$t('actions.cancel')" v-close-popup />
+          <q-btn
+            flat
+            :label="$t('actions.cancel')"
+            v-close-popup
+          />
           <q-btn
             flat
             :label="$t('actions.confirm')"

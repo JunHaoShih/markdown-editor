@@ -14,6 +14,7 @@
     </q-btn>
     <q-separator
       class="q-ma-sm"
+      :dark="isDark"
     />
     <q-tree
       dense
@@ -26,6 +27,7 @@
       :duration="0"
       no-selection-unset
       style="width: max-content;"
+      :dark="isDark"
     >
       <template v-slot:default-header="prop">
         <div :class="prop.node.marked ? 'filter-marked' : ''">
@@ -43,6 +45,8 @@
         <q-menu
           touch-position
           context-menu
+          class="dark:tw-bg-stone-800"
+          :dark="isDark"
         >
           <q-list dense style="min-width: 100px">
             <q-item
@@ -206,6 +210,7 @@ const trashBinView = ref<TrashBin>({
 
 const props = defineProps<{
   id: string,
+  isDark: boolean,
 }>();
 
 watch(() => props.id, (newValue) => {

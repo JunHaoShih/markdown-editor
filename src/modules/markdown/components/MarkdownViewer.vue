@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div ref="mdRef" v-html="markdown"></div>
+    <div
+      ref="mdRef"
+      v-html="markdown"
+      class="tw-text-black dark:tw-text-stone-200"
+    ></div>
   </div>
 </template>
 
@@ -24,6 +28,7 @@ const copyIcon = '<i class="q-icon notranslate material-icons" aria-hidden="true
 
 const props = defineProps<{
   modelValue: string,
+  isDark: boolean,
 }>();
 
 type Emit = {

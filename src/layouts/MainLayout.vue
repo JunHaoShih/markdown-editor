@@ -18,30 +18,33 @@
           <q-btn round>
             <template v-slot:default>
               <q-avatar icon="account_circle" class="q-electron-drag--exception">
-                <q-menu>
-                  <q-item clickable v-close-popup>
-                    <q-item-section avatar>
-                      <q-avatar icon="account_circle">
-                      </q-avatar>
-                    </q-item-section>
-                    <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <!-- language -->
-                  <q-item clickable v-close-popup>
-                    <q-item-section
-                      @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
-                  </q-item>
-                  <q-item clickable v-close-popup>
-                    <q-item-section
-                      @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <!-- logout -->
-                  <q-item clickable v-close-popup>
-                    <q-item-section
-                      @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
-                  </q-item>
+                <q-menu :dark="darkStore.isDark">
+                  <q-list
+                    class="tw-bg-white tw-text-gray-900 dark:tw-bg-stone-800 dark:tw-text-stone-300"
+                  >
+                    <q-item clickable v-close-popup>
+                      <q-item-section avatar>
+                        <q-icon name="account_circle" />
+                      </q-item-section>
+                      <q-item-section>{{ authStore.user?.displayName }}</q-item-section>
+                    </q-item>
+                    <q-separator class="dark:tw-bg-stone-200" />
+                    <!-- language -->
+                    <q-item clickable v-close-popup>
+                      <q-item-section
+                        @click="setLanguage('zh-TW')">{{ $t('lang.zhTW') }}</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup>
+                      <q-item-section
+                        @click="setLanguage('en-US')">{{ $t('lang.enUS') }}</q-item-section>
+                    </q-item>
+                    <q-separator class="dark:tw-bg-stone-200" />
+                    <!-- logout -->
+                    <q-item clickable v-close-popup>
+                      <q-item-section
+                        @click="onLogoutClicked">{{ $t('actions.logout') }}</q-item-section>
+                    </q-item>
+                  </q-list>
                 </q-menu>
               </q-avatar>
             </template>
@@ -57,18 +60,22 @@
       mini-to-overlay
       bordered
       :mini="true"
+      class="tw-bg-white dark:tw-bg-darkBg"
     >
       <q-scroll-area style="width: inherit; height: calc(100vh - 55px);">
-        <q-list>
+        <q-list
+          class="tw-text-black dark:tw-text-stone-200"
+        >
           <q-item-label
             header
           >
-          {{ $t('menu') }}
+            {{ $t('menu') }}
           </q-item-label>
           <NavItem
             v-for="link in essentialLinks"
             :key="link.title"
             :navNode="link"
+            :is-dark="darkStore.isDark"
           />
         </q-list>
       </q-scroll-area>
@@ -95,12 +102,15 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import TitleBar from 'src/components/TitleBar.vue';
 import NavItem, { NavNode } from 'src/components/NavItem.vue';
+import { useDarkStore } from 'src/stores/darkModeStore';
 
 const i18n = useI18n();
 
 const router = useRouter();
 
 const authStore = useAuthStore();
+
+const darkStore = useDarkStore();
 
 let initialDrawerWidth = 0;
 
