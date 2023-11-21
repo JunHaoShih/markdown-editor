@@ -59,7 +59,6 @@
       show-if-above
       mini-to-overlay
       bordered
-      :mini="true"
       class="tw-bg-white dark:tw-bg-stone-800"
     >
       <q-scroll-area style="width: inherit; height: calc(100vh - 55px);">
