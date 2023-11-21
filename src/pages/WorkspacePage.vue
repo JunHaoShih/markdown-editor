@@ -3,7 +3,7 @@
     <q-splitter
       v-model="splitterModel"
       unit="px"
-      class="outer-max tw-bg-white dark:tw-bg-darkBg"
+      class="outer-max tw-bg-white dark:tw-bg-stone-800"
       :dark="darkStore.isDark"
     >
       <template v-slot:before>

@@ -42,6 +42,9 @@ export default {
     alternative: 'Or',
     useEditorOnly: 'Use editor only',
   },
+  indexPage: {
+    toWorkspace: 'Move to workspace',
+  },
   registerPage: {
     loginHint: 'Already has an account?',
     login: 'Login now!',

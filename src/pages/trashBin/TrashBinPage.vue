@@ -1,5 +1,5 @@
 <template>
-  <div class="tw-bg-white dark:tw-bg-darkBg">
+  <div class="tw-bg-white dark:tw-bg-stone-800">
     <q-table
       :title="$t('trashBinPage.trashBin')"
       :rows="trashBinView.content"
@@ -7,8 +7,8 @@
       :pagination="pagination"
       class="main-panel "
       table-class="outer-max"
-      table-header-class="tw-sticky tw-top-0 tw-bg-white dark:tw-bg-darkBg tw-z-10"
-      card-class="tw-bg-white dark:tw-bg-darkBg tw-text-black dark:tw-text-stone-200"
+      table-header-class="tw-sticky tw-top-0 tw-bg-white dark:tw-bg-stone-800 tw-z-10"
+      card-class="tw-bg-white dark:tw-bg-stone-800 tw-text-black dark:tw-text-stone-200"
       dense
       :dark="darkStore.isDark"
     >

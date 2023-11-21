@@ -42,6 +42,9 @@ export default {
     alternative: '或是',
     useEditorOnly: '只使用編輯器',
   },
+  indexPage: {
+    toWorkspace: '移至工作區',
+  },
   registerPage: {
     loginHint: '已經擁有帳號?',
     login: '馬上登入!',
