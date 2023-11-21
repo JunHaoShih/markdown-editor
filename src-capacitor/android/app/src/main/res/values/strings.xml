@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Markdown editor</string>
+    <string name="title_activity_main">Markdown editor</string>
+    <string name="package_name">org.victorshih.quasar.markdown</string>
+    <string name="custom_url_scheme">org.victorshih.quasar.markdown</string>
+</resources>
