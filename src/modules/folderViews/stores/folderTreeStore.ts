@@ -2,13 +2,13 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { FolderTreeNode } from '../components/WorkspaceTree.vue';
 
-export type MoveAction = 'cut' | 'copy' | 'none';
-
 /**
  * This is mainly used to store all parent nodes, so other page can display breadcrumbs of files
  */
 export const useFolderTreeStore = defineStore('folderTree', () => {
   const selectedNodeParents = ref<FolderTreeNode[]>([]);
+
+  const panelWidth = ref(0);
 
   const breadCrumbs = computed(() => selectedNodeParents.value);
 
@@ -18,6 +18,7 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
 
   return {
     selectedNodeParents,
+    panelWidth,
     breadCrumbs,
     fileName,
   };

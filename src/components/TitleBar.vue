@@ -3,7 +3,7 @@
     <q-toolbar class="tw-bg-black q-electron-drag">
       <slot name="front"></slot>
       <q-icon name="face" size="sm" class="tw-text-primary-600 tw-pl-1"/>
-      <q-toolbar-title>
+      <q-toolbar-title class="tw-hidden sm:tw-block">
         {{ title }}
       </q-toolbar-title>
 

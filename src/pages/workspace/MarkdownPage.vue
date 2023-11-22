@@ -14,7 +14,7 @@
       :color="darkStore.isDark ? 'grey-4' : 'grey-10'"
       class="q-my-sm"
     />
-    <div class="q-gutter-sm row">
+    <div class="q-gutter-sm row tw-hidden sm:tw-flex">
       <q-btn
         :disable="mdSource.content === mdEdit"
         icon="save"
@@ -73,9 +73,63 @@
         :type="editorType"
         :is-dark="darkStore.isDark"
         splitter-class="tw-h-[calc(100vh-145px)]"
+        @on-splitter-resize="editorType = 'none'"
       >
       </MarkdownEditor>
     </div>
+    <q-fab
+      v-model="fabDisplay"
+      icon="keyboard_arrow_up"
+      direction="up"
+      :class="`tw-fixed tw-end-6 tw-bottom-6 tw-group tw-bg-fuchsia-700 tw-text-stone-200
+      hover:tw-opacity-100
+      ${fabDisplay ? 'tw-opacity-100' : 'tw-opacity-50'}`"
+    >
+        <q-fab-action
+          :disable="mdSource.content === mdEdit"
+          class="tw-bg-primary-600 tw-text-stone-200"
+          icon="save"
+          @click="onSaveClicked"
+        >
+          <q-tooltip>
+            {{ $t('markdownPage.save') }}
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action
+          :disable="mdSource.content === mdEdit"
+          class="tw-bg-red-600 tw-text-stone-200"
+          icon="cancel"
+          @click="onDiscardClicked"
+        >
+          <q-tooltip>
+            {{ $t('markdownPage.discardChange') }}
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action
+          class="tw-bg-primary-600 tw-text-stone-200"
+          icon="download"
+          @click="onDownload"
+        >
+          <q-tooltip>
+            {{ $t('markdownPage.download') }}
+          </q-tooltip>
+        </q-fab-action>
+        <q-fab-action
+          class="tw-bg-primary-600 tw-text-stone-200"
+          icon="edit"
+          @click="editorType = 'edit'"
+        />
+        <q-fab-action
+          class="tw-bg-primary-600 tw-text-stone-200 tw-hidden sm:tw-block"
+          icon="horizontal_distribute"
+          @click="editorType = 'split'"
+        />
+        <q-fab-action
+          class="tw-bg-primary-600 tw-text-stone-200"
+          icon="visibility"
+          @click="editorType = 'view'"
+        />
+      </q-fab>
   </div>
 </template>
 
@@ -112,6 +166,8 @@ const authStore = useAuthStore();
 const darkStore = useDarkStore();
 
 const editorType = ref<EditorType>('split');
+
+const fabDisplay = ref(false);
 
 const props = defineProps<{
   id: string,

@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
         props: true,
         children: [
           {
-            path: '', component: () => import('pages/IndexPage.vue'),
+            path: '', component: () => import('pages/workspace/IndexPage.vue'),
           },
           {
             path: ':id', component: () => import('pages/workspace/MarkdownPage.vue'), props: true,
