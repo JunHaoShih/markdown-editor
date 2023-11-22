@@ -42,6 +42,9 @@ export default {
     alternative: '或是',
     useEditorOnly: '只使用編輯器',
   },
+  indexPage: {
+    toWorkspace: '移至工作區',
+  },
   registerPage: {
     loginHint: '已經擁有帳號?',
     login: '馬上登入!',
@@ -56,6 +59,8 @@ export default {
   workspacePage: {
     workspace: '工作區',
     caption: '您的Markdown工作區',
+    folderTree: '資料夾結構',
+    indexInfo: '開始編輯md檔案',
   },
   trashBinPage: {
     trashBin: '垃圾桶',

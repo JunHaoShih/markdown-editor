@@ -1,25 +1,26 @@
 <template>
-  <div>
-    <q-splitter
-      v-model="splitterModel"
-      :class="`${splitterClass}`"
-      :limits="limits"
+  <div class="tw-flex tw-flex-row">
+    <div ref="leftDiv" class="tw-w-full sm:tw-w-6/12">
+      <MonacoEditor
+        v-model="mdText"
+        :class="`${splitterClass} q-pt-xs q-pr-sm`"
+        :is-dark="isDark"
+      ></MonacoEditor>
+    </div>
+    <div
+      class="tw-w-2 tw-cursor-ew-resize tw-flex tw-flex-col tw-justify-center tw-items-center
+      hover:tw-bg-stone-400"
+      v-touch-pan.preserveCursor.prevent.mouse.touch.horizontal="resizeDrawer"
     >
-      <template v-slot:before>
-        <MonacoEditor
-          v-model="mdText"
-          :class="`${splitterClass} q-pt-xs q-pr-sm`"
-          :is-dark="isDark"
-        ></MonacoEditor>
-      </template>
-      <template v-slot:after>
-        <markdown-viewer
-          v-model="mdText"
-          class="q-ma-sm"
-          :is-dark="isDark"
-        />
-      </template>
-    </q-splitter>
+      <div class="tw-bg-stone-400 tw-w-0.5 tw-flex-auto"></div>
+    </div>
+    <div class="tw-flex-1 tw-overflow-auto">
+      <markdown-viewer
+        v-model="mdText"
+        class="q-ma-sm"
+        :is-dark="isDark"
+      />
+    </div>
   </div>
 </template>
 
@@ -27,15 +28,14 @@
 import {
   computed, ref, watch,
 } from 'vue';
-import { QSplitter } from 'quasar';
 import MonacoEditor from 'src/components/MonacoEditor.vue';
 import MarkdownViewer from './MarkdownViewer.vue';
 
-export type EditorType = 'edit' | 'view' | 'split';
+export type EditorType = 'edit' | 'view' | 'split' | 'none';
 
 const splitterModel = ref(50);
 
-const limits = ref<QSplitter['limits']>([0, Infinity]);
+const leftDiv = ref<HTMLElement>();
 
 const props = withDefaults(defineProps<{
   modelValue: string,
@@ -46,6 +46,7 @@ const props = withDefaults(defineProps<{
 
 type Emit = {
   (e: 'update:modelValue', value: string): void
+  (e: 'onSplitterResize'): void
 }
 const emit = defineEmits<Emit>();
 
@@ -55,12 +56,38 @@ const mdText = computed({
 });
 
 watch(() => props.type, (newValue) => {
+  if (!leftDiv.value) {
+    return;
+  }
   if (newValue === 'edit') {
-    splitterModel.value = 100;
+    leftDiv.value.style.width = '100%';
   } else if (newValue === 'view') {
+    leftDiv.value.style.width = '0%';
     splitterModel.value = 0;
   } else {
+    leftDiv.value.style.width = '50%';
     splitterModel.value = 50;
   }
 });
+
+let initialDrawerWidth = 0;
+
+function resizeDrawer(details: {
+  isFirst?: boolean,
+  offset?: {
+    x?: number,
+    y?: number,
+  },
+}) {
+  if (!leftDiv.value) {
+    return;
+  }
+  if (details.isFirst) {
+    initialDrawerWidth = leftDiv.value.offsetWidth;
+  }
+  if (details.offset?.x) {
+    leftDiv.value.style.width = `${initialDrawerWidth + details.offset.x}px`;
+    emit('onSplitterResize');
+  }
+}
 </script>

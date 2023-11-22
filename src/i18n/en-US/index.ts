@@ -42,6 +42,9 @@ export default {
     alternative: 'Or',
     useEditorOnly: 'Use editor only',
   },
+  indexPage: {
+    toWorkspace: 'Move to workspace',
+  },
   registerPage: {
     loginHint: 'Already has an account?',
     login: 'Login now!',
@@ -56,6 +59,8 @@ export default {
   workspacePage: {
     workspace: 'Workspace',
     caption: 'Your markdown workspace',
+    folderTree: 'Folder tree',
+    indexInfo: 'Start editing your markdown',
   },
   trashBinPage: {
     trashBin: 'Trash bin',
