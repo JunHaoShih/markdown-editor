@@ -14,10 +14,10 @@
     >
       <div class="tw-bg-stone-400 tw-w-0.5 tw-flex-auto"></div>
     </div>
-    <div class="tw-flex-1 tw-overflow-auto">
+    <div class="tw-flex-1 tw-overflow-auto tw-relative">
       <markdown-viewer
         v-model="mdText"
-        class="q-ma-sm"
+        :class="`${splitterClass}`"
         :is-dark="isDark"
       />
     </div>
