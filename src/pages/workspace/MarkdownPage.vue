@@ -73,6 +73,7 @@
         :type="editorType"
         :is-dark="darkStore.isDark"
         splitter-class="tw-h-[calc(100vh-145px)]"
+        @on-splitter-resize="editorType = 'none'"
       >
       </MarkdownEditor>
     </div>

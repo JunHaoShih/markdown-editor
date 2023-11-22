@@ -59,6 +59,8 @@ export default {
   workspacePage: {
     workspace: '工作區',
     caption: '您的Markdown工作區',
+    folderTree: '資料夾結構',
+    indexInfo: '開始編輯md檔案',
   },
   trashBinPage: {
     trashBin: '垃圾桶',

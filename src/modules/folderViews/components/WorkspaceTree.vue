@@ -3,15 +3,19 @@
     v-on:keydown.esc.prevent="cancelMarked"
     tabindex="-1"
   >
-    <q-btn
-      icon="description"
-      class="action-btn q-pa-sm"
-      @click="addFile"
-    >
-      <q-tooltip>
-        {{ $t('folderViews.addFile') }}
-      </q-tooltip>
-    </q-btn>
+    <div class="tw-flex tw-flex-row">
+      <q-btn
+        icon="description"
+        class="action-btn q-pa-sm"
+        @click="addFile"
+      >
+        <q-tooltip>
+          {{ $t('folderViews.addFile') }}
+        </q-tooltip>
+      </q-btn>
+      <div class="tw-flex-grow" />
+      <slot name="btn-panel"></slot>
+    </div>
     <q-separator
       class="q-ma-sm"
       :dark="isDark"
@@ -157,7 +161,9 @@ import { getMarkdownFolderView, setDefaultFolderView, setFolderView } from '../s
 import { FolderItem, FolderItemType, FolderView } from '../models/folderView';
 import { getTrashBin, setDefaultTrashBin, setTrashBin } from '../services/trashBinService';
 import { TrashBin } from '../models/trashBin';
-import { MoveAction, useFolderTreeStore } from '../stores/folderTreeStore';
+import { useFolderTreeStore } from '../stores/folderTreeStore';
+
+type MoveAction = 'cut' | 'copy' | 'none';
 
 export interface FolderTreeNode extends QTreeNode {
   id: string,

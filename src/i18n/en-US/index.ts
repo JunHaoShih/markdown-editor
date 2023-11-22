@@ -59,6 +59,8 @@ export default {
   workspacePage: {
     workspace: 'Workspace',
     caption: 'Your markdown workspace',
+    folderTree: 'Folder tree',
+    indexInfo: 'Start editing your markdown',
   },
   trashBinPage: {
     trashBin: 'Trash bin',
