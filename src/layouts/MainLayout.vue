@@ -58,6 +58,7 @@
       :width="drawerWidth"
       show-if-above
       mini-to-overlay
+      no-swipe-open
       bordered
       class="tw-bg-white dark:tw-bg-stone-800"
     >
