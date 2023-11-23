@@ -1,0 +1,10 @@
+{
+  "appId": "org.victorshih.quasar.markdown",
+  "appName": "Markdown editor",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
