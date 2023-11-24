@@ -55,6 +55,7 @@ export default {
     discardChange: '捨棄變更',
     confirmDiscard: '確定要捨棄未儲存的變更? 捨棄後將無法復原',
     download: '下載',
+    downloadComplete: '下載完成!',
   },
   workspacePage: {
     workspace: '工作區',

@@ -150,6 +150,8 @@ import { useI18n } from 'vue-i18n';
 import { Markdown } from 'src/modules/markdown/models/markdown';
 import { Timestamp } from '@firebase/firestore';
 import { useDarkStore } from 'src/stores/darkModeStore';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
+import { getValidName } from 'src/services/fileNameService';
 
 const $q = useQuasar();
 
@@ -227,7 +229,55 @@ async function onDiscardClicked() {
   });
 }
 
-function onDownload() {
+async function downloadByCapacitor() {
+  const folderName = 'markdown-editor';
+  const readdirResult = await Filesystem.readdir({
+    path: '',
+    directory: Directory.Documents,
+  });
+
+  if (!readdirResult.files.find((file) => file.type === 'directory' && file.name === folderName)) {
+    await Filesystem.mkdir({
+      path: folderName,
+      directory: Directory.Documents,
+      recursive: true,
+    });
+  }
+
+  const readdirMdResult = await Filesystem.readdir({
+    path: folderName,
+    directory: Directory.Documents,
+  });
+
+  const fileNames = readdirMdResult.files.map((file) => {
+    const lastIndex = file.name.lastIndexOf('.');
+    if (lastIndex === -1) {
+      return file.name;
+    }
+    return file.name.substring(0, lastIndex);
+  });
+  const newName = getValidName(fileNames, folderTreeStore.fileName ?? 'unknown');
+
+  const mdFullPath = `${folderName}/${newName}.md`;
+  Filesystem.writeFile({
+    path: mdFullPath,
+    data: mdSource.value.content,
+    directory: Directory.Documents,
+    encoding: Encoding.UTF8,
+  }).then(() => {
+    $q.notify({
+      type: 'success',
+      message: `${i18n.t('markdownPage.downloadComplete')} ${Directory.Documents}/${mdFullPath}`,
+    });
+  }).catch((error) => {
+    $q.notify({
+      type: 'error',
+      message: error,
+    });
+  });
+}
+
+function downloadByAnchor() {
   const blob = new Blob([mdSource.value.content], { type: 'text/plain' });
   const aRef = document.createElement('a');
   const label = folderTreeStore.fileName;
@@ -235,6 +285,14 @@ function onDownload() {
   aRef.download = fileName;
   aRef.href = window.URL.createObjectURL(blob);
   aRef.click();
+}
+
+async function onDownload() {
+  if (process.env.MODE === 'capacitor') {
+    await downloadByCapacitor();
+  } else {
+    downloadByAnchor();
+  }
 }
 
 watch(() => props.id, async (newValue, oldValue) => {

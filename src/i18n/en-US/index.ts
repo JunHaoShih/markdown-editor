@@ -55,6 +55,7 @@ export default {
     discardChange: 'Discard change',
     confirmDiscard: 'Do you want to discard unsaved change? It cannot be reverted',
     download: 'Download',
+    downloadComplete: 'Download complete!',
   },
   workspacePage: {
     workspace: 'Workspace',
