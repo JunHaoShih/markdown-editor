@@ -108,7 +108,7 @@ onMounted(() => {
   if (!leftDiv.value) {
     return;
   }
-  collapse.value = !!leftDiv.value.offsetWidth;
+  collapse.value = !leftDiv.value.offsetWidth;
 });
 </script>
 
