@@ -152,6 +152,7 @@ import { Timestamp } from '@firebase/firestore';
 import { useDarkStore } from 'src/stores/darkModeStore';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { getValidName } from 'src/services/fileNameService';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 const $q = useQuasar();
 
@@ -229,6 +230,34 @@ async function onDiscardClicked() {
   });
 }
 
+const mdChannelId = 'markdown-editor';
+
+async function capacitorNotify(mdName: string) {
+  await LocalNotifications.createChannel({
+    id: mdChannelId,
+    name: 'Markdown Editor',
+  });
+  const { notifications } = await LocalNotifications.getDeliveredNotifications();
+  const ids = notifications.length > 0
+    ? notifications
+      .filter((notification) => notification.group !== 'ranker_group')
+      .map((notification) => notification.id)
+    : [0];
+
+  const nextId = Math.max(...ids) + 1;
+
+  LocalNotifications.schedule({
+    notifications: [
+      {
+        id: nextId,
+        title: `${mdName}`,
+        body: `${i18n.t('markdownPage.downloadComplete')}`,
+        channelId: mdChannelId,
+      },
+    ],
+  });
+}
+
 async function downloadByCapacitor() {
   const folderName = 'markdown-editor';
   const readdirResult = await Filesystem.readdir({
@@ -258,17 +287,19 @@ async function downloadByCapacitor() {
   });
   const newName = getValidName(fileNames, folderTreeStore.fileName ?? 'unknown');
 
-  const mdFullPath = `${folderName}/${newName}.md`;
+  const mdName = `${newName}.md`;
+  const mdFullPath = `${folderName}/${mdName}`;
   Filesystem.writeFile({
     path: mdFullPath,
     data: mdSource.value.content,
     directory: Directory.Documents,
     encoding: Encoding.UTF8,
-  }).then(() => {
+  }).then(async () => {
     $q.notify({
       type: 'success',
       message: `${i18n.t('markdownPage.downloadComplete')} ${Directory.Documents}/${mdFullPath}`,
     });
+    await capacitorNotify(mdName);
   }).catch((error) => {
     $q.notify({
       type: 'error',
