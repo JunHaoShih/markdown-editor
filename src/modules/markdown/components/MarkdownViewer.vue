@@ -14,6 +14,7 @@ import {
   computed, onMounted, ref,
 } from 'vue';
 import MarkdownIt from 'markdown-it';
+import emoji from 'markdown-it-emoji';
 import hljs from 'highlight.js';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -58,6 +59,8 @@ const md: MarkdownIt = new MarkdownIt({
     return `<pre class="hljs"><button class="action-btn">${copyIcon}</button><code>${md.utils.escapeHtml(str)}</code></pre>`;
   },
 });
+
+md.use(emoji);
 
 const defaultLinkRender = md.renderer.rules.link_open
   || ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
