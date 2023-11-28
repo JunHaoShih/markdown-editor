@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
@@ -103,6 +103,9 @@ import { useI18n } from 'vue-i18n';
 import TitleBar from 'src/components/TitleBar.vue';
 import NavItem, { NavNode } from 'src/components/NavItem.vue';
 import { useDarkStore } from 'src/stores/darkModeStore';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
 
 const i18n = useI18n();
 
@@ -173,9 +176,15 @@ function resizeDrawer(details: {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     authStore.user = user;
+    $q.loading.hide();
   } else {
+    $q.loading.hide();
     router.push('/login');
   }
+});
+
+onBeforeMount(() => {
+  $q.loading.show();
 });
 </script>
 
