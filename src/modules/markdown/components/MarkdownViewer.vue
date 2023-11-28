@@ -15,6 +15,7 @@ import {
 } from 'vue';
 import MarkdownIt from 'markdown-it';
 import emoji from 'markdown-it-emoji';
+import footnote from 'markdown-it-footnote';
 import hljs from 'highlight.js';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -60,7 +61,8 @@ const md: MarkdownIt = new MarkdownIt({
   },
 });
 
-md.use(emoji);
+md.use(emoji)
+  .use(footnote);
 
 const defaultLinkRender = md.renderer.rules.link_open
   || ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
