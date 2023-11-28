@@ -1,5 +1,7 @@
 # Markdown editor (makrdown-editor)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JunHaoShih_markdown-editor&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JunHaoShih_markdown-editor)
+
 Simple markdown editor  
 Hosted on Firebase  
 [Click here](https://markdown-editor-da01c.web.app/) to try it
