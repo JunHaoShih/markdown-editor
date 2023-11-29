@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@capacitor/filesystem": "^5.1.4",
+    "@capacitor/local-notifications": "^5.0.6",
     "@electron/remote": "^2.0.10",
     "@quasar/extras": "^1.0.0",
     "@types/dompurify": "^3.0.2",
