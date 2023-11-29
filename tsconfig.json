@@ -11,9 +11,10 @@
     "dist",
     "dist*",
     "node_modules",
-    "subfolder/dist",
-    "subfolder/node_modules",
     "**/dist/*",
     "**/node_modules/*",
+    "src-capacitor/android",
+    "src-capacitor/node_modules",
+    "src-capacitor/www",
   ],
 }
