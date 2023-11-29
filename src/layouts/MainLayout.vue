@@ -68,6 +68,7 @@
         >
           <q-item-label
             header
+            class="dark:tw-text-stone-300"
           >
             {{ $t('menu') }}
           </q-item-label>
