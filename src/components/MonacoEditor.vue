@@ -33,24 +33,25 @@ const text = computed({
 });
 
 onMounted(() => {
-  // eslint-disable-next-line no-restricted-globals
-  self.MonacoEnvironment = {
-    getWorker(_, label) {
-      if (label === 'json') {
-        return new JsonWorker();
-      }
-      if (label === 'css' || label === 'scss' || label === 'less') {
-        return new CssWorker();
-      }
-      if (label === 'html' || label === 'handlebars' || label === 'razor') {
-        return new HtmlWorker();
-      }
-      if (label === 'typescript' || label === 'javascript') {
-        return new TsWorker();
-      }
-      return new EditorWorker();
-    },
-  };
+  if (!window.MonacoEnvironment) {
+    window.MonacoEnvironment = {
+      getWorker(_, label) {
+        if (label === 'json') {
+          return new JsonWorker();
+        }
+        if (label === 'css' || label === 'scss' || label === 'less') {
+          return new CssWorker();
+        }
+        if (label === 'html' || label === 'handlebars' || label === 'razor') {
+          return new HtmlWorker();
+        }
+        if (label === 'typescript' || label === 'javascript') {
+          return new TsWorker();
+        }
+        return new EditorWorker();
+      },
+    };
+  }
   if (divDom.value) {
     editor = monaco.editor.create(divDom.value, {
       value: text.value,
@@ -71,6 +72,11 @@ onMounted(() => {
     editor.onDidChangeModelContent(() => {
       text.value = editor.getValue();
     });
+
+    editor.getModel()
+      ?.updateOptions({
+        tabSize: 2,
+      });
   }
 });
 

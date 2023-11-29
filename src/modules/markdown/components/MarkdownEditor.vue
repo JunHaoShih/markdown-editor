@@ -26,12 +26,18 @@
 
 <script setup lang="ts">
 import {
-  computed, ref, watch,
+  computed, defineAsyncComponent, ref, watch,
 } from 'vue';
-import MonacoEditor from 'src/components/MonacoEditor.vue';
+import LoadingPanel from 'src/components/LoadingPanel.vue';
 import MarkdownViewer from './MarkdownViewer.vue';
 
 export type EditorType = 'edit' | 'view' | 'split' | 'none';
+
+const MonacoEditor = defineAsyncComponent({
+  loader: () => import('src/components/MonacoEditor.vue'),
+  loadingComponent: LoadingPanel,
+  delay: 200,
+});
 
 const splitterModel = ref(50);
 
