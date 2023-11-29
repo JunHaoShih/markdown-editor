@@ -4,6 +4,11 @@
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_launcher"
+    }
+  },
   "server": {
     "androidScheme": "https"
   }
