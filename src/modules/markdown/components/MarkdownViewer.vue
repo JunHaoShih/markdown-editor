@@ -16,18 +16,17 @@ import {
 import MarkdownIt from 'markdown-it';
 import emoji from 'markdown-it-emoji';
 import footnote from 'markdown-it-footnote';
-import hljs from 'highlight.js';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { v4 as uuidv4 } from 'uuid';
+import { codeBlockPlugin } from '../plugins/codeBlockPlugin';
+import { mermaidPlugin } from '../plugins/mermaidPlugin';
+import { anchorBlankPlugin } from '../plugins/anchorBlankPlugin';
 
 const $q = useQuasar();
 
 const i18n = useI18n();
 
 const mdRef = ref<HTMLElement>();
-
-const copyIcon = '<i class="q-icon notranslate material-icons" aria-hidden="true" role="img">content_copy</i>';
 
 const props = defineProps<{
   modelValue: string,
@@ -48,38 +47,22 @@ const mdText = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const md: MarkdownIt = new MarkdownIt({
-  highlight: (str, lang) => {
-    const uuid = uuidv4();
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return `<pre class="hljs"><button class="action-btn" data-clipboard-target=${uuid}>${copyIcon}</button><code class="mona-space-radon" id=${uuid}>${hljs.highlight(str, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
-      } catch (__) { /* empty */ }
-    }
+const md: MarkdownIt = new MarkdownIt();
 
-    return `<pre class="hljs"><button class="action-btn">${copyIcon}</button><code>${md.utils.escapeHtml(str)}</code></pre>`;
-  },
-});
+const btnAttributeName = 'data-clipboard-target';
 
 md.use(emoji)
-  .use(footnote);
-
-const defaultLinkRender = md.renderer.rules.link_open
-  || ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
-
-md.renderer.rules.link_open = ((tokens, idx, options, env, self) => {
-  // If you are sure other plugins can't add `target` - drop check below
-  const aIndex = tokens[idx].attrIndex('target');
-
-  if (aIndex < 0) {
-    tokens[idx].attrPush(['target', '_blank']); // add new attribute
-  } else {
-    tokens[idx].attrSet('target', '_blank');// replace value of existing attr
-  }
-
-  // pass token to default renderer.
-  return defaultLinkRender(tokens, idx, options, env, self);
-});
+  .use(footnote)
+  .use(codeBlockPlugin, {
+    highlightClass: 'hljs',
+    copyBtn: {
+      btnClass: 'action-btn',
+      attribute: btnAttributeName,
+    },
+    codeClass: 'mona-space-radon',
+  })
+  .use(anchorBlankPlugin)
+  .use(mermaidPlugin);
 
 const markdown = computed(
   () => md.render(mdText.value),
@@ -93,7 +76,7 @@ function copyCLicked(evt: MouseEvent) {
   if (target.tagName.toLowerCase() === 'i') {
     target = target.parentElement;
   }
-  const clipboardTargetId = target?.getAttribute('data-clipboard-target');
+  const clipboardTargetId = target?.getAttribute(btnAttributeName);
 
   if (clipboardTargetId) {
     const textToCopy = document.getElementById(clipboardTargetId)?.textContent;
