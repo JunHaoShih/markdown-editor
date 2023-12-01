@@ -102,6 +102,11 @@ export default {
     updateAt: '修改日期',
     deleteAt: '刪除日期',
   },
+  themes: {
+    dark: '深色模式',
+    light: '淺色模式',
+    system: '與系統同步',
+  },
   unknownError: '未知錯誤',
   menu: '清單',
 };

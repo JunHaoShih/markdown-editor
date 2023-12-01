@@ -102,6 +102,11 @@ export default {
     updateAt: 'Modified date',
     deleteAt: 'Delete date',
   },
+  themes: {
+    dark: 'Dark mode',
+    light: 'Light mode',
+    system: 'Sync with system',
+  },
   unknownError: 'Something went wrong!',
   menu: 'Menu',
 };

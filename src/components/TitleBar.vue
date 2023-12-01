@@ -9,26 +9,46 @@
 
       <q-space />
 
-      <q-btn
-        v-if="darkStore.isDark"
-        dense
-        flat
-        icon="dark_mode"
-        class="tw-text-primary-600"
-        @click="darkStore.colorScheme = 'light'"
-      />
-
-      <q-btn
-        v-if="!darkStore.isDark"
-        dense
-        flat
-        icon="light_mode"
-        class="tw-text-amber-600"
-        @click="darkStore.colorScheme = 'dark'"
-      />
+      <!-- Dark mode button -->
+      <q-btn round>
+        <template v-slot:default>
+          <q-avatar
+            size="30px"
+            :icon="darkStore.isDark ? 'dark_mode' : 'light_mode'"
+            :class="darkStore.isDark ? 'tw-text-primary-600' : 'tw-text-amber-600'"
+          >
+            <q-menu :dark="darkStore.isDark">
+              <q-list
+                class="tw-bg-white tw-text-gray-900 dark:tw-bg-stone-800 dark:tw-text-stone-300"
+              >
+                <q-item
+                  v-for="theme in themes"
+                  v-bind:key="theme.mode"
+                  clickable v-close-popup
+                  @click="theme.onClick"
+                >
+                <q-item-section avatar>
+                  <q-icon :class="theme.icon.class" :name="theme.icon.name" />
+                </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ $t(theme.name) }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-icon
+                      v-if="theme.mode === darkStore.colorScheme"
+                      name="check" color="green"
+                    />
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-avatar>
+        </template>
+      </q-btn>
 
       <slot name="end"></slot>
 
+      <!-- Electron only panel -->
       <div class="electron-only">
         <q-btn dense flat icon="minimize" @click="minimize" />
         <q-btn dense flat :icon="maximizeState" @click="toggleMaximize" />
@@ -39,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { useDarkStore } from 'src/stores/darkModeStore';
+import { ThemeMode, useDarkStore } from 'src/stores/darkModeStore';
 import { onBeforeMount, ref } from 'vue';
 
 type MaximizeState = 'crop_square' | 'filter_none';
@@ -47,6 +67,52 @@ type MaximizeState = 'crop_square' | 'filter_none';
 const maximizeState = ref<MaximizeState>('crop_square');
 
 const darkStore = useDarkStore();
+
+interface ThemeAction {
+  mode: ThemeMode,
+  icon: {
+    class: string,
+    name: string,
+  },
+  name: string,
+  onClick:() => void,
+}
+
+const themes: ThemeAction[] = [
+  {
+    mode: 'light',
+    icon: {
+      name: 'light_mode',
+      class: 'tw-text-amber-600',
+    },
+    name: 'themes.light',
+    onClick: () => {
+      darkStore.colorScheme = 'light';
+    },
+  },
+  {
+    mode: 'dark',
+    icon: {
+      name: 'dark_mode',
+      class: 'tw-text-primary-600',
+    },
+    name: 'themes.dark',
+    onClick: () => {
+      darkStore.colorScheme = 'dark';
+    },
+  },
+  {
+    mode: 'system',
+    icon: {
+      name: 'sync',
+      class: 'tw-text-green-600',
+    },
+    name: 'themes.system',
+    onClick: () => {
+      darkStore.colorScheme = 'system';
+    },
+  },
+];
 
 defineProps<{
   title: string,
