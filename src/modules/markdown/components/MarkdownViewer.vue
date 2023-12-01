@@ -289,6 +289,12 @@ onMounted(() => {
   font-size: 0.67em
   font-weight: bold
 
+:deep(pre.hljs)
+  position: relative
+
+:deep(pre.hljs pre)
+  position: relative
+
 :deep(pre.hljs button)
   transition: 0.2s ease-out
   cursor: pointer
