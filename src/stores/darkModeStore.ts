@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+export type ThemeMode = 'dark' | 'light' | 'system';
 
 export const useDarkStore = defineStore('darkMode', () => {
-  const colorScheme = ref<'dark' | 'light' | 'system'>('system');
+  const colorScheme = ref<ThemeMode>('system');
 
   const isDark = computed(
     () => {
