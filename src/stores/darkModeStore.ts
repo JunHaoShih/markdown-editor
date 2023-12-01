@@ -15,6 +15,16 @@ export const useDarkStore = defineStore('darkMode', () => {
     },
   );
 
+  const themeKey = 'defaultTheme';
+
+  // Retrieve the default theme from local storage
+  const defaultTheme = localStorage.getItem(themeKey) as ThemeMode | undefined;
+  colorScheme.value = defaultTheme || 'system';
+
+  watch(colorScheme, (newValue) => {
+    localStorage.setItem(themeKey, newValue);
+  });
+
   return {
     colorScheme,
     isDark,
