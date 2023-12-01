@@ -17,7 +17,7 @@
     <div class="tw-flex-1 tw-overflow-auto tw-relative">
       <markdown-viewer
         v-model="mdText"
-        :class="`${splitterClass}`"
+        :class="`${splitterClass} tw-mx-auto tw-max-w-7xl`"
         :is-dark="isDark"
       />
     </div>
