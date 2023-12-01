@@ -39,8 +39,6 @@ const MonacoEditor = defineAsyncComponent({
   delay: 200,
 });
 
-const splitterModel = ref(50);
-
 const leftDiv = ref<HTMLElement>();
 
 const props = withDefaults(defineProps<{
@@ -69,10 +67,8 @@ watch(() => props.type, (newValue) => {
     leftDiv.value.style.width = '100%';
   } else if (newValue === 'view') {
     leftDiv.value.style.width = '0%';
-    splitterModel.value = 0;
   } else {
     leftDiv.value.style.width = '50%';
-    splitterModel.value = 50;
   }
 });
 
