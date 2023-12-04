@@ -1,5 +1,5 @@
 import {
-  app, BrowserWindow, dialog, ipcMain, nativeTheme,
+  app, BrowserWindow, dialog, ipcMain, nativeTheme, shell,
 } from 'electron';
 import { initialize, enable } from '@electron/remote/main';
 import path from 'path';
@@ -56,6 +56,14 @@ function createWindow() {
       mainWindow?.webContents.closeDevTools();
     });
   }
+
+  // Intercept url window open
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = undefined;
