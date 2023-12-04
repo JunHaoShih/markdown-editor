@@ -24,6 +24,7 @@ try {
 } catch (_) { /* empty */ }
 
 let mainWindow: BrowserWindow | undefined;
+let splashScreen: BrowserWindow | undefined;
 
 function createWindow() {
   /**
@@ -42,6 +43,21 @@ function createWindow() {
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
     },
   });
+
+  splashScreen = new BrowserWindow({
+    width: 500,
+    height: 300,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+  });
+
+  mainWindow.hide();
+
+  const publicFolder = path.resolve(__dirname, process.env.QUASAR_PUBLIC_FOLDER || '');
+  splashScreen.loadFile(path.resolve(publicFolder, 'splash.html'));
+  splashScreen.center();
+  splashScreen.show();
 
   enable(mainWindow.webContents);
 
@@ -93,6 +109,14 @@ function createWindow() {
         }
       }
     }
+  });
+
+  // Close splash screen and open main window on load finish
+  mainWindow.webContents.on('did-finish-load', () => {
+    setTimeout(() => {
+      splashScreen?.close();
+      mainWindow?.show();
+    }, 2000);
   });
 
   ipcMain.handle('setUnsaveState', (_event, isUnsaved: boolean) => {
