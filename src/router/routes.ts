@@ -50,6 +50,15 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/verifying',
+    component: () => import('layouts/VerifyingLayout.vue'),
+    children: [
+      {
+        path: '', component: () => import('pages/VerifyingPage.vue'),
+      },
+    ],
+  },
+  {
     path: '/editor',
     component: () => import('layouts/LoginLayout.vue'),
     children: [

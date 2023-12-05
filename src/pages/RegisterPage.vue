@@ -118,15 +118,14 @@ const password = ref('');
 const displayName = ref('');
 
 async function onSubmit() {
-  const success = await authStore.register(username.value, password.value, displayName.value);
-  if (success) {
-    router.replace('/');
-  }
+  await authStore.register(username.value, password.value, displayName.value);
 }
 
 auth.onAuthStateChanged((user) => {
-  if (user) {
+  if (user && user.emailVerified) {
     router.replace('/');
+  } else if (user && !user.emailVerified) {
+    router.replace('/verifying');
   }
 });
 </script>

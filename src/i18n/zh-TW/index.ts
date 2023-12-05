@@ -49,6 +49,15 @@ export default {
     loginHint: '已經擁有帳號?',
     login: '馬上登入!',
   },
+  verifyingPage: {
+    title: '請驗證Email',
+    checkYourEmail: '就快完成了! 我們將Email送到了',
+    howToVerify: '只需點擊Email內的連結即可完成註冊',
+    cannotFindEmail: '找不到Email? 沒關係',
+    resendEmail: '重新寄送Email',
+    emailSentSuccess: 'Email送出成功!',
+    emailSentFailed: 'Email送出失敗!',
+  },
   markdownPage: {
     editHere: '在此編輯您的Markdown',
     save: '儲存檔案',

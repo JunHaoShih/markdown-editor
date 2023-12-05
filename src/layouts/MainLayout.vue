@@ -177,10 +177,15 @@ function resizeDrawer(details: {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     authStore.user = user;
-    $q.loading.hide();
+    if (!user.emailVerified) {
+      $q.loading.hide();
+      router.replace('/verifying');
+    } else {
+      $q.loading.hide();
+    }
   } else {
     $q.loading.hide();
-    router.push('/login');
+    router.replace('/login');
   }
 });
 
