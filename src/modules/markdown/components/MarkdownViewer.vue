@@ -18,7 +18,7 @@ import emoji from 'markdown-it-emoji';
 import footnote from 'markdown-it-footnote';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { codeBlockPlugin } from '../plugins/codeBlockPlugin';
+import { CodeBlockOptions, codeBlockPlugin } from '../plugins/codeBlockPlugin';
 import { mermaidPlugin } from '../plugins/mermaidPlugin';
 import { anchorBlankPlugin } from '../plugins/anchorBlankPlugin';
 
@@ -51,16 +51,20 @@ const md: MarkdownIt = new MarkdownIt();
 
 const btnAttributeName = 'data-clipboard-target';
 
+const codeblockOptions: CodeBlockOptions = {
+  highlightClass: 'hljs',
+  copyBtn: {
+    btnClass: 'action-btn',
+    attribute: btnAttributeName,
+  },
+  codeClass: 'mona-space-radon',
+  titleClass: 'code-block-title',
+  bodyClass: 'code-block-body',
+};
+
 md.use(emoji)
   .use(footnote)
-  .use(codeBlockPlugin, {
-    highlightClass: 'hljs',
-    copyBtn: {
-      btnClass: 'action-btn',
-      attribute: btnAttributeName,
-    },
-    codeClass: 'mona-space-radon',
-  })
+  .use(codeBlockPlugin, codeblockOptions)
   .use(anchorBlankPlugin)
   .use(mermaidPlugin);
 
@@ -205,6 +209,26 @@ onMounted(() => {
   border-radius: 4px
   padding: 2px 4px
 
+/* code block styles */
+:deep(pre)
+  border-radius: 10px
+
+:deep(pre .code-block-title)
+  display: flex
+  position: relative
+  background-color: #1f2937
+  border-top-left-radius: 10px
+  border-top-right-radius: 10px
+  padding: 5px 18px
+  align-items: center
+  justify-content: space-between
+
+:deep(pre .code-block-body)
+  border-bottom-left-radius: 10px
+  border-bottom-right-radius: 10px
+  padding: 18px
+  overflow-y: auto
+
 :deep(pre code)
   padding: 0
   font-size: inherit
@@ -298,10 +322,6 @@ onMounted(() => {
 :deep(pre.hljs button)
   transition: 0.2s ease-out
   cursor: pointer
-  position: absolute
-  margin-right: 12px
-  margin-top: -2px
-  opacity: 0.5
-  right: 0
+  opacity: 0.8
   padding: 2px 5px 2px 5px
 </style>
