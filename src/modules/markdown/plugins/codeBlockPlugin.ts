@@ -2,7 +2,7 @@ import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
 import { v4 as uuidv4 } from 'uuid';
 
-interface CodeBlockOptions {
+export interface CodeBlockOptions {
   /**
    * Class name to style your code
    */
@@ -31,6 +31,14 @@ interface CodeBlockOptions {
    * Style your code block
    */
   codeClass?: string,
+  /**
+   * Style your code title
+   */
+  titleClass?: string,
+  /**
+   * Style your body(which contains your code)
+   */
+  bodyClass?: string,
 }
 
 export const codeBlockPlugin: MarkdownIt.PluginWithOptions<CodeBlockOptions> = (md, options) => {
@@ -50,6 +58,13 @@ export const codeBlockPlugin: MarkdownIt.PluginWithOptions<CodeBlockOptions> = (
       pre.className = options.highlightClass;
     }
 
+    const titleDiv = document.createElement('div');
+    if (options && options.titleClass) {
+      titleDiv.className = options.titleClass;
+    }
+    titleDiv.innerText = lang;
+    pre.appendChild(titleDiv);
+
     if (options && options.copyBtn) {
       const btn = document.createElement('button');
       if (options?.copyBtn?.btnClass) {
@@ -57,15 +72,19 @@ export const codeBlockPlugin: MarkdownIt.PluginWithOptions<CodeBlockOptions> = (
       }
       btn.innerHTML = copyIcon;
       btn.setAttribute(options.copyBtn.attribute, uuid);
-      pre.appendChild(btn);
+      titleDiv.appendChild(btn);
     }
+
+    const bodyDiv = document.createElement('div');
+    bodyDiv.className = 'code-block-body';
+    pre.appendChild(bodyDiv);
 
     const code = document.createElement('code');
     if (options && options.codeClass) {
       code.className = options.codeClass;
     }
     code.id = uuid;
-    pre.appendChild(code);
+    bodyDiv.appendChild(code);
     if (lang && hljs.getLanguage(lang)) {
       try {
         code.innerHTML = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
