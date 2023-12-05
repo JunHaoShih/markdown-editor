@@ -49,6 +49,15 @@ export default {
     loginHint: 'Already has an account?',
     login: 'Login now!',
   },
+  verifyingPage: {
+    title: 'Please verify your email',
+    checkYourEmail: 'You`re almost there! We sent an email to',
+    howToVerify: 'Just click on the link in that email to complete your signup',
+    cannotFindEmail: 'Cannot find the email? Send it again.',
+    resendEmail: 'Resend Verification Email',
+    emailSentSuccess: 'Email sent successfully!',
+    emailSentFailed: 'Email sent failed!',
+  },
   markdownPage: {
     editHere: 'Edit your markdown here!',
     save: 'Save file',

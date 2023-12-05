@@ -118,7 +118,11 @@ async function onSubmit() {
 
 auth.onAuthStateChanged((user) => {
   if (user) {
-    router.replace('/');
+    if (!user.emailVerified) {
+      router.replace('/verifying');
+    } else {
+      router.replace('/');
+    }
   }
 });
 </script>

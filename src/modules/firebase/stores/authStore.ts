@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import {
   User as FirebaseUser,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -23,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
           await updateProfile(this.user, {
             displayName,
           });
-          // await setDefaultFolderView(result.user.uid);
+          await sendEmailVerification(result.user);
           return true;
         })
         .catch((error): boolean => {
