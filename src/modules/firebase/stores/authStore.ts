@@ -6,6 +6,7 @@ import {
   sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile,
 } from 'firebase/auth';
@@ -107,13 +108,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function googleLogin(): Promise<boolean> {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
-    const response = await signInWithPopup(auth, provider)
-      .then((result): boolean => {
-        user.value = result.user;
-        return true;
-      })
-      .catch(handleAuthError);
-    return response;
+    const response = await signInWithRedirect(auth, provider);
+    return true;
   }
 
   return {
