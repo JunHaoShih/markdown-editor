@@ -69,27 +69,52 @@
             :label="$t('actions.login')"
             @click="onSubmit"
           />
-          <p class="tw-text-sm tw-font-light tw-text-gray-500 dark:tw-text-gray-400">
-            {{ $t('loginPage.alternative') }}
-          </p>
-          <q-btn
-            push
-            dense
-            size="lg"
-            class="tw-text-white tw-bg-primary-600 tw-w-full"
-            :label="$t('loginPage.useEditorOnly')"
-            to="/editor"
-          />
-          <p class="tw-text-sm tw-font-light tw-text-gray-500 dark:tw-text-gray-400">
-            {{ $t('loginPage.registerHint') }}
-            <router-link to="/register"
-              class="tw-font-medium tw-text-primary-600 hover:tw-underline
-              dark:tw-text-primary-500"
-            >
-              {{ $t('loginPage.createAccount') }}
-            </router-link>
-          </p>
+          <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-full">
+            <hr class="tw-w-64 tw-h-px tw-bg-gray-200 tw-border-0 dark:tw-bg-gray-700">
+            <span
+              class="tw-absolute tw-px-3 tw-font-medium tw-text-gray-900 -tw-translate-x-1/2
+              tw-bg-white tw-left-1/2 dark:tw-text-white dark:tw-bg-stone-800">
+              {{ $t('loginPage.alternative') }}
+            </span>
+          </div>
         </q-form>
+
+        <button
+          class="tw-px-4 tw-py-2 tw-border tw-flex tw-gap-2 tw-border-slate-300 tw-w-full
+          tw-items-center tw-justify-center tw-flex-row
+          dark:tw-border-slate-700 tw-rounded-lg tw-text-slate-700 dark:tw-text-slate-200
+          hover:tw-border-slate-400 dark:tw-hover:border-slate-500 hover:tw-text-slate-900
+          dark:hover:tw-text-slate-300 hover:tw-shadow tw-transition tw-duration-150"
+          @click="googleLogin"
+        >
+          <img class="tw-w-6 tw-h-6" src="https://www.svgrepo.com/show/475656/google-color.svg" loading="lazy" alt="google logo">
+          <span>Login with Google</span>
+        </button>
+        <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-full">
+          <hr class="tw-w-64 tw-h-px tw-bg-gray-200 tw-border-0 dark:tw-bg-gray-700">
+          <span
+            class="tw-absolute tw-px-3 tw-font-medium tw-text-gray-900 -tw-translate-x-1/2
+            tw-bg-white tw-left-1/2 dark:tw-text-white dark:tw-bg-stone-800">
+            {{ $t('loginPage.alternative') }}
+          </span>
+        </div>
+        <q-btn
+          push
+          dense
+          size="lg"
+          class="tw-text-white tw-bg-primary-600 tw-w-full"
+          :label="$t('loginPage.useEditorOnly')"
+          to="/editor"
+        />
+        <p class="tw-text-sm tw-font-light tw-text-gray-500 dark:tw-text-gray-400">
+          {{ $t('loginPage.registerHint') }}
+          <router-link to="/register"
+            class="tw-font-medium tw-text-primary-600 hover:tw-underline
+            dark:tw-text-primary-500"
+          >
+            {{ $t('loginPage.createAccount') }}
+          </router-link>
+        </p>
       </div>
     </div>
   </div>
@@ -114,6 +139,11 @@ async function onSubmit() {
   if (success) {
     router.replace('/');
   }
+}
+
+async function googleLogin() {
+  // TODO login with Google
+  const success = await authStore.googleLogin();
 }
 
 auth.onAuthStateChanged((user) => {
