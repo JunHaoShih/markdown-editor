@@ -142,8 +142,7 @@ async function onSubmit() {
 }
 
 async function googleLogin() {
-  // TODO login with Google
-  const success = await authStore.googleLogin();
+  await authStore.googleLogin();
 }
 
 auth.onAuthStateChanged((user) => {

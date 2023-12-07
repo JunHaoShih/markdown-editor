@@ -75,10 +75,11 @@ function createWindow() {
 
   // Intercept url window open
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('http:') || url.startsWith('https:')) {
+    if ((url.startsWith('http:') || url.startsWith('https:')) && !url.includes('/__/auth/handler?')) {
       shell.openExternal(url);
+      return { action: 'deny' };
     }
-    return { action: 'deny' };
+    return { action: 'allow' };
   });
 
   mainWindow.on('closed', () => {
