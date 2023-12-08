@@ -121,10 +121,12 @@
 </template>
 
 <script setup lang="ts">
-import { auth } from 'src/boot/firebase';
+import { auth, firebaseApp } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { v4 as uuidv4 } from 'uuid';
+import { GoogleAuthProvider } from 'firebase/auth';
 
 const router = useRouter();
 
@@ -142,7 +144,25 @@ async function onSubmit() {
 }
 
 async function googleLogin() {
-  await authStore.googleLogin();
+  if (process.env.MODE === 'spa') {
+    await authStore.googleLogin();
+  }
+  if (process.env.MODE === 'electron') {
+    // const domain = firebaseApp.options.authDomain;
+    const domain = 'markdown-editor-da01c--pr54-fix-electron-google-uo58oosf.web.app';
+    const callbackId = uuidv4();
+    const aRef = document.createElement('a');
+    aRef.href = `https://${domain}/auth/google?callbackId=${callbackId}`;
+    aRef.target = '_blank';
+    aRef.click();
+    window.windowApi.handleGoogleOauth(async (event, idToken) => {
+      if (authStore.user) {
+        return;
+      }
+      const credential = GoogleAuthProvider.credential(idToken);
+      await authStore.credentialLogin(credential);
+    });
+  }
 }
 
 auth.onAuthStateChanged((user) => {

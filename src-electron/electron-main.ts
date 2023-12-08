@@ -4,6 +4,7 @@ import {
 import { initialize, enable } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
+import { URL } from 'url';
 
 initialize();
 
@@ -26,6 +27,9 @@ try {
 let mainWindow: BrowserWindow | undefined;
 let splashScreen: BrowserWindow | undefined;
 
+/**
+ * Setup scheme protocol
+ */
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
     app.setAsDefaultProtocolClient('markdown-editor', process.execPath, [path.resolve(process.argv[1])]);
@@ -157,8 +161,14 @@ if (!single) {
         mainWindow.restore();
       }
       mainWindow.focus();
+
+      // the commandLine is array of strings in which last element is deep link url
+      // We only handle login when electron is open
+      const externalUrl = new URL(commandLine.pop() ?? '');
+      mainWindow?.webContents.send('googleTokenReceived', externalUrl.searchParams.get('idToken'));
     }
-    // the commandLine is array of strings in which last element is deep link url
-    dialog.showErrorBox('Welcome Back', `You arrived from: ${commandLine.pop()}`);
   });
 }
+
+const url = new URL('markdown-editor://googleAuth?idToken=123&callbackId=1');
+console.log(url);

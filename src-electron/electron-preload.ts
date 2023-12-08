@@ -38,6 +38,9 @@ export interface PreloadMethods {
     (isMaximized: (event: IpcRendererEvent, isMaximized: boolean) => void) => void
   ),
   setUnsaveState: ((isUnsaved: boolean) => void),
+  handleGoogleOauth: (
+    (idTokenReceived: (event: IpcRendererEvent, idToken: string) => void) => void
+  ),
 }
 
 const preloadMethods: PreloadMethods = {
@@ -60,6 +63,8 @@ const preloadMethods: PreloadMethods = {
   },
 
   handleIsMaximized: (isMaximized: (event: IpcRendererEvent, isMaximized: boolean) => void) => ipcRenderer.on('isMaximized', isMaximized),
+
+  handleGoogleOauth: (idTokenReceived: (event: IpcRendererEvent, idToken: string) => void) => ipcRenderer.on('googleTokenReceived', idTokenReceived),
 
   setUnsaveState: (isUnsaved: boolean): void => {
     ipcRenderer.invoke('setUnsaveState', isUnsaved);
