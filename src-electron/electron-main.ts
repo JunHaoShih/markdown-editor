@@ -26,6 +26,14 @@ try {
 let mainWindow: BrowserWindow | undefined;
 let splashScreen: BrowserWindow | undefined;
 
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('markdown-editor', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('markdown-editor');
+}
+
 function createWindow() {
   /**
    * Initial window options
@@ -138,3 +146,19 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+const single = app.requestSingleInstanceLock();
+if (!single) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    }
+    // the commandLine is array of strings in which last element is deep link url
+    dialog.showErrorBox('Welcome Back', `You arrived from: ${commandLine.pop()}`);
+  });
+}

@@ -104,13 +104,14 @@ export const useAuthStore = defineStore('auth', () => {
    * Login with Google account
    * @returns Success or failed
    */
-  async function googleLogin(): Promise<boolean> {
+  async function googleLogin(): Promise<string | false> {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
     const response = await signInWithPopup(auth, provider)
-      .then((result): boolean => {
+      .then(async (result) => {
         user.value = result.user;
-        return true;
+        const idToken = await result.user.getIdToken();
+        return idToken;
       })
       .catch(handleAuthError);
     return response;

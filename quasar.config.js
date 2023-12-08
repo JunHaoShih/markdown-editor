@@ -203,6 +203,14 @@ module.exports = configure((/* ctx */) => ({
       // appCategoryType: '',
       // osxSign: '',
       // protocol: 'myapp://path',
+      protocols: [
+        {
+          name: 'markdown-editor-protocol',
+          schemes: [
+            'markdown-editor',
+          ],
+        },
+      ],
 
       // Windows only
       // win32metadata: { ... }

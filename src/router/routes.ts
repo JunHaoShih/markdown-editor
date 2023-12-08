@@ -67,6 +67,16 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/auth',
+    component: () => import('layouts/AuthLayout.vue'),
+    children: [
+      {
+        path: 'google', component: () => import('pages/auth/GoogleAuthPage.vue'),
+      },
+    ],
+    redirect: '/',
+  },
 
   // Always leave this as last one,
   // but you can also remove it
