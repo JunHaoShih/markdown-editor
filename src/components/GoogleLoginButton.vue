@@ -13,19 +13,20 @@
 </template>
 
 <script setup lang="ts">
+import { OAuthCredential } from 'firebase/auth';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 
 const authStore = useAuthStore();
 
 type Emit = {
-  (e: 'onSuccess', idToken: string): void
+  (e: 'onSuccess', credential: OAuthCredential): void
 }
 const emit = defineEmits<Emit>();
 
 async function googleLogin() {
-  const idToken = await authStore.googleLogin();
-  if (idToken !== false) {
-    emit('onSuccess', idToken);
+  const credential = await authStore.googleLogin();
+  if (credential !== false) {
+    emit('onSuccess', credential);
   }
 }
 </script>

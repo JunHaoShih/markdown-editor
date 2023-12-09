@@ -3,6 +3,7 @@ import {
   AuthCredential,
   User as FirebaseUser,
   GoogleAuthProvider,
+  OAuthCredential,
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signInWithCredential,
@@ -106,14 +107,14 @@ export const useAuthStore = defineStore('auth', () => {
    * Login with Google account
    * @returns Success or failed
    */
-  async function googleLogin(): Promise<string | false> {
+  async function googleLogin(): Promise<OAuthCredential | false> {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
     const response = await signInWithPopup(auth, provider)
       .then(async (result) => {
         user.value = result.user;
-        const idToken = await result.user.getIdToken();
-        return idToken;
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        return credential ?? false;
       })
       .catch(handleAuthError);
     return response;

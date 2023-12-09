@@ -18,7 +18,7 @@
       <div class="tw-p-6 tw-space-y-4 md:tw-space-y-6 sm:tw-p-8 dark:tw-bg-stone-800 tw-rounded-lg">
         <GoogleLoginButton
           v-if="!complete"
-          @on-success="sendId"
+          @on-success="sendCredential"
         />
         <h5
           v-else
@@ -33,8 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from 'src/boot/firebase';
+import { OAuthCredential } from 'firebase/auth';
 import GoogleLoginButton from 'src/components/GoogleLoginButton.vue';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -55,20 +54,10 @@ watch(callbackId, (newId) => {
   immediate: true,
 });
 
-function sendId(idToken: string) {
+function sendCredential(credential: OAuthCredential) {
   const aRef = document.createElement('a');
-  aRef.href = `markdown-editor://googleAuth?idToken=${idToken}&callbackId=${callbackId.value}`;
+  aRef.href = `markdown-editor://googleAuth?credential=${credential}&callbackId=${callbackId.value}`;
   aRef.click();
   complete.value = true;
 }
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    const result = await user.getIdTokenResult();
-    if (result.claims.firebase?.sign_in_provider === 'google.com') {
-      const idToken = await user.getIdToken();
-      sendId(idToken);
-    }
-  }
-});
 </script>
