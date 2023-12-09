@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia';
 import {
+  AuthCredential,
   User as FirebaseUser,
   GoogleAuthProvider,
+  OAuthCredential,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -104,11 +107,27 @@ export const useAuthStore = defineStore('auth', () => {
    * Login with Google account
    * @returns Success or failed
    */
-  async function googleLogin(): Promise<boolean> {
+  async function googleLogin(): Promise<OAuthCredential | false> {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
     const response = await signInWithPopup(auth, provider)
-      .then((result): boolean => {
+      .then(async (result) => {
+        user.value = result.user;
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        return credential ?? false;
+      })
+      .catch(handleAuthError);
+    return response;
+  }
+
+  /**
+   * Login with credential
+   * @param credential Credential of specific provider
+   * @returns Success or failed
+   */
+  async function credentialLogin(credential: AuthCredential): Promise<boolean> {
+    const response = signInWithCredential(auth, credential)
+      .then((result) => {
         user.value = result.user;
         return true;
       })
@@ -122,5 +141,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     googleLogin,
+    credentialLogin,
   };
 });

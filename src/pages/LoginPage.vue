@@ -121,10 +121,18 @@
 </template>
 
 <script setup lang="ts">
-import { auth } from 'src/boot/firebase';
+import { auth, firebaseApp } from 'src/boot/firebase';
 import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { v4 as uuidv4 } from 'uuid';
+import { OAuthCredential } from 'firebase/auth';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+
+const $q = useQuasar();
+
+const i18n = useI18n();
 
 const router = useRouter();
 
@@ -142,8 +150,31 @@ async function onSubmit() {
 }
 
 async function googleLogin() {
-  // TODO login with Google
-  const success = await authStore.googleLogin();
+  if (process.env.MODE === 'spa') {
+    await authStore.googleLogin();
+  }
+  if (process.env.MODE === 'electron') {
+    const domain = firebaseApp.options.authDomain;
+    const callbackId = uuidv4();
+    const aRef = document.createElement('a');
+    aRef.href = `https://${domain}/auth/google?callbackId=${callbackId}`;
+    aRef.target = '_blank';
+    aRef.click();
+    window.windowApi.handleOauth(async (event, credentialJson) => {
+      if (authStore.user) {
+        return;
+      }
+      const credential = OAuthCredential.fromJSON(credentialJson);
+      if (!credential) {
+        $q.notify({
+          type: 'error',
+          message: i18n.t('auth.unknownError'),
+        });
+        return;
+      }
+      await authStore.credentialLogin(credential);
+    });
+  }
 }
 
 auth.onAuthStateChanged((user) => {

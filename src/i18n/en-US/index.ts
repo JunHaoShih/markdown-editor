@@ -116,6 +116,11 @@ export default {
     light: 'Light mode',
     system: 'Sync with system',
   },
+  auth: {
+    title: 'Authentication',
+    closeNow: 'Authentication complete! You can close this page now!',
+    unknownError: 'Unknown error occurred during authentication.',
+  },
   unknownError: 'Something went wrong!',
   menu: 'Menu',
 };

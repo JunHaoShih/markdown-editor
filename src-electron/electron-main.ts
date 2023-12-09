@@ -4,6 +4,7 @@ import {
 import { initialize, enable } from '@electron/remote/main';
 import path from 'path';
 import os from 'os';
+import { URL } from 'url';
 
 initialize();
 
@@ -25,6 +26,17 @@ try {
 
 let mainWindow: BrowserWindow | undefined;
 let splashScreen: BrowserWindow | undefined;
+
+/**
+ * Setup scheme protocol
+ */
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('markdown-editor', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('markdown-editor');
+}
 
 function createWindow() {
   /**
@@ -75,10 +87,11 @@ function createWindow() {
 
   // Intercept url window open
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('http:') || url.startsWith('https:')) {
+    if ((url.startsWith('http:') || url.startsWith('https:')) && !url.includes('/__/auth/handler?')) {
       shell.openExternal(url);
+      return { action: 'deny' };
     }
-    return { action: 'deny' };
+    return { action: 'allow' };
   });
 
   mainWindow.on('closed', () => {
@@ -137,3 +150,29 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+const single = app.requestSingleInstanceLock();
+if (!single) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+
+      // the commandLine is array of strings in which last element is deep link url
+      // We only handle login when electron is open
+      try {
+        const externalUrl = new URL(commandLine.pop() ?? '');
+        const credentialJson = externalUrl.searchParams.get('credential');
+        if (credentialJson) {
+          mainWindow?.webContents.send('credentialReceived', credentialJson);
+        }
+      } catch (error) {
+        // TODO add some error handling
+      }
+    }
+  });
+}

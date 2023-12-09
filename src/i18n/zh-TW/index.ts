@@ -116,6 +116,11 @@ export default {
     light: '淺色模式',
     system: '與系統同步',
   },
+  auth: {
+    title: '驗證',
+    closeNow: '驗證完畢! 您可以關閉此頁面了',
+    unknownError: '驗證時發生未知錯誤',
+  },
   unknownError: '未知錯誤',
   menu: '清單',
 };
