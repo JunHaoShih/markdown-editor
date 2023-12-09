@@ -126,7 +126,13 @@ import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { v4 as uuidv4 } from 'uuid';
-import { GoogleAuthProvider } from 'firebase/auth';
+import { OAuthCredential } from 'firebase/auth';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+
+const $q = useQuasar();
+
+const i18n = useI18n();
 
 const router = useRouter();
 
@@ -148,18 +154,24 @@ async function googleLogin() {
     await authStore.googleLogin();
   }
   if (process.env.MODE === 'electron') {
-    // const domain = firebaseApp.options.authDomain;
-    const domain = 'markdown-editor-da01c--pr54-fix-electron-google-uo58oosf.web.app';
+    const domain = firebaseApp.options.authDomain;
     const callbackId = uuidv4();
     const aRef = document.createElement('a');
     aRef.href = `https://${domain}/auth/google?callbackId=${callbackId}`;
     aRef.target = '_blank';
     aRef.click();
-    window.windowApi.handleGoogleOauth(async (event, idToken) => {
+    window.windowApi.handleOauth(async (event, credentialJson) => {
       if (authStore.user) {
         return;
       }
-      const credential = GoogleAuthProvider.credential(idToken);
+      const credential = OAuthCredential.fromJSON(credentialJson);
+      if (!credential) {
+        $q.notify({
+          type: 'error',
+          message: i18n.t('auth.unknownError'),
+        });
+        return;
+      }
       await authStore.credentialLogin(credential);
     });
   }

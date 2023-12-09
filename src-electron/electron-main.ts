@@ -164,11 +164,15 @@ if (!single) {
 
       // the commandLine is array of strings in which last element is deep link url
       // We only handle login when electron is open
-      const externalUrl = new URL(commandLine.pop() ?? '');
-      mainWindow?.webContents.send('googleTokenReceived', externalUrl.searchParams.get('idToken'));
+      try {
+        const externalUrl = new URL(commandLine.pop() ?? '');
+        const credentialJson = externalUrl.searchParams.get('credential');
+        if (credentialJson) {
+          mainWindow?.webContents.send('credentialReceived', credentialJson);
+        }
+      } catch (error) {
+        // TODO add some error handling
+      }
     }
   });
 }
-
-const url = new URL('markdown-editor://googleAuth?idToken=123&callbackId=1');
-console.log(url);
