@@ -72,6 +72,10 @@ const markdown = computed(
   () => md.render(mdText.value),
 );
 
+/**
+ * Handle code block copy
+ * @param evt Mouse event
+ */
 function copyCLicked(evt: MouseEvent) {
   let target = evt.target as HTMLElement | null;
   if (!target) {
@@ -97,8 +101,40 @@ function copyCLicked(evt: MouseEvent) {
   }
 }
 
+/**
+ * Handle anchor hash for Electron and Capacitor due to file protocol.<br/>
+ * @param evt Mouse event
+ */
+function handleHashAnchor(evt: MouseEvent) {
+  const target = evt.target as HTMLElement | null;
+  if (!target) {
+    return;
+  }
+  if (target.tagName.toLocaleLowerCase() !== 'a') {
+    return;
+  }
+  const anchor = target as HTMLAnchorElement;
+  if (!anchor.hash.startsWith('#')) {
+    return;
+  }
+  if (process.env.MODE !== 'electron' && process.env.MODE !== 'capacitor') {
+    return;
+  }
+  evt.preventDefault();
+  const scrollToElement = document.getElementById(anchor.hash.substring(1));
+  if (!scrollToElement) {
+    return;
+  }
+  // Instead of using default behavior, we find our element and scroll to it.
+  // The reason I do this is because Electron and Capacitor cannot handle hash anchor properly.
+  scrollToElement.scrollIntoView({
+    behavior: 'smooth',
+  });
+}
+
 onMounted(() => {
   mdRef.value?.addEventListener('click', copyCLicked);
+  mdRef.value?.addEventListener('click', handleHashAnchor);
 });
 </script>
 
