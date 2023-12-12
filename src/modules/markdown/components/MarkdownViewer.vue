@@ -117,9 +117,6 @@ function handleHashAnchor(evt: MouseEvent) {
   if (!anchor.hash.startsWith('#')) {
     return;
   }
-  if (process.env.MODE !== 'electron' && process.env.MODE !== 'capacitor') {
-    return;
-  }
   evt.preventDefault();
   const scrollToElement = document.getElementById(anchor.hash.substring(1));
   if (!scrollToElement) {
