@@ -153,7 +153,7 @@ async function googleLogin() {
   if (process.env.MODE === 'spa') {
     await authStore.googleLogin();
   }
-  if (process.env.MODE === 'electron') {
+  if (process.env.MODE === 'electron' || process.env.MODE === 'capacitor') {
     const domain = firebaseApp.options.authDomain;
     const callbackId = uuidv4();
     const aRef = document.createElement('a');
