@@ -70,6 +70,7 @@
       <MarkdownEditor
         :style="repo.id === id ? '' : 'display: none'"
         v-model="repo.edit"
+        :hide-viewer="repo.id !== id"
         :type="editorType"
         :is-dark="darkStore.isDark"
         splitter-class="tw-h-[calc(100vh-145px)]"
