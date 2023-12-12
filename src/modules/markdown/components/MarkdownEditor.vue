@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import {
-  computed, defineAsyncComponent, ref, watch,
+  computed, defineAsyncComponent, onMounted, ref, watch,
 } from 'vue';
 import LoadingPanel from 'src/components/LoadingPanel.vue';
 import MarkdownViewer from './MarkdownViewer.vue';
@@ -63,17 +63,21 @@ const mdText = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-watch(() => props.type, (newValue) => {
+function resizeDev(editorType: EditorType) {
   if (!leftDiv.value) {
     return;
   }
-  if (newValue === 'edit') {
+  if (editorType === 'edit') {
     leftDiv.value.style.width = '100%';
-  } else if (newValue === 'view') {
+  } else if (editorType === 'view') {
     leftDiv.value.style.width = '0%';
   } else {
     leftDiv.value.style.width = '50%';
   }
+}
+
+watch(() => props.type, (newValue) => {
+  resizeDev(newValue);
 });
 
 let initialDrawerWidth = 0;
@@ -96,4 +100,8 @@ function resizeDrawer(details: {
     emit('onSplitterResize');
   }
 }
+
+onMounted(() => {
+  resizeDev(props.type);
+});
 </script>
