@@ -333,8 +333,17 @@ watch(() => props.id, async (newValue, oldValue) => {
   }
 });
 
+/**
+ * Decide editor type by min width<br/>
+ * Please see MarkdownEditor.vue, we use sm:tw-w-6/12 on leftDiv
+ */
 onBeforeMount(async () => {
   await markdownInit(props.id);
+  if (window.matchMedia('(min-width: 640px)').matches) {
+    editorType.value = 'split';
+  } else {
+    editorType.value = 'view';
+  }
 });
 
 onAuthStateChanged(auth, (user) => {
