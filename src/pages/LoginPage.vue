@@ -129,6 +129,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { OAuthCredential } from 'firebase/auth';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { App } from '@capacitor/app';
 
 const $q = useQuasar();
 
@@ -149,31 +150,58 @@ async function onSubmit() {
   }
 }
 
+async function loginWithCredential(credentialJson: string) {
+  if (authStore.user) {
+    return;
+  }
+  const credential = OAuthCredential.fromJSON(credentialJson);
+  if (!credential) {
+    $q.notify({
+      type: 'error',
+      message: i18n.t('auth.unknownError'),
+    });
+    return;
+  }
+  await authStore.credentialLogin(credential);
+}
+
 async function googleLogin() {
   if (process.env.MODE === 'spa') {
     await authStore.googleLogin();
   }
-  if (process.env.MODE === 'electron') {
+  if (process.env.MODE === 'electron' || process.env.MODE === 'capacitor') {
     const domain = firebaseApp.options.authDomain;
     const callbackId = uuidv4();
     const aRef = document.createElement('a');
     aRef.href = `https://${domain}/auth/google?callbackId=${callbackId}`;
     aRef.target = '_blank';
     aRef.click();
-    window.windowApi.handleOauth(async (event, credentialJson) => {
-      if (authStore.user) {
-        return;
-      }
-      const credential = OAuthCredential.fromJSON(credentialJson);
-      if (!credential) {
-        $q.notify({
-          type: 'error',
-          message: i18n.t('auth.unknownError'),
-        });
-        return;
-      }
-      await authStore.credentialLogin(credential);
-    });
+    if (process.env.MODE === 'electron') {
+      window.windowApi.handleOauth(async (event, credentialJson) => {
+        await loginWithCredential(credentialJson);
+      });
+    }
+    if (process.env.MODE === 'capacitor') {
+      App.addListener('appUrlOpen', async (evt) => {
+        const url = new URL(evt.url);
+        if (url.pathname !== '//verifyAuth') {
+          $q.notify({
+            type: 'error',
+            message: `Wrong hostname: ${url.pathname}`,
+          });
+          return;
+        }
+        const credentialJson = url.searchParams.get('credential');
+        if (!credentialJson) {
+          $q.notify({
+            type: 'error',
+            message: 'No credential',
+          });
+          return;
+        }
+        await loginWithCredential(credentialJson);
+      });
+    }
   }
 }
 

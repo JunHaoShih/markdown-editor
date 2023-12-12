@@ -56,7 +56,7 @@ watch(callbackId, (newId) => {
 
 function sendCredential(credential: OAuthCredential) {
   const aRef = document.createElement('a');
-  aRef.href = `markdown-editor://googleAuth?credential=${JSON.stringify(credential.toJSON())}&callbackId=${callbackId.value}`;
+  aRef.href = `markdown-editor://verifyAuth?credential=${JSON.stringify(credential.toJSON())}&callbackId=${callbackId.value}`;
   aRef.click();
   complete.value = true;
 }
