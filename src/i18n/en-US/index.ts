@@ -70,6 +70,7 @@ export default {
     workspace: 'Workspace',
     caption: 'Your markdown workspace',
     folderTree: 'Folder tree',
+    openedFiles: 'Opened files',
     indexInfo: 'Start editing your markdown',
   },
   trashBinPage: {

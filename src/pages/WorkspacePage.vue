@@ -1,27 +1,48 @@
 <template>
   <div class="outer-max tw-flex tw-flex-row tw-bg-white dark:tw-bg-stone-800 tw-ml-0.5">
-    <div class="tw-flex-none">
-      <q-btn
-        icon="folder"
-        class="action-btn q-pa-sm"
-        @click="collapseOrExpand"
+    <div class="tw-flex tw-flex-col">
+      <q-item
+        v-for="item in items" v-bind:key="item.icon"
+        :icon="item.icon"
+        dense
+        clickable
+        :class="`tw-p-2 tw-mt-2 hover:tw-bg-stone-300 hover:dark:tw-bg-stone-600
+          ${currentType === item.type ?
+            'tw-text-primary-600' :
+            'tw-text-black dark:tw-text-stone-300'}`"
+        @click="currentType = currentType === item.type ? 'none' : item.type"
       >
         <q-tooltip>
-          {{ $t('workspacePage.folderTree') }}
+          {{ $t(item.title) }}
         </q-tooltip>
-      </q-btn>
+        <q-icon :name="item.icon" size="24px"/>
+        <q-badge
+          v-if="item.type === 'files' && markdownsStore.repos.length > 0"
+          color="red"
+          floating
+          transparent
+        >
+          {{ markdownsStore.repos.length }}
+        </q-badge>
+      </q-item>
     </div>
     <div
       class="tw-w-px tw-flex tw-flex-col tw-justify-center tw-items-center
       tw-bg-stone-400 tw-ml-1"
     >
     </div>
-    <div ref="leftDiv" class="tw-flex-none tw-w-0 sm:tw-w-80">
+    <div ref="leftDiv" class="tw-flex-none tw-w-80">
       <WorkspaceTree
+        :style="currentType !== 'explorer' ? 'display: none' : ''"
         :id="id"
         :is-dark="darkStore.isDark"
         class="q-mx-sm tw-overflow-auto outer-max"
       ></WorkspaceTree>
+      <OpenedFileList
+        :id="id"
+        :style="currentType !== 'files' ? 'display: none' : ''"
+        :dark="darkStore.isDark"
+      ></OpenedFileList>
     </div>
     <div
       class="tw-w-2 tw-cursor-ew-resize tw-flex tw-flex-col tw-justify-center tw-items-center
@@ -37,9 +58,13 @@
 </template>
 
 <script setup lang="ts">
+import OpenedFileList from 'src/modules/folderViews/components/OpenedFileList.vue';
 import WorkspaceTree from 'src/modules/folderViews/components/WorkspaceTree.vue';
+import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { useDarkStore } from 'src/stores/darkModeStore';
-import { onMounted, ref } from 'vue';
+import {
+  onMounted, ref, watch,
+} from 'vue';
 
 const leftDiv = ref<HTMLElement>();
 
@@ -50,6 +75,8 @@ const defaultWidth = 320;
 const collapse = ref(false);
 
 const darkStore = useDarkStore();
+
+const markdownsStore = useMarkdownsStore();
 
 withDefaults(defineProps<{
   id?: string,
@@ -96,13 +123,36 @@ function expandTree() {
   collapse.value = false;
 }
 
-function collapseOrExpand() {
-  if (collapse.value) {
-    expandTree();
-  } else {
-    collapseTree();
-  }
+type ItemType = 'explorer' | 'files' | 'none';
+
+interface Item {
+  type: ItemType,
+  icon: string,
+  title: string,
 }
+
+const currentType = ref<ItemType>('explorer');
+
+const items: Item[] = [
+  {
+    type: 'explorer',
+    icon: 'folder',
+    title: 'workspacePage.folderTree',
+  },
+  {
+    type: 'files',
+    icon: 'list',
+    title: 'workspacePage.openedFiles',
+  },
+];
+
+watch(currentType, (newValue) => {
+  if (newValue === 'none') {
+    collapseTree();
+  } else {
+    expandTree();
+  }
+});
 
 onMounted(() => {
   if (!leftDiv.value) {
