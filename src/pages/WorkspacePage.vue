@@ -31,7 +31,7 @@
       tw-bg-stone-400 tw-ml-1"
     >
     </div>
-    <div ref="leftDiv" class="tw-flex-none tw-w-0 sm:tw-w-80">
+    <div ref="leftDiv" class="tw-flex-none tw-w-80">
       <WorkspaceTree
         :style="currentType !== 'explorer' ? 'display: none' : ''"
         :id="id"
