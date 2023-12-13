@@ -23,7 +23,7 @@
     <q-tree
       dense
       ref="treeRef"
-      :nodes="treeNodes"
+      :nodes="folderTreeStore.treeNodes"
       node-key="id"
       v-model:selected="selectedNodeKey"
       v-model:expanded="expandedKeys"
@@ -148,7 +148,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { QTree, QTreeNode, useQuasar } from 'quasar';
+import { QTree, useQuasar } from 'quasar';
 import { v4 as uuidv4 } from 'uuid';
 import { onAuthStateChanged } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
@@ -161,18 +161,9 @@ import { getMarkdownFolderView, setDefaultFolderView, setFolderView } from '../s
 import { FolderItem, FolderItemType, FolderView } from '../models/folderView';
 import { getTrashBin, setDefaultTrashBin, setTrashBin } from '../services/trashBinService';
 import { TrashBin } from '../models/trashBin';
-import { useFolderTreeStore } from '../stores/folderTreeStore';
+import { FolderTreeNode, useFolderTreeStore } from '../stores/folderTreeStore';
 
 type MoveAction = 'cut' | 'copy' | 'none';
-
-export interface FolderTreeNode extends QTreeNode {
-  id: string,
-  type: FolderItemType,
-  ref?: FolderItem,
-  parent?: FolderTreeNode | null,
-  marked?: boolean,
-  edited?: boolean,
-}
 
 const $q = useQuasar();
 
@@ -183,8 +174,6 @@ const router = useRouter();
 const markdownsStore = useMarkdownsStore();
 
 const folderTreeStore = useFolderTreeStore();
-
-const treeNodes = ref<FolderTreeNode[]>([]);
 
 const treeRef = ref<QTree>();
 
@@ -641,7 +630,7 @@ function updateEditState(nodes: FolderTreeNode[], ids: string[]) {
  * Update folder tree node edit state when unsavedIds changed
  */
 watch(() => markdownsStore.unsavedIds, () => {
-  updateEditState(treeNodes.value, markdownsStore.unsavedIds);
+  updateEditState(folderTreeStore.treeNodes, markdownsStore.unsavedIds);
 });
 
 function unsavedWarning(event: BeforeUnloadEvent) {
@@ -696,7 +685,7 @@ function folderViewInit(initView: FolderView) {
   rootNode.children?.forEach((child) => {
     child.parent = rootNode;
   });
-  treeNodes.value = [rootNode];
+  folderTreeStore.treeNodes = [rootNode];
 }
 
 /**
@@ -723,7 +712,7 @@ onAuthStateChanged(auth, async (user) => {
     if (reload) {
       window.location.reload();
     }
-    updateEditState(treeNodes.value, markdownsStore.unsavedIds);
+    updateEditState(folderTreeStore.treeNodes, markdownsStore.unsavedIds);
   }
 });
 

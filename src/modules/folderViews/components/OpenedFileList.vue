@@ -22,7 +22,7 @@
           color="amber"
           class="tw-mt-1 tw-mr-2"
         ></q-icon>
-        {{ repo.edit.split('\n')[0] }}
+        {{ folderTreeStore.findFileName(repo.id) }}
       </q-item-section>
       <q-item-section side>
         <q-icon
@@ -41,6 +41,7 @@ import { useQuasar } from 'quasar';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useFolderTreeStore } from '../stores/folderTreeStore';
 
 const $q = useQuasar();
 
@@ -49,6 +50,8 @@ const i18n = useI18n();
 const router = useRouter();
 
 const markdownsStore = useMarkdownsStore();
+
+const folderTreeStore = useFolderTreeStore();
 
 withDefaults(defineProps<{
   dark?: boolean,
