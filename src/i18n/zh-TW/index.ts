@@ -70,6 +70,7 @@ export default {
     workspace: '工作區',
     caption: '您的Markdown工作區',
     folderTree: '資料夾結構',
+    openedFiles: '已開啟檔案',
     indexInfo: '開始編輯md檔案',
   },
   trashBinPage: {
