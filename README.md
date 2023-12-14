@@ -10,7 +10,8 @@ Hosted on Firebase
 
 1. Markdown editor with real-time display  
 ![real-time-display](docs/imgs/realtime-display.png)
-3. Cloud storage
+3. Cloud storage and personal workspace  
+![workspace](docs/imgs/workspace.png)
 4. Mermaid support in Markdown  
 ![mermaid-support](docs/imgs/mermaid-support.png)
 5. Mobile support  
