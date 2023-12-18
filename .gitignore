@@ -34,3 +34,6 @@ yarn-error.log*
 
 # Firebase cache
 .firebase
+
+# Code coverage files
+coverage
