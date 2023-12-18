@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { Markdown } from '../models/markdown';
 
-interface MarkdownRepository {
+export interface MarkdownRepository {
   id: string,
   source: Markdown,
   edit: string,
