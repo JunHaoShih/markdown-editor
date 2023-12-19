@@ -26,12 +26,12 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
    */
   const selectedNodeParents = ref<FolderTreeNode[]>([]);
 
-  const panelWidth = ref(0);
-
   const breadCrumbs = computed(() => selectedNodeParents.value);
 
   const fileName = computed(
-    () => selectedNodeParents.value[selectedNodeParents.value.length - 1].label,
+    () => (selectedNodeParents.value.length > 0
+      ? selectedNodeParents.value[selectedNodeParents.value.length - 1].label
+      : null),
   );
 
   /**
@@ -44,10 +44,10 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
     if (node.id === id) {
       return node.label;
     }
-    for (let i = 0; i < (node.children?.length ?? 0); i += 1) {
-      if (!node.children) {
-        return null;
-      }
+    if (!node.children) {
+      return null;
+    }
+    for (let i = 0; i < node.children.length; i += 1) {
       const result = findFileNameFromNode(node.children[i] as FolderTreeNode, id);
       if (result) {
         return result;
@@ -61,7 +61,7 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
    * @param id Markdown file id
    * @returns Markdown filename if exist
    */
-  function findFileName(id: string): string | null | undefined {
+  function findFileName(id: string): string | null {
     for (let i = 0; i < treeNodes.value.length; i += 1) {
       const result = findFileNameFromNode(treeNodes.value[i], id);
       if (result) {
@@ -74,7 +74,6 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
   return {
     treeNodes,
     selectedNodeParents,
-    panelWidth,
     breadCrumbs,
     fileName,
     findFileName,
