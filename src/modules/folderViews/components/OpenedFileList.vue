@@ -1,39 +1,44 @@
 <template>
-  <q-list
-    separator
-    :dark="dark"
+  <div
+    ref="listRef"
+    tabindex="-1"
   >
-    <q-item
-      v-for="repo in markdownsStore.repos" :key="repo.id"
-      clickable
-      v-ripple
-      dense
-      @click="toFile(repo.id)"
+    <q-list
+      separator
+      :dark="dark"
     >
-      <q-item-section avator class="tw-flex-none">
-        <q-icon name="description"
-          :color="repo.id === id ? 'primary' : 'white'" />
-      </q-item-section>
-      <q-item-section class="tw-text-stone-800 dark:tw-text-stone-300
-      tw-flex tw-flex-row tw-my-auto tw-justify-start">
-        <q-icon
-          v-if="markdownsStore.unsavedIds.includes(repo.id)"
-          name="adjust"
-          color="amber"
-          class="tw-mt-1 tw-mr-2"
-        ></q-icon>
-        {{ folderTreeStore.findFileName(repo.id) }}
-      </q-item-section>
-      <q-item-section side>
-        <q-icon
-          v-if="repo.id !== id"
-          name="cancel"
-          class="tw-cursor-pointer tw-bg-white dark:tw-bg-stone-700 dark:tw-text-stone-300"
-          @click.stop="closeFile(repo.id)"
-        />
-      </q-item-section>
-    </q-item>
-  </q-list>
+      <q-item
+        v-for="repo in markdownsStore.repos" :key="repo.id"
+        clickable
+        v-ripple
+        dense
+        @click="toFile(repo.id)"
+      >
+        <q-item-section avator class="tw-flex-none">
+          <q-icon name="description"
+            :color="repo.id === id ? 'primary' : 'white'" />
+        </q-item-section>
+        <q-item-section class="tw-text-stone-800 dark:tw-text-stone-300
+        tw-flex tw-flex-row tw-my-auto tw-justify-start">
+          <q-icon
+            v-if="markdownsStore.unsavedIds.includes(repo.id)"
+            name="adjust"
+            color="amber"
+            class="tw-mt-1 tw-mr-2"
+          ></q-icon>
+          {{ folderTreeStore.findFileName(repo.id) }}
+        </q-item-section>
+        <q-item-section side>
+          <q-icon
+            v-if="repo.id !== id"
+            name="cancel"
+            class="tw-cursor-pointer tw-bg-white dark:tw-bg-stone-700 dark:tw-text-stone-300"
+            @click.stop="closeFile(repo.id)"
+          />
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -41,7 +46,10 @@ import { useQuasar } from 'quasar';
 import { useMarkdownsStore } from 'src/modules/markdown/stores/markdownsStore';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 import { useFolderTreeStore } from '../stores/folderTreeStore';
+
+const listRef = ref<HTMLElement>();
 
 const $q = useQuasar();
 
@@ -86,4 +94,14 @@ function closeFile(mdId: string) {
 function toFile(mdId: string) {
   router.push(`/workspace/${mdId}`);
 }
+
+function focusList() {
+  setTimeout(() => {
+    listRef.value?.focus();
+  }, 200);
+}
+
+defineExpose({
+  focusList,
+});
 </script>

@@ -68,4 +68,62 @@ describe('Test folderTreeStore', () => {
     });
     expect(store.fileName === 'Title 3');
   });
+
+  function getTravelTestTree(): {
+    tree: FolderTreeNode[],
+    startingNode: FolderTreeNode,
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    const childTwo: FolderTreeNode = {
+      id: '3',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne, childTwo];
+    const subChildOne: FolderTreeNode = {
+      id: '4',
+      type: 'article',
+      parent: childOne,
+    };
+    childOne.children = [subChildOne];
+    return {
+      tree: [rootNode],
+      startingNode: childTwo,
+    };
+  }
+
+  it.concurrent('Get above node', () => {
+    const store = useFolderTreeStore();
+    const data = getTravelTestTree();
+    store.treeNodes = data.tree;
+    const targetId = store.getNextNodeAbove(
+      data.startingNode,
+      () => true,
+      '99',
+    );
+    expect(targetId === '1');
+    const defaultId = store.getNextNodeAbove(
+      null,
+      () => true,
+      '99',
+    );
+    expect(defaultId === '99');
+    const nestedAboveId = store.getNextNodeAbove(
+      {
+        id: '3',
+        type: 'article',
+      },
+      () => true,
+      '99',
+    );
+    expect(nestedAboveId === '4');
+  });
 });
