@@ -187,7 +187,6 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
       return currentNode.id;
     }
     const first = currentNode.children[0] as FolderTreeNode;
-    setExpanded(currentNode.id, true);
     return first.id;
   }
 
