@@ -182,6 +182,8 @@ onMounted(() => {
     return;
   }
   collapse.value = !leftDiv.value.offsetWidth;
+  currentType.value = 'explorer';
+  folderTree.value?.focusTree();
 });
 </script>
 
