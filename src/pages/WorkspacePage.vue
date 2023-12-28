@@ -174,7 +174,6 @@ function handleKeyDown(event: KeyboardEvent) {
   if (event.ctrlKey && event.shiftKey && event.key === 'F') {
     currentType.value = 'files';
     listRef.value?.focusList();
-    // mainRef.value?.focus();
   }
 }
 
