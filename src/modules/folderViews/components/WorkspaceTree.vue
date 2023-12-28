@@ -161,7 +161,7 @@
 
 <script setup lang="ts">
 import {
-  computed, onBeforeMount, ref, watch,
+  computed, ref, watch,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -243,10 +243,6 @@ watch(() => props.id, (newValue) => {
   }
 }, {
   immediate: true,
-});
-
-onBeforeMount(() => {
-  // selectedNodeKey.value = props.id;
 });
 
 function allParents(node: FolderTreeNode): FolderTreeNode[] {

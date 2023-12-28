@@ -73,7 +73,7 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
 
   function findNextNodeBelow(currentNode: FolderTreeNode): FolderTreeNode | null {
     const { parent } = currentNode;
-    if (!parent || !parent.children) {
+    if (!parent?.children) {
       return null;
     }
     const index = parent.children.findIndex((node) => node.id === currentNode.id);
@@ -139,7 +139,7 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
       return defaultId;
     }
     const { parent } = currentNode;
-    if (!parent || !parent.children || parent.children.length === 0) {
+    if (!parent?.children || parent.children.length === 0) {
       return currentNode.id;
     }
     const index = parent.children.findIndex((child) => child.id === currentNode.id);
