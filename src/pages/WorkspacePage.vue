@@ -175,6 +175,9 @@ function handleKeyDown(event: KeyboardEvent) {
     currentType.value = 'files';
     listRef.value?.focusList();
   }
+  if (event.ctrlKey && event.shiftKey && event.key === '!') {
+    markdownsStore.triggerFocus = true;
+  }
 }
 
 onMounted(() => {
