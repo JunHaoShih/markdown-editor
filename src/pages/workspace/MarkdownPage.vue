@@ -66,18 +66,18 @@
         @click="editorType = 'view'"
       ></q-btn>
     </div>
-    <div v-for="repo in markdownsStore.repos" :key="repo.id">
-      <MarkdownEditor
-        :style="repo.id === id ? '' : 'display: none'"
-        v-model="repo.edit"
-        :hide-viewer="repo.id !== id"
-        :type="editorType"
-        :is-dark="darkStore.isDark"
-        splitter-class="tw-h-[calc(100vh-145px)]"
-        @on-splitter-resize="editorType = 'none'"
-      >
-      </MarkdownEditor>
-    </div>
+    <MarkdownEditor
+      v-for="repo in markdownsStore.repos" :key="repo.id"
+      ref="editors"
+      :style="repo.id === id ? '' : 'display: none'"
+      v-model="repo.edit"
+      :hide-viewer="repo.id !== id"
+      :type="editorType"
+      :is-dark="darkStore.isDark"
+      splitter-class="tw-h-[calc(100vh-145px)]"
+      @on-splitter-resize="editorType = 'none'"
+    >
+    </MarkdownEditor>
     <q-fab
       v-model="fabDisplay"
       icon="keyboard_arrow_up"
@@ -168,6 +168,8 @@ const folderTreeStore = useFolderTreeStore();
 const authStore = useAuthStore();
 
 const darkStore = useDarkStore();
+
+const editors = ref<InstanceType<typeof MarkdownEditor>[]>();
 
 const editorType = ref<EditorType>('split');
 
@@ -351,6 +353,23 @@ onAuthStateChanged(auth, (user) => {
     authStore.user = user;
   } else {
     router.push('/login');
+  }
+});
+
+watch(() => markdownsStore.triggerFocus, (newValue) => {
+  if (newValue) {
+    const index = markdownsStore.repos.findIndex((repo) => repo.id === props.id);
+    if (index < 0) {
+      markdownsStore.triggerFocus = false;
+      return;
+    }
+    const editor = editors.value?.at(index);
+    if (!editor) {
+      markdownsStore.triggerFocus = false;
+      return;
+    }
+    markdownsStore.triggerFocus = false;
+    editor.focusEditor();
   }
 });
 </script>

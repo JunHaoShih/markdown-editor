@@ -1,5 +1,9 @@
 <template>
-  <div class="outer-max tw-flex tw-flex-row tw-bg-white dark:tw-bg-stone-800 tw-ml-0.5">
+  <div
+    class="outer-max tw-flex tw-flex-row tw-bg-white dark:tw-bg-stone-800 tw-ml-0.5"
+    @keydown="handleKeyDown"
+    ref="mainRef"
+  >
     <div class="tw-flex tw-flex-col">
       <q-item
         v-for="item in items" v-bind:key="item.icon"
@@ -33,12 +37,14 @@
     </div>
     <div ref="leftDiv" class="tw-flex-none tw-w-80">
       <WorkspaceTree
+        ref="folderTree"
         :style="currentType !== 'explorer' ? 'display: none' : ''"
         :id="id"
         :is-dark="darkStore.isDark"
         class="q-mx-sm tw-overflow-auto outer-max"
       ></WorkspaceTree>
       <OpenedFileList
+        ref="listRef"
         :id="id"
         :style="currentType !== 'files' ? 'display: none' : ''"
         :dark="darkStore.isDark"
@@ -67,6 +73,12 @@ import {
 } from 'vue';
 
 const leftDiv = ref<HTMLElement>();
+
+const mainRef = ref<HTMLElement>();
+
+const folderTree = ref<InstanceType<typeof WorkspaceTree> | null>(null);
+
+const listRef = ref<InstanceType<typeof OpenedFileList> | null>(null);
 
 const drawerMaxWidth = 500;
 
@@ -154,11 +166,27 @@ watch(currentType, (newValue) => {
   }
 });
 
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.ctrlKey && event.shiftKey && event.key === 'E') {
+    currentType.value = 'explorer';
+    folderTree.value?.focusTree();
+  }
+  if (event.ctrlKey && event.shiftKey && event.key === 'F') {
+    currentType.value = 'files';
+    listRef.value?.focusList();
+  }
+  if (event.ctrlKey && event.shiftKey && event.key === '!') {
+    markdownsStore.triggerFocus = true;
+  }
+}
+
 onMounted(() => {
   if (!leftDiv.value) {
     return;
   }
   collapse.value = !leftDiv.value.offsetWidth;
+  currentType.value = 'explorer';
+  folderTree.value?.focusTree();
 });
 </script>
 

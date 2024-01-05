@@ -11,6 +11,8 @@ export interface MarkdownRepository {
 export const useMarkdownsStore = defineStore('markdownCache', () => {
   const repos = ref<MarkdownRepository[]>([]);
 
+  const triggerFocus = ref(false);
+
   const hasUnsaved = computed(
     () => !!repos.value.find((repo) => repo.source.content !== repo.edit),
   );
@@ -64,6 +66,7 @@ export const useMarkdownsStore = defineStore('markdownCache', () => {
 
   return {
     repos,
+    triggerFocus,
     hasUnsaved,
     unsavedIds,
     targetRepo,
