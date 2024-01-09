@@ -82,7 +82,7 @@
 
 <script setup lang="ts">
 import { onAuthStateChanged } from 'firebase/auth';
-import { QuerySnapshot } from 'firebase/firestore';
+import { QueryDocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { QTableProps, useQuasar } from 'quasar';
 import { auth } from 'src/boot/firebase';
 import { FolderItem, FolderView } from 'src/modules/folderViews/models/folderView';
@@ -90,7 +90,7 @@ import { TrashBin } from 'src/modules/folderViews/models/trashBin';
 import { getMarkdownFolderView, setDefaultFolderView, setFolderView } from 'src/modules/folderViews/services/folderViewService';
 import { getTrashBin, setDefaultTrashBin, setTrashBin } from 'src/modules/folderViews/services/trashBinService';
 import { Markdown } from 'src/modules/markdown/models/markdown';
-import { deleteMarkdown, getDeletedMarkdowns } from 'src/modules/markdown/services/markdownService';
+import { deleteMarkdown, getDeletedMarkdowns, setMarkdown } from 'src/modules/markdown/services/markdownService';
 import { getValidName } from 'src/services/fileNameService';
 import { useDarkStore } from 'src/stores/darkModeStore';
 import { computed, ref } from 'vue';
@@ -119,6 +119,15 @@ const trashBinView = ref<TrashBin>({
 
 const deletedMarkdowns = ref<QuerySnapshot<Markdown, Markdown>>();
 
+function getAllChildren(folderItem: FolderItem): FolderItem[] {
+  const items: FolderItem[] = [];
+  items.push(folderItem);
+  const allChildren = folderItem.children
+    .map((child) => getAllChildren(child))
+    .reduce((previous, current) => previous.concat(current), items);
+  return allChildren;
+}
+
 function onUndoClicked(folderItem: FolderItem) {
   $q.dialog({
     dark: true,
@@ -133,18 +142,21 @@ function onUndoClicked(folderItem: FolderItem) {
     const newName = getValidName(itemNames, removedFolderItem.name);
     removedFolderItem.name = newName;
     folderView.value.content.push(removedFolderItem);
+    const children = getAllChildren(folderItem);
+    const promises = children
+      .map(
+        (child) => deletedMarkdowns.value?.docs.find((docRef) => docRef.id === child.id),
+      ).filter(
+        (child): child is QueryDocumentSnapshot<Markdown, Markdown> => child !== null,
+      ).map((doc) => {
+        const md = doc.data();
+        md.isDeleted = false;
+        return setMarkdown(md, doc.id);
+      });
+    await Promise.all(promises);
     await setFolderView(folderView.value);
     await setTrashBin(trashBinView.value);
   });
-}
-
-function getAllChildren(folderItem: FolderItem): FolderItem[] {
-  const items: FolderItem[] = [];
-  items.push(folderItem);
-  const allChildren = folderItem.children
-    .map((child) => getAllChildren(child))
-    .reduce((previous, current) => previous.concat(current), items);
-  return allChildren;
 }
 
 function onDeleteClicked(folderItem: FolderItem) {
