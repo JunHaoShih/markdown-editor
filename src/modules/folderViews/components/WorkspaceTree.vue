@@ -28,6 +28,7 @@
       @keydown.up="tryMoveUpNode"
       @keydown.down="tryMoveDownNode"
       @keydown.enter.prevent="openFile"
+      @keydown="handleKeyDown"
       tabindex="-1"
     >
       <q-tree
@@ -445,12 +446,16 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
   // Move folder item to trash bin
   trashBinView.value.content.push(node.ref);
   // Get children of parent folder item
-  const targetChildren = parentNode.id
+  const targetChildren = parentNode.id !== workspaceRoot
     ? parentNode.ref?.children
     : folderView.value.content;
-  markAllChildrenFileAsDelete(targetChildren);
-  const index = targetChildren?.findIndex((child) => child.id === node.id);
+  if (!targetChildren) {
+    return;
+  }
+  const index = targetChildren.findIndex((child) => child.id === node.id);
   if (index !== undefined && index >= 0) {
+    const targetChild = targetChildren[index];
+    markAllChildrenFileAsDelete([targetChild]);
     targetChildren?.splice(index, 1);
   }
   // Delete tree node
@@ -459,7 +464,11 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
     parentNode.children?.splice(nodeIndex, 1);
   }
   // Push route to parent node page after delete
-  router.push(`/workspace/${parentNode.id}`);
+  if (parentNode.id === workspaceRoot) {
+    router.push('/workspace');
+  } else {
+    router.push(`/workspace/${parentNode.id}`);
+  }
 }
 
 /**
@@ -770,6 +779,19 @@ watch(trashBinView, async (newValue, oldValue) => {
 }, {
   deep: true,
 });
+
+function addFileByShortCut() {
+  if (!traveledNode.value) {
+    return;
+  }
+  setupDialog(i18n.t('folderViews.addFile'), 'article', traveledNode.value);
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.shiftKey && event.key === 'N') {
+    addFileByShortCut();
+  }
+}
 
 function tryExpandNode() {
   traveledNodeKey.value = folderTreeStore.getStepInNode(
