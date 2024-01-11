@@ -1,4 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia';
+import { FolderItem } from 'src/modules/folderViews/models/folderView';
 import { FolderTreeNode, useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
 import {
   beforeEach, describe, expect, it,
@@ -11,10 +12,10 @@ describe('Test folderTreeStore', () => {
 
   it.concurrent('Init', () => {
     const store = useFolderTreeStore();
-    expect(store.treeNodes.length === 0);
-    expect(store.selectedNodeParents.length === 0);
-    expect(store.breadCrumbs.length === 0);
-    expect(store.fileName === undefined);
+    expect(store.treeNodes.length).toBe(0);
+    expect(store.selectedNodeParents.length).toBe(0);
+    expect(store.breadCrumbs.length).toBe(0);
+    expect(store.fileName).toBe(null);
   });
 
   function getDefaultTree(): FolderTreeNode[] {
@@ -45,8 +46,8 @@ describe('Test folderTreeStore', () => {
     const found = !!store.findFileName('1');
     const alsoFound = !!store.findFileName('3');
     const notFound = !store.findFileName('5');
-    expect(found && alsoFound);
-    expect(notFound);
+    expect(found).toBe(alsoFound);
+    expect(notFound).toBe(true);
   });
 
   it.concurrent('Breadcrumbs', () => {
@@ -66,6 +67,305 @@ describe('Test folderTreeStore', () => {
       type: 'article',
       label: 'Title 3',
     });
-    expect(store.fileName === 'Title 3');
+    expect(store.fileName).toBe('Title 3');
+  });
+
+  function getTravelTestTree(): {
+    tree: FolderTreeNode[],
+    cases: {
+      start: FolderTreeNode | null,
+      nextId: string | null,
+      expand: boolean,
+    }[],
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    const childTwo: FolderTreeNode = {
+      id: '3',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne, childTwo];
+    const subChildOne: FolderTreeNode = {
+      id: '4',
+      type: 'article',
+      parent: childOne,
+    };
+    childOne.children = [subChildOne];
+    return {
+      tree: [rootNode],
+      cases: [
+        { start: childOne, nextId: rootNode.id, expand: true },
+        { start: null, nextId: null, expand: true },
+        { start: childTwo, nextId: subChildOne.id, expand: true },
+        { start: childTwo, nextId: childOne.id, expand: false },
+      ],
+    };
+  }
+
+  it.concurrent('Get above node', () => {
+    const store = useFolderTreeStore();
+    const data = getTravelTestTree();
+    store.treeNodes = data.tree;
+    data.cases.forEach((testCase) => {
+      const targetId = store.getNextNodeAbove(
+        testCase.start,
+        () => testCase.expand,
+        '99',
+      );
+      expect(targetId).toBe(testCase.nextId ?? '99');
+    });
+  });
+
+  function getTravelBelowTree(): {
+    tree: FolderTreeNode[],
+    cases: {
+      start: FolderTreeNode| null,
+      nextId: string | null,
+      expand: boolean,
+    }[],
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    const childTwo: FolderTreeNode = {
+      id: '3',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne, childTwo];
+    const subChildOne: FolderTreeNode = {
+      id: '4',
+      type: 'article',
+      parent: childOne,
+    };
+    childOne.children = [subChildOne];
+    return {
+      tree: [rootNode],
+      cases: [
+        { start: subChildOne, nextId: childTwo.id, expand: true },
+        { start: childOne, nextId: subChildOne.id, expand: true },
+        { start: childTwo, nextId: childTwo.id, expand: true },
+        { start: null, nextId: null, expand: true },
+      ],
+    };
+  }
+
+  it.concurrent('Get below node', () => {
+    const store = useFolderTreeStore();
+    const data = getTravelBelowTree();
+    store.treeNodes = data.tree;
+    data.cases.forEach((testCase) => {
+      const targetId = store.getNextNodeBelow(
+        testCase.start,
+        () => testCase.expand,
+        '99',
+      );
+      expect(targetId).toBe(testCase.nextId ?? '99');
+    });
+  });
+
+  function getStepInTree(): {
+    tree: FolderTreeNode[],
+    cases: {
+      start: FolderTreeNode| null,
+      nextId: string | null,
+      expand: boolean,
+      setExpandTrigger: boolean,
+    }[],
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne];
+    return {
+      tree: [rootNode],
+      cases: [
+        {
+          start: rootNode, nextId: rootNode.id, expand: false, setExpandTrigger: true,
+        },
+        {
+          start: rootNode, nextId: childOne.id, expand: true, setExpandTrigger: false,
+        },
+        {
+          start: null, nextId: null, expand: true, setExpandTrigger: false,
+        },
+      ],
+    };
+  }
+
+  it.concurrent('Get step in node', () => {
+    const store = useFolderTreeStore();
+    const data = getStepInTree();
+    store.treeNodes = data.tree;
+    data.cases.forEach((testCase) => {
+      let triggered = false;
+      const targetId = store.getStepInNode(
+        testCase.start,
+        () => testCase.expand,
+        () => { triggered = true; },
+        '99',
+      );
+      expect(targetId).toBe(testCase.nextId ?? '99');
+      expect(triggered).toBe(testCase.setExpandTrigger);
+    });
+  });
+
+  function getStepOutTree(): {
+    tree: FolderTreeNode[],
+    cases: {
+      start: FolderTreeNode| null,
+      nextId: string | null,
+      expand: boolean,
+      setExpandTrigger: boolean,
+    }[],
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne];
+    return {
+      tree: [rootNode],
+      cases: [
+        {
+          start: rootNode, nextId: rootNode.id, expand: true, setExpandTrigger: true,
+        },
+        {
+          start: childOne, nextId: rootNode.id, expand: false, setExpandTrigger: false,
+        },
+        {
+          start: null, nextId: null, expand: true, setExpandTrigger: false,
+        },
+      ],
+    };
+  }
+
+  it.concurrent('Get step out node', () => {
+    const store = useFolderTreeStore();
+    const data = getStepOutTree();
+    store.treeNodes = data.tree;
+    data.cases.forEach((testCase) => {
+      let triggered = false;
+      const targetId = store.getStepOutNode(
+        testCase.start,
+        () => testCase.expand,
+        () => { triggered = true; },
+        '99',
+      );
+      expect(targetId).toBe(testCase.nextId ?? '99');
+      expect(triggered).toBe(testCase.setExpandTrigger);
+    });
+  });
+
+  function getDefaultFolderItems(): FolderItem[] {
+    const items: FolderItem[] = [
+      {
+        id: '1',
+        name: '1',
+        type: 'article',
+        children: [
+          {
+            id: '3',
+            name: '3',
+            type: 'article',
+            children: [],
+          },
+        ],
+      },
+      {
+        id: '2',
+        name: '2',
+        type: 'article',
+        children: [],
+      },
+    ];
+    return items;
+  }
+
+  it.concurrent('Init folder view', () => {
+    const store = useFolderTreeStore();
+    const folderItems = getDefaultFolderItems();
+    store.folderViewInit(folderItems, 'root', 'root-id');
+    expect(store.treeNodes.length).toBe(1);
+    expect(store.treeNodes[0].label).toBe('root');
+    expect(store.treeNodes[0].id).toBe('root-id');
+    const rootNode = store.treeNodes[0];
+    expect(rootNode.children?.length).toBe(2);
+  });
+
+  it.concurrent('Expand nodes', () => {
+    const store = useFolderTreeStore();
+    store.expandNode('1');
+    expect(store.expandedKeys.includes('1')).toBe(true);
+  });
+
+  function getBreadCrubsTestTree(): {
+    tree: FolderTreeNode[],
+    cases: {
+      start: FolderTreeNode,
+      crumbs: FolderTreeNode[],
+    }[],
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    const childTwo: FolderTreeNode = {
+      id: '3',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne, childTwo];
+    const subChildOne: FolderTreeNode = {
+      id: '4',
+      type: 'article',
+      parent: childOne,
+    };
+    childOne.children = [subChildOne];
+    return {
+      tree: [rootNode],
+      cases: [
+        { start: subChildOne, crumbs: [subChildOne, childOne, rootNode] },
+      ],
+    };
+  }
+
+  it.concurrent('Update breadcrubs', () => {
+    const store = useFolderTreeStore();
+    const { cases } = getBreadCrubsTestTree();
+    cases.forEach(({ start, crumbs }) => {
+      store.updateBreadcrumbs(start);
+      expect(store.breadCrumbs.length).toBe(crumbs.length);
+    });
   });
 });

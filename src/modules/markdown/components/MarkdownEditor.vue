@@ -2,6 +2,7 @@
   <div class="tw-flex tw-flex-row">
     <div ref="leftDiv" class="tw-w-full sm:tw-w-6/12">
       <MonacoEditor
+        ref="editor"
         v-model="mdText"
         :class="`${splitterClass} q-pt-xs q-pr-sm`"
         :is-dark="isDark"
@@ -39,6 +40,8 @@ const MonacoEditor = defineAsyncComponent({
   loadingComponent: LoadingPanel,
   delay: 200,
 });
+
+const editor = ref<InstanceType<typeof MonacoEditor> | null>(null);
 
 const leftDiv = ref<HTMLElement>();
 
@@ -101,7 +104,15 @@ function resizeDrawer(details: {
   }
 }
 
+function focusEditor() {
+  editor.value?.focusEditor();
+}
+
 onMounted(() => {
   resizeDev(props.type);
+});
+
+defineExpose({
+  focusEditor,
 });
 </script>

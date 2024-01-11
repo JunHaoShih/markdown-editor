@@ -77,6 +77,7 @@
             :key="link.title"
             :navNode="link"
             :is-dark="darkStore.isDark"
+            @click="leftDrawerOpen = false"
           />
         </q-list>
       </q-scroll-area>

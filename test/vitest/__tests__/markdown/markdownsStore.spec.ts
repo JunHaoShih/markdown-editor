@@ -13,7 +13,7 @@ describe('Test markdownStore', () => {
 
   it.concurrent('Init', () => {
     const stroe = useMarkdownsStore();
-    expect(stroe.repos.length === 0);
+    expect(stroe.repos.length).toBe(0);
   });
 
   function getDefaultRepos(): MarkdownRepository[] {
@@ -38,7 +38,7 @@ describe('Test markdownStore', () => {
           createAt: Timestamp.now(),
           updateAt: Timestamp.now(),
         },
-        edit: 'Test2',
+        edit: '',
       },
     ];
   }
@@ -47,14 +47,14 @@ describe('Test markdownStore', () => {
     const store = useMarkdownsStore();
     const repos = getDefaultRepos();
     repos.forEach((repo) => store.insert(repo.source, repo.id));
-    expect(store.repos.length === repos.length);
+    expect(store.repos.length).toBe(repos.length);
     store.repos.forEach((repo, index) => {
-      expect(repo.edit === '');
-      expect(repo.source === repos[index].source);
+      expect(repo.edit).toBe(repo.source.content);
+      expect(repo.source).toStrictEqual(repos[index].source);
     });
     // Test repeat insert
     repos.forEach((repo) => store.insert(repo.source, repo.id));
-    expect(store.repos.length === repos.length);
+    expect(store.repos.length).toBe(repos.length);
   });
 
   it.concurrent('Get by id', () => {
@@ -63,8 +63,8 @@ describe('Test markdownStore', () => {
     repos.forEach((repo) => store.insert(repo.source, repo.id));
     const exist = !!store.targetRepo('1');
     const notExist = !store.targetRepo('3');
-    expect(exist);
-    expect(notExist);
+    expect(exist).toBe(true);
+    expect(notExist).toBe(true);
   });
 
   it.concurrent('Unsaved', () => {
@@ -73,9 +73,9 @@ describe('Test markdownStore', () => {
     repos.forEach((repo) => store.insert(repo.source, repo.id));
     store.repos[0].edit = 'Yes';
     const { hasUnsaved, unsavedIds } = store;
-    expect(hasUnsaved);
-    expect(unsavedIds.length === 1);
-    expect(unsavedIds[0] === '1');
+    expect(hasUnsaved).toBe(true);
+    expect(unsavedIds.length).toBe(1);
+    expect(unsavedIds[0]).toBe('1');
   });
 
   it.concurrent('Save', () => {
@@ -90,9 +90,9 @@ describe('Test markdownStore', () => {
       updateAt: Timestamp.now(),
     };
     store.save(newMd, '1');
-    expect(store.repos[0].source === newMd);
+    expect(store.repos[0].source).toStrictEqual(newMd);
     store.save(newMd, '5');
-    expect(store.repos[2].source === newMd);
+    expect(store.repos[2].source).toStrictEqual(newMd);
   });
 
   it.concurrent('Update edit', () => {
@@ -100,7 +100,7 @@ describe('Test markdownStore', () => {
     const repos = getDefaultRepos();
     repos.forEach((repo) => store.insert(repo.source, repo.id));
     store.updateEdit('New edit', '1');
-    expect(store.repos[0].edit === 'New edit');
+    expect(store.repos[0].edit).toBe('New edit');
   });
 
   it.concurrent('Set delete', () => {
@@ -108,6 +108,6 @@ describe('Test markdownStore', () => {
     const repos = getDefaultRepos();
     repos.forEach((repo) => store.insert(repo.source, repo.id));
     store.setDelete(true, '1');
-    expect(store.repos[0].source.isDeleted === true);
+    expect(store.repos[0].source.isDeleted).toBe(true);
   });
 });

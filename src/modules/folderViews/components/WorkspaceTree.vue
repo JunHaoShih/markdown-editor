@@ -1,7 +1,7 @@
 <template>
   <div
     v-on:keydown.esc.prevent="cancelMarked"
-    tabindex="-1"
+    class="tw-flex tw-flex-col"
   >
     <div class="tw-flex tw-flex-row">
       <q-btn
@@ -20,122 +20,140 @@
       class="q-ma-sm"
       :dark="isDark"
     />
-    <q-tree
-      dense
-      ref="treeRef"
-      :nodes="folderTreeStore.treeNodes"
-      node-key="id"
-      v-model:selected="selectedNodeKey"
-      v-model:expanded="expandedKeys"
-      selected-color="primary"
-      :duration="0"
-      no-selection-unset
-      style="width: max-content;"
-      :dark="isDark"
+    <div
+      ref="treePanel"
+      class="tw-flex-1 focus:tw-border-yellow-500"
+      @keydown.right="tryExpandNode"
+      @keydown.left="tryCollapseNode"
+      @keydown.up="tryMoveUpNode"
+      @keydown.down="tryMoveDownNode"
+      @keydown.enter.prevent="openFile"
+      @keydown="handleKeyDown"
+      tabindex="-1"
     >
-      <template v-slot:default-header="prop">
-        <div :class="prop.node.marked ? 'filter-marked' : ''">
-          <div class="row items-center">
-            <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
-            <q-icon
-              v-if="(prop.node as FolderTreeNode).edited"
-              name="adjust"
-              color="amber"
-              class="q-mr-sm"
-            ></q-icon>
-            <div>{{ prop.node.label }}</div>
+      <q-tree
+        dense
+        ref="treeRef"
+        :nodes="folderTreeStore.treeNodes"
+        node-key="id"
+        v-model:selected="selectedNodeKey"
+        v-model:expanded="folderTreeStore.expandedKeys"
+        selected-color="primary"
+        :duration="0"
+        no-selection-unset
+        style="width: max-content;"
+        :dark="isDark"
+      >
+        <template v-slot:default-header="prop">
+          <div :class="prop.node.marked ? 'filter-marked' : ''">
+            <div :class="`row items-center ${
+              (prop.node as FolderTreeNode).id === traveledNodeKey ?
+                'tw-bg-stone-300 dark:tw-bg-stone-600 tw-rounded' :
+                ''
+            }`">
+              <q-icon :name="prop.node.icon" class="q-mr-sm"></q-icon>
+              <q-icon
+                v-if="(prop.node as FolderTreeNode).edited"
+                name="adjust"
+                color="amber"
+                class="q-mr-sm"
+              ></q-icon>
+              <div>
+                {{ prop.node.label }}
+              </div>
+            </div>
           </div>
-        </div>
-        <q-menu
-          touch-position
-          context-menu
-          class="dark:tw-bg-stone-800"
-          :dark="isDark"
-        >
-          <q-list dense style="min-width: 100px">
-            <q-item
-              clickable
-              v-close-popup
-            >
-              <q-item-section>
-                <div
-                  @click="addFileByRightClick(prop.node)"
-                >
-                  <q-icon name="description" color="primary"/>
-                  {{ $t('folderViews.addFile') }}
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              v-if="(prop.node as FolderTreeNode).id"
-            >
-              <q-item-section>
-                <div
-                  @click="setRenameDialog($t('folderViews.rename'), prop.node)"
-                >
-                  <q-icon name="edit" color="primary"/>
-                  {{ $t('actions.rename') }}
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              v-if="(prop.node as FolderTreeNode).id"
-              @click="onDeleteClicked(prop.node)"
-            >
-              <q-item-section>
-                <div>
-                  <q-icon name="delete" color="red"/>
-                  {{ $t('actions.delete') }}
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              v-if="(prop.node as FolderTreeNode).id"
-              @click="onCutClicked(prop.node)"
-            >
-              <q-item-section>
-                <div>
-                  <q-icon name="content_cut" color="primary"/>
-                  {{ $t('actions.cut') }}
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              v-if="(prop.node as FolderTreeNode).id"
-              @click="onCopyClicked(prop.node)"
-            >
-              <q-item-section>
-                <div>
-                  <q-icon name="content_copy" color="primary"/>
-                  {{ $t('actions.copy') }}
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              :class="!pastable(prop.node) ? 'hidden' : ''"
-              @click="onPasteClicked(prop.node)"
-            >
-              <q-item-section>
-                <div>
-                  <q-icon name="content_paste" color="primary"/>
-                  {{ $t('actions.paste') }}
-                </div>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </template>
-    </q-tree>
+          <q-menu
+            touch-position
+            context-menu
+            class="dark:tw-bg-stone-800"
+            :dark="isDark"
+          >
+            <q-list dense style="min-width: 100px">
+              <q-item
+                clickable
+                v-close-popup
+              >
+                <q-item-section>
+                  <div
+                    @click="addFileByRightClick(prop.node)"
+                  >
+                    <q-icon name="description" color="primary"/>
+                    {{ $t('folderViews.addFile') }}
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                v-if="(prop.node as FolderTreeNode).id"
+              >
+                <q-item-section>
+                  <div
+                    @click="setRenameDialog($t('folderViews.rename'), prop.node)"
+                  >
+                    <q-icon name="edit" color="primary"/>
+                    {{ $t('actions.rename') }}
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                v-if="(prop.node as FolderTreeNode).id"
+                @click="onDeleteClicked(prop.node)"
+              >
+                <q-item-section>
+                  <div>
+                    <q-icon name="delete" color="red"/>
+                    {{ $t('actions.delete') }}
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                v-if="(prop.node as FolderTreeNode).id"
+                @click="onCutClicked(prop.node)"
+              >
+                <q-item-section>
+                  <div>
+                    <q-icon name="content_cut" color="primary"/>
+                    {{ $t('actions.cut') }}
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                v-if="(prop.node as FolderTreeNode).id"
+                @click="onCopyClicked(prop.node)"
+              >
+                <q-item-section>
+                  <div>
+                    <q-icon name="content_copy" color="primary"/>
+                    {{ $t('actions.copy') }}
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-close-popup
+                :class="!pastable(prop.node) ? 'hidden' : ''"
+                @click="onPasteClicked(prop.node)"
+              >
+                <q-item-section>
+                  <div>
+                    <q-icon name="content_paste" color="primary"/>
+                    {{ $t('actions.paste') }}
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </template>
+      </q-tree>
+    </div>
     <NewFileDialog
       ref="dialogRef"
     ></NewFileDialog>
@@ -144,7 +162,7 @@
 
 <script setup lang="ts">
 import {
-  computed, onBeforeMount, ref, watch,
+  computed, ref, watch,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -165,6 +183,8 @@ import { FolderTreeNode, useFolderTreeStore } from '../stores/folderTreeStore';
 
 type MoveAction = 'cut' | 'copy' | 'none';
 
+const workspaceRoot = 'workspace-root';
+
 const $q = useQuasar();
 
 const i18n = useI18n();
@@ -175,17 +195,23 @@ const markdownsStore = useMarkdownsStore();
 
 const folderTreeStore = useFolderTreeStore();
 
+const treePanel = ref<HTMLDivElement>();
+
 const treeRef = ref<QTree>();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
-const expandedKeys = ref<string[]>([]);
+const selectedNodeKey = ref(workspaceRoot);
 
-const selectedNodeKey = ref('');
+const traveledNodeKey = ref(workspaceRoot);
 
 const markedKey = ref<string>();
 
 const movedAction = ref<MoveAction>('none');
+
+const traveledNode = computed(
+  (): FolderTreeNode | null => treeRef.value?.getNodeByKey(traveledNodeKey.value),
+);
 
 const selectedNode = computed(
   (): FolderTreeNode | null => treeRef.value?.getNodeByKey(selectedNodeKey.value),
@@ -209,40 +235,20 @@ const props = defineProps<{
 }>();
 
 watch(() => props.id, (newValue) => {
-  selectedNodeKey.value = newValue;
+  if (newValue) {
+    selectedNodeKey.value = newValue;
+  } else {
+    selectedNodeKey.value = workspaceRoot;
+  }
+}, {
+  immediate: true,
 });
-
-onBeforeMount(() => {
-  selectedNodeKey.value = props.id;
-});
-
-function allParents(node: FolderTreeNode): FolderTreeNode[] {
-  const arr: FolderTreeNode[] = [];
-  if (!node) {
-    return arr;
-  }
-  arr.push(node);
-  if (node.parent) {
-    return arr.concat(allParents(node.parent));
-  }
-  return arr;
-}
-
-function expandNode(key: string) {
-  if (!expandedKeys.value.find((expandedKey) => expandedKey === key)) {
-    expandedKeys.value.push(key);
-  }
-}
-
-function updateBreadcrumbs(node: FolderTreeNode) {
-  const parents = allParents(node);
-  folderTreeStore.selectedNodeParents = parents.reverse();
-  folderTreeStore.selectedNodeParents.forEach(
-    (p) => expandNode(p.id),
-  );
-}
 
 watch(selectedNodeKey, (newValue) => {
+  if (newValue === workspaceRoot) {
+    router.push('/workspace');
+    return;
+  }
   router.push(`/workspace/${newValue}`);
 });
 
@@ -252,7 +258,7 @@ watch(() => selectedNode.value, (newValue, oldValue) => {
     return;
   }
   if (newValue) {
-    updateBreadcrumbs(newValue);
+    folderTreeStore.updateBreadcrumbs(newValue);
   }
 }, {
   deep: true,
@@ -291,7 +297,7 @@ async function addNewItem(
     children: [],
   } as FolderTreeNode);
   // We expand folder node here so user don't need to expand again
-  expandNode(node.id);
+  folderTreeStore.expandNode(node.id);
   // Update folder view
   if (node.ref) {
     node.ref.children.push(newItem);
@@ -412,12 +418,16 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
   // Move folder item to trash bin
   trashBinView.value.content.push(node.ref);
   // Get children of parent folder item
-  const targetChildren = parentNode.id
+  const targetChildren = parentNode.id !== workspaceRoot
     ? parentNode.ref?.children
     : folderView.value.content;
-  markAllChildrenFileAsDelete(targetChildren);
-  const index = targetChildren?.findIndex((child) => child.id === node.id);
+  if (!targetChildren) {
+    return;
+  }
+  const index = targetChildren.findIndex((child) => child.id === node.id);
   if (index !== undefined && index >= 0) {
+    const targetChild = targetChildren[index];
+    markAllChildrenFileAsDelete([targetChild]);
     targetChildren?.splice(index, 1);
   }
   // Delete tree node
@@ -426,7 +436,11 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
     parentNode.children?.splice(nodeIndex, 1);
   }
   // Push route to parent node page after delete
-  router.push(`/workspace/${parentNode.id}`);
+  if (parentNode.id === workspaceRoot) {
+    router.push('/workspace');
+  } else {
+    router.push(`/workspace/${parentNode.id}`);
+  }
 }
 
 /**
@@ -575,9 +589,9 @@ async function onPasteClicked(node: FolderTreeNode) {
   }
   // We should always update breadcrumb on paste to prevent breadcrumb desync
   if (selectedNode.value) {
-    updateBreadcrumbs(selectedNode.value);
+    folderTreeStore.updateBreadcrumbs(selectedNode.value);
   }
-  expandNode(node.id);
+  folderTreeStore.expandNode(node.id);
   cancelMarked();
 }
 
@@ -656,38 +670,6 @@ watch(() => markdownsStore.hasUnsaved, (newValue) => {
   }
 });
 
-function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
-  const children = folderItems.map((item):FolderTreeNode => ({
-    label: item.name,
-    icon: item.type,
-    id: item.id,
-    type: item.type,
-    ref: item,
-    children: toFolderTreeNodes(item.children),
-  }));
-  children.forEach((child) => {
-    child.children?.forEach((subChild) => {
-      subChild.parent = child;
-    });
-  });
-  return children;
-}
-
-function folderViewInit(initView: FolderView) {
-  folderView.value = initView;
-  const rootNode: FolderTreeNode = {
-    label: initView.name,
-    icon: 'home',
-    id: '',
-    type: 'article',
-    children: toFolderTreeNodes(initView.content),
-  };
-  rootNode.children?.forEach((child) => {
-    child.parent = rootNode;
-  });
-  folderTreeStore.treeNodes = [rootNode];
-}
-
 /**
  * Initialize folder tree on user authed
  */
@@ -697,7 +679,9 @@ onAuthStateChanged(auth, async (user) => {
     let reload = false;
     const markdownFolderView = await getMarkdownFolderView(user.uid);
     if (markdownFolderView) {
-      folderViewInit(markdownFolderView);
+      folderView.value = markdownFolderView;
+      const { content, name } = markdownFolderView;
+      folderTreeStore.folderViewInit(content, name, workspaceRoot);
     } else {
       await setDefaultFolderView(user.uid);
       reload = true;
@@ -736,6 +720,67 @@ watch(trashBinView, async (newValue, oldValue) => {
   }
 }, {
   deep: true,
+});
+
+function addFileByShortCut() {
+  if (!traveledNode.value) {
+    return;
+  }
+  setupDialog(i18n.t('folderViews.addFile'), 'article', traveledNode.value);
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.shiftKey && event.key === 'N') {
+    addFileByShortCut();
+  }
+}
+
+function tryExpandNode() {
+  traveledNodeKey.value = folderTreeStore.getStepInNode(
+    traveledNode.value,
+    (id) => treeRef.value?.isExpanded(id),
+    (id, expand) => treeRef.value?.setExpanded(id, expand),
+    workspaceRoot,
+  );
+}
+
+function tryCollapseNode() {
+  traveledNodeKey.value = folderTreeStore.getStepOutNode(
+    traveledNode.value,
+    (id) => treeRef.value?.isExpanded(id),
+    (id, expand) => treeRef.value?.setExpanded(id, expand),
+    workspaceRoot,
+  );
+}
+
+function tryMoveUpNode() {
+  traveledNodeKey.value = folderTreeStore.getNextNodeAbove(
+    traveledNode.value,
+    (id) => treeRef.value?.isExpanded(id),
+    workspaceRoot,
+  );
+}
+
+function tryMoveDownNode() {
+  traveledNodeKey.value = folderTreeStore.getNextNodeBelow(
+    traveledNode.value,
+    (id) => treeRef.value?.isExpanded(id),
+    workspaceRoot,
+  );
+}
+
+function focusTree() {
+  setTimeout(() => {
+    treePanel.value?.focus();
+  }, 200);
+}
+
+function openFile() {
+  selectedNodeKey.value = traveledNodeKey.value;
+}
+
+defineExpose({
+  focusTree,
 });
 </script>
 

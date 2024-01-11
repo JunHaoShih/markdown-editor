@@ -86,4 +86,12 @@ watch(text, (newValue) => {
     editor.setValue(newValue);
   }
 });
+
+function focusEditor() {
+  editor.focus();
+}
+
+defineExpose({
+  focusEditor,
+});
 </script>
