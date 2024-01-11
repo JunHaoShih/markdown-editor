@@ -21,6 +21,8 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
    */
   const treeNodes = ref<FolderTreeNode[]>([]);
 
+  const expandedKeys = ref<string[]>([]);
+
   /**
    * Store selected node and all of its parent. This is used for breadcrumb display
    */
@@ -190,8 +192,80 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
     return first.id;
   }
 
+  function toFolderTreeNodes(folderItems: FolderItem[]): FolderTreeNode[] {
+    const children = folderItems.map((item):FolderTreeNode => ({
+      label: item.name,
+      icon: item.type,
+      id: item.id,
+      type: item.type,
+      ref: item,
+      children: toFolderTreeNodes(item.children),
+    }));
+    children.forEach((child) => {
+      child.children?.forEach((subChild) => {
+        subChild.parent = child;
+      });
+    });
+    return children;
+  }
+
+  /**
+   * Initialize folder tree nodes
+   * @param folderItems Children of root nodes
+   * @param rootName Root node name
+   * @param workspaceRoot root node id
+   */
+  function folderViewInit(folderItems: FolderItem[], rootName: string, workspaceRoot: string) {
+    const rootNode: FolderTreeNode = {
+      label: rootName,
+      icon: 'home',
+      id: workspaceRoot,
+      type: 'article',
+      children: toFolderTreeNodes(folderItems),
+    };
+    rootNode.children?.forEach((child) => {
+      child.parent = rootNode;
+    });
+    treeNodes.value = [rootNode];
+  }
+
+  function allParents(node: FolderTreeNode): FolderTreeNode[] {
+    const arr: FolderTreeNode[] = [];
+    if (!node) {
+      return arr;
+    }
+    arr.push(node);
+    if (node.parent) {
+      return arr.concat(allParents(node.parent));
+    }
+    return arr;
+  }
+
+  /**
+   * Expand specific node
+   * @param key node key
+   */
+  function expandNode(key: string) {
+    if (!expandedKeys.value.find((expandedKey) => expandedKey === key)) {
+      expandedKeys.value.push(key);
+    }
+  }
+
+  /**
+   * Update breadcrumbs
+   * @param node The node you want to display
+   */
+  function updateBreadcrumbs(node: FolderTreeNode) {
+    const parents = allParents(node);
+    selectedNodeParents.value = parents.reverse();
+    selectedNodeParents.value.forEach(
+      (p) => expandNode(p.id),
+    );
+  }
+
   return {
     treeNodes,
+    expandedKeys,
     selectedNodeParents,
     breadCrumbs,
     fileName,
@@ -200,5 +274,8 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
     getNextNodeAbove,
     getStepOutNode,
     getStepInNode,
+    folderViewInit,
+    updateBreadcrumbs,
+    expandNode,
   };
 });

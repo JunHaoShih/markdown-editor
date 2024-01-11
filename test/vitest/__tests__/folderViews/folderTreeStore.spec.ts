@@ -1,4 +1,5 @@
 import { createPinia, setActivePinia } from 'pinia';
+import { FolderItem } from 'src/modules/folderViews/models/folderView';
 import { FolderTreeNode, useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
 import {
   beforeEach, describe, expect, it,
@@ -221,9 +222,7 @@ describe('Test folderTreeStore', () => {
       const targetId = store.getStepInNode(
         testCase.start,
         () => testCase.expand,
-        () => {
-          triggered = true;
-        },
+        () => { triggered = true; },
         '99',
       );
       expect(targetId).toBe(testCase.nextId ?? '99');
@@ -275,13 +274,98 @@ describe('Test folderTreeStore', () => {
       const targetId = store.getStepOutNode(
         testCase.start,
         () => testCase.expand,
-        () => {
-          triggered = true;
-        },
+        () => { triggered = true; },
         '99',
       );
       expect(targetId).toBe(testCase.nextId ?? '99');
       expect(triggered).toBe(testCase.setExpandTrigger);
+    });
+  });
+
+  function getDefaultFolderItems(): FolderItem[] {
+    const items: FolderItem[] = [
+      {
+        id: '1',
+        name: '1',
+        type: 'article',
+        children: [
+          {
+            id: '3',
+            name: '3',
+            type: 'article',
+            children: [],
+          },
+        ],
+      },
+      {
+        id: '2',
+        name: '2',
+        type: 'article',
+        children: [],
+      },
+    ];
+    return items;
+  }
+
+  it.concurrent('Init folder view', () => {
+    const store = useFolderTreeStore();
+    const folderItems = getDefaultFolderItems();
+    store.folderViewInit(folderItems, 'root', 'root-id');
+    expect(store.treeNodes.length).toBe(1);
+    expect(store.treeNodes[0].label).toBe('root');
+    expect(store.treeNodes[0].id).toBe('root-id');
+    const rootNode = store.treeNodes[0];
+    expect(rootNode.children?.length).toBe(2);
+  });
+
+  it.concurrent('Expand nodes', () => {
+    const store = useFolderTreeStore();
+    store.expandNode('1');
+    expect(store.expandedKeys.includes('1')).toBe(true);
+  });
+
+  function getBreadCrubsTestTree(): {
+    tree: FolderTreeNode[],
+    cases: {
+      start: FolderTreeNode,
+      crumbs: FolderTreeNode[],
+    }[],
+    } {
+    const rootNode: FolderTreeNode = {
+      id: '1',
+      type: 'article',
+    };
+    const childOne: FolderTreeNode = {
+      id: '2',
+      type: 'article',
+      parent: rootNode,
+    };
+    const childTwo: FolderTreeNode = {
+      id: '3',
+      type: 'article',
+      parent: rootNode,
+    };
+    rootNode.children = [childOne, childTwo];
+    const subChildOne: FolderTreeNode = {
+      id: '4',
+      type: 'article',
+      parent: childOne,
+    };
+    childOne.children = [subChildOne];
+    return {
+      tree: [rootNode],
+      cases: [
+        { start: subChildOne, crumbs: [subChildOne, childOne, rootNode] },
+      ],
+    };
+  }
+
+  it.concurrent('Update breadcrubs', () => {
+    const store = useFolderTreeStore();
+    const { cases } = getBreadCrubsTestTree();
+    cases.forEach(({ start, crumbs }) => {
+      store.updateBreadcrumbs(start);
+      expect(store.breadCrumbs.length).toBe(crumbs.length);
     });
   });
 });
