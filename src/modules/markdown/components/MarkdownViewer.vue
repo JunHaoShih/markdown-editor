@@ -217,6 +217,7 @@ onMounted(() => {
   margin-inline-start: 0px
   margin-inline-end: 0px
   margin: 0 0 10px
+  line-height: 1.6em
 
 :deep(b),
 :deep(strong)
