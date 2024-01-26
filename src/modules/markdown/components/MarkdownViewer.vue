@@ -158,6 +158,7 @@ onMounted(() => {
   margin-inline-start: opx
   margin-inline-end: 0px
   padding-inline-start: 25px
+  line-height: 1.8em
 
 :deep(ul ul)
   list-style-type: circle
@@ -173,6 +174,7 @@ onMounted(() => {
   margin-inline-start: opx
   margin-inline-end: 0px
   padding-inline-start: 25px
+  line-height: 1.8em
 
 /* blockquote style */
 :deep(blockquote)
