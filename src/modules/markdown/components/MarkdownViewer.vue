@@ -245,6 +245,7 @@ onMounted(() => {
 /* code block styles */
 :deep(pre)
   border-radius: 10px
+  margin-bottom: 1em
 
 :deep(pre .code-block-title)
   display: flex
@@ -324,6 +325,7 @@ onMounted(() => {
 :deep(h2:after)
   content: ''
   display: block
+  padding-top: 0.3em
   border-bottom: 1px solid hsla(0,0%,50%,.33)
 
 :deep(h2)
