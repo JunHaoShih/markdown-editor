@@ -158,6 +158,7 @@ onMounted(() => {
   margin-inline-start: opx
   margin-inline-end: 0px
   padding-inline-start: 25px
+  line-height: 1.8em
 
 :deep(ul ul)
   list-style-type: circle
@@ -173,6 +174,7 @@ onMounted(() => {
   margin-inline-start: opx
   margin-inline-end: 0px
   padding-inline-start: 25px
+  line-height: 1.8em
 
 /* blockquote style */
 :deep(blockquote)
@@ -215,6 +217,7 @@ onMounted(() => {
   margin-inline-start: 0px
   margin-inline-end: 0px
   margin: 0 0 10px
+  line-height: 1.6em
 
 :deep(b),
 :deep(strong)
@@ -245,6 +248,7 @@ onMounted(() => {
 /* code block styles */
 :deep(pre)
   border-radius: 10px
+  margin-bottom: 1em
 
 :deep(pre .code-block-title)
   display: flex
@@ -324,6 +328,7 @@ onMounted(() => {
 :deep(h2:after)
   content: ''
   display: block
+  padding-top: 0.3em
   border-bottom: 1px solid hsla(0,0%,50%,.33)
 
 :deep(h2)
