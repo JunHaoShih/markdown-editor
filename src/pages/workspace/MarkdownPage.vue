@@ -1,15 +1,8 @@
 <template>
   <div class="q-pa-sm">
-    <q-breadcrumbs class="tw-text-primary-600"
-      :active-color="darkStore.isDark ? 'grey-4' : 'grey-10'">
-      <q-breadcrumbs-el
-        v-for="breadCrumb in folderTreeStore.breadCrumbs"
-        :key="breadCrumb.id"
-        :label="breadCrumb.label"
-        :icon="breadCrumb.icon"
-        :to="`/workspace/${breadCrumb.id}`"
-      />
-    </q-breadcrumbs>
+    <BreadCrumbs
+      :breadcrumbs="breadcrumbs"
+    />
     <q-separator
       :color="darkStore.isDark ? 'grey-4' : 'grey-10'"
       class="q-my-sm"
@@ -74,7 +67,7 @@
       :hide-viewer="repo.id !== id"
       :type="editorType"
       :is-dark="darkStore.isDark"
-      splitter-class="tw-h-[calc(100vh-145px)]"
+      splitter-class="tw-h-[calc(100vh-115px)] sm:tw-h-[calc(100vh-155px)]"
       @on-splitter-resize="editorType = 'none'"
     >
     </MarkdownEditor>
@@ -135,6 +128,7 @@
 </template>
 
 <script setup lang="ts">
+import BreadCrumbs from 'src/components/BreadCrumbs.vue';
 import MarkdownEditor, { EditorType } from 'src/modules/markdown/components/MarkdownEditor.vue';
 import { useFolderTreeStore } from 'src/modules/folderViews/stores/folderTreeStore';
 import {
@@ -164,6 +158,16 @@ const router = useRouter();
 const markdownsStore = useMarkdownsStore();
 
 const folderTreeStore = useFolderTreeStore();
+
+const breadcrumbs = computed(
+  () => folderTreeStore.breadCrumbs.map((breadcrumb) => ({
+    icon: breadcrumb.icon,
+    label: breadcrumb.label,
+    to: breadcrumb.id === 'workspace-root'
+      ? '/workspace'
+      : `/workspace/${breadcrumb.id}`,
+  })),
+);
 
 const authStore = useAuthStore();
 
