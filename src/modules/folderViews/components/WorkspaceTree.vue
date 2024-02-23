@@ -180,10 +180,9 @@ import { FolderItem, FolderItemType, FolderView } from '../models/folderView';
 import { getTrashBin, setDefaultTrashBin, setTrashBin } from '../services/trashBinService';
 import { TrashBin } from '../models/trashBin';
 import { FolderTreeNode, useFolderTreeStore } from '../stores/folderTreeStore';
+import { useWorkspaceRoute } from '../composables/useWorkspaceRoute';
 
 type MoveAction = 'cut' | 'copy' | 'none';
-
-const workspaceRoot = 'workspace-root';
 
 const $q = useQuasar();
 
@@ -201,13 +200,13 @@ const treeRef = ref<QTree>();
 
 const dialogRef = ref<InstanceType<typeof NewFileDialog> | null>(null);
 
-const selectedNodeKey = ref(workspaceRoot);
-
-const traveledNodeKey = ref(workspaceRoot);
-
 const markedKey = ref<string>();
 
 const movedAction = ref<MoveAction>('none');
+
+const {
+  workspaceRoot, selectedNodeKey, traveledNodeKey, getRoute, getRootRoute,
+} = useWorkspaceRoute();
 
 const traveledNode = computed(
   (): FolderTreeNode | null => treeRef.value?.getNodeByKey(traveledNodeKey.value),
@@ -244,17 +243,13 @@ watch(() => props.id, (newValue) => {
   immediate: true,
 });
 
-watch(selectedNodeKey, (newValue) => {
-  if (newValue === workspaceRoot) {
-    router.push('/workspace');
-    return;
-  }
-  router.push(`/workspace/${newValue}`);
+watch(selectedNodeKey, async (newValue) => {
+  await router.push(getRoute(newValue));
 });
 
-watch(() => selectedNode.value, (newValue, oldValue) => {
+watch(() => selectedNode.value, async (newValue, oldValue) => {
   if (oldValue === null && newValue === null) {
-    router.push('/workspace');
+    await router.push(getRootRoute());
     return;
   }
   if (newValue) {
