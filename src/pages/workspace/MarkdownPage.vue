@@ -148,6 +148,7 @@ import { useDarkStore } from 'src/stores/darkModeStore';
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { getValidName } from 'src/services/fileNameService';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { useWorkspaceRoute } from 'src/modules/folderViews/composables/useWorkspaceRoute';
 
 const $q = useQuasar();
 
@@ -159,13 +160,13 @@ const markdownsStore = useMarkdownsStore();
 
 const folderTreeStore = useFolderTreeStore();
 
+const { getRoute } = useWorkspaceRoute();
+
 const breadcrumbs = computed(
   () => folderTreeStore.breadCrumbs.map((breadcrumb) => ({
     icon: breadcrumb.icon,
     label: breadcrumb.label,
-    to: breadcrumb.id === 'workspace-root'
-      ? '/workspace'
-      : `/workspace/${breadcrumb.id}`,
+    to: getRoute(breadcrumb.id),
   })),
 );
 
