@@ -247,7 +247,7 @@ function resize(details: {
     initialWidth = props.width;
     emit('onResize', true);
   }
-  if (details.offset && details.offset.y && details.offset.x) {
+  if (details.offset?.y && details.offset?.x) {
     const newX = info.leftResizable
       ? initialPosition.x + details.offset.x
       : initialPosition.x;

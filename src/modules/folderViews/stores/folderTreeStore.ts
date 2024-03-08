@@ -257,7 +257,7 @@ export const useFolderTreeStore = defineStore('folderTree', () => {
    */
   function updateBreadcrumbs(node: FolderTreeNode) {
     const parents = allParents(node);
-    selectedNodeParents.value = parents.reverse();
+    selectedNodeParents.value = parents.slice().reverse();
     selectedNodeParents.value.forEach(
       (p) => expandNode(p.id),
     );

@@ -235,7 +235,7 @@ function onSelectedChange(id: string) {
 }
 
 function unselectAll() {
-  // selectedIds.value.length = 0;
+  // Not used
 }
 
 function addSelectedChildren() {

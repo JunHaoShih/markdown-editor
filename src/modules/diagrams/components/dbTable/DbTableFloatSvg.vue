@@ -165,13 +165,11 @@ function deleteRow() {
   target.children.length = 0;
   // select adjacent row
   if (firstIndex >= shape.value.dbColumns.length) {
-    // selectedIds.value.push(shape.value.dbColumns[shape.value.dbColumns.length - 1].id);
     target.children.push({
       id: shape.value.dbColumns[shape.value.dbColumns.length - 1].id,
       children: [],
     });
   } else {
-    // selectedIds.value.push(shape.value.dbColumns[firstIndex].id);
     target.children.push({
       id: shape.value.dbColumns[firstIndex].id,
       children: [],
