@@ -68,9 +68,8 @@ const props = defineProps<{
   modelValue: Shape,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: Shape): void
-}
+type Emit = (e: 'update:modelValue', value: Shape) => void;
+
 const emit = defineEmits<Emit>();
 
 const line = computed({

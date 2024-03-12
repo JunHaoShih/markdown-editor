@@ -27,9 +27,8 @@ const props = defineProps<{
   minWidth: number,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: number): void
-}
+type Emit = (e: 'update:modelValue', value: number) => void;
+
 const emit = defineEmits<Emit>();
 
 const width = computed({

@@ -66,7 +66,7 @@ function createWindow() {
 
   mainWindow.hide();
 
-  const publicFolder = path.resolve(__dirname, process.env.QUASAR_PUBLIC_FOLDER || '');
+  const publicFolder = path.resolve(__dirname, process.env.QUASAR_PUBLIC_FOLDER ?? '');
   splashScreen.loadFile(path.resolve(publicFolder, 'splash.html'));
   splashScreen.center();
   splashScreen.show();

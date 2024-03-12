@@ -394,11 +394,6 @@ class Grid {
 
   readonly data: Map<number, Map<number, Rectangle>> = new Map();
 
-  // eslint-disable-next-line no-useless-constructor
-  constructor() {
-    //
-  }
-
   set(row: number, column: number, rectangle: Rectangle) {
     // eslint-disable-next-line no-underscore-dangle
     this._rows = Math.max(this.rows, row + 1);

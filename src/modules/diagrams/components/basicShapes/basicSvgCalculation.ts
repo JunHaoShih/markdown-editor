@@ -5,9 +5,7 @@ export const useBasicSvgCalculation = (shapeInfo: {
   shape: () => Shape,
   defaultMinWidth: () => number,
   defaultMinHeight: () => number,
-  emit: {
-    (e: 'update:modelValue', value: Shape): void
-  },
+  emit: (e: 'update:modelValue', value: Shape) => void,
   aspectRatio?: () => boolean,
 }) => {
   let originalX = 0;

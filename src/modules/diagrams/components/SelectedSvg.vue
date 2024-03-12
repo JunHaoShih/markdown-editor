@@ -157,9 +157,14 @@ const props = withDefaults(defineProps<{
   topResizable: false,
 });
 
-type Emit = {
-  (e: 'onResize', isFirst?: boolean, newPosition?: Point, newWidth?: number, newHeight?: number): void
-}
+type Emit = (
+  e: 'onResize',
+  isFirst?: boolean,
+  newPosition?: Point,
+  newWidth?: number,
+  newHeight?: number
+) => void;
+
 const emit = defineEmits<Emit>();
 
 const topLeft = computed(
