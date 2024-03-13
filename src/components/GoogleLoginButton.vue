@@ -18,9 +18,8 @@ import { useAuthStore } from 'src/modules/firebase/stores/authStore';
 
 const authStore = useAuthStore();
 
-type Emit = {
-  (e: 'onSuccess', credential: OAuthCredential): void
-}
+type Emit = (e: 'onSuccess', credential: OAuthCredential) => void;
+
 const emit = defineEmits<Emit>();
 
 async function googleLogin() {

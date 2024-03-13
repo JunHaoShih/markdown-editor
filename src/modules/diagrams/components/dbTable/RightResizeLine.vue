@@ -27,9 +27,8 @@ const props = defineProps<{
   minWidth: number,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: number): void
-}
+type Emit = (e: 'update:modelValue', value: number) => void;
+
 const emit = defineEmits<Emit>();
 
 const width = computed({
@@ -49,7 +48,7 @@ function resizeRow(details: {
   if (details.isFirst) {
     initialRowWidth = width.value;
   }
-  if (details.offset && details.offset.x) {
+  if (details.offset?.x) {
     width.value = Math.max(initialRowWidth + details.offset.x, props.minWidth);
   }
 }

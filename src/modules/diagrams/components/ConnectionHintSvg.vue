@@ -51,9 +51,8 @@ const props = defineProps<{
   shapeId: string,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: ConnectionNode[]): void
-}
+type Emit = (e: 'update:modelValue', value: ConnectionNode[]) => void;
+
 const emit = defineEmits<Emit>();
 
 const nodes = computed({
@@ -91,7 +90,7 @@ function unsetToNode(node: ConnectionNode) {
   }
 }
 
-const relocateNodes: { (): void }[] = [
+const relocateNodes: (() => void)[] = [
   () => {
     const node = nodes.value.find((cn) => cn.orient === 270);
     if (!node) {

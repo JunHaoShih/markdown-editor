@@ -59,9 +59,8 @@ const props = defineProps<{
   modelValue: Shape,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: Shape): void
-}
+type Emit = (e: 'update:modelValue', value: Shape) => void;
+
 const emit = defineEmits<Emit>();
 
 const shape = computed({
@@ -165,13 +164,11 @@ function deleteRow() {
   target.children.length = 0;
   // select adjacent row
   if (firstIndex >= shape.value.dbColumns.length) {
-    // selectedIds.value.push(shape.value.dbColumns[shape.value.dbColumns.length - 1].id);
     target.children.push({
       id: shape.value.dbColumns[shape.value.dbColumns.length - 1].id,
       children: [],
     });
   } else {
-    // selectedIds.value.push(shape.value.dbColumns[firstIndex].id);
     target.children.push({
       id: shape.value.dbColumns[firstIndex].id,
       children: [],

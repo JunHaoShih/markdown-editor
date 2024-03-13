@@ -22,9 +22,8 @@ const props = defineProps<{
   height: number,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: boolean): void
-}
+type Emit = (e: 'update:modelValue', value: boolean) => void;
+
 const emit = defineEmits<Emit>();
 
 const isTrue = computed({

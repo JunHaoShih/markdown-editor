@@ -59,13 +59,13 @@ export const codeBlockPlugin: MarkdownIt.PluginWithOptions<CodeBlockOptions> = (
     }
 
     const titleDiv = document.createElement('div');
-    if (options && options.titleClass) {
+    if (options?.titleClass) {
       titleDiv.className = options.titleClass;
     }
     titleDiv.innerText = lang;
     pre.appendChild(titleDiv);
 
-    if (options && options.copyBtn) {
+    if (options?.copyBtn) {
       const btn = document.createElement('button');
       if (options?.copyBtn?.btnClass) {
         btn.className = options.copyBtn.btnClass;
@@ -80,7 +80,7 @@ export const codeBlockPlugin: MarkdownIt.PluginWithOptions<CodeBlockOptions> = (
     pre.appendChild(bodyDiv);
 
     const code = document.createElement('code');
-    if (options && options.codeClass) {
+    if (options?.codeClass) {
       code.className = options.codeClass;
     }
     code.id = uuid;

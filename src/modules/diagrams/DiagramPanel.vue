@@ -103,7 +103,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import {
+  computed, onMounted, onUnmounted, ref,
+} from 'vue';
 import DbTableSvg from './components/dbTable/DbTableSvg.vue';
 import DbTableFloatSvg from './components/dbTable/DbTableFloatSvg.vue';
 import LineSvg from './components/line/LineSvg.vue';
@@ -244,11 +246,21 @@ function onDeleteClicked() {
   diagramStore.selectedIds.length = 0;
 }
 
+const resizeObserver = new ResizeObserver((entries) => {
+  entries.forEach((entry) => {
+    diagramStore.setBoudings(entry.target.getBoundingClientRect());
+  });
+});
+
 onMounted(() => {
   if (!svgRef.value) {
     return;
   }
-  diagramStore.setBoudings(svgRef.value.getBoundingClientRect());
+  resizeObserver.observe(svgRef.value);
+});
+
+onUnmounted(() => {
+  resizeObserver.disconnect();
 });
 </script>
 

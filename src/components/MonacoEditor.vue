@@ -22,9 +22,8 @@ const props = defineProps<{
   isDark: boolean,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: string): void
-}
+type Emit = (e: 'update:modelValue', value: string) => void;
+
 const emit = defineEmits<Emit>();
 
 const text = computed({

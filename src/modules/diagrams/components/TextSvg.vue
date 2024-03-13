@@ -63,9 +63,8 @@ const props = withDefaults(defineProps<{
   fontSize: '12px',
 });
 
-type Emit = {
-  (e: 'update:modelValue', value: string): void
-}
+type Emit = (e: 'update:modelValue', value: string) => void;
+
 const emit = defineEmits<Emit>();
 
 const textX = computed(

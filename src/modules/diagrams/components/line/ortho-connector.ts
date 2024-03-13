@@ -394,11 +394,6 @@ class Grid {
 
   readonly data: Map<number, Map<number, Rectangle>> = new Map();
 
-  // eslint-disable-next-line no-useless-constructor
-  constructor() {
-    //
-  }
-
   set(row: number, column: number, rectangle: Rectangle) {
     // eslint-disable-next-line no-underscore-dangle
     this._rows = Math.max(this.rows, row + 1);
@@ -565,12 +560,6 @@ function gridToSpots(grid: Grid, obstacles: Rectangle[]): Point[] {
     });
   });
 
-  // for(const r of grid) {
-  //     gridPoints.push(
-  //         r.northWest, r.north, r.northEast, r.east,
-  //         r.southEast, r.south, r.southWest, r.west, r.center);
-  // }
-
   // Reduce repeated points and filter out those who touch shapes
   return reducePoints(gridPoints).filter((p) => !obstacleCollision(p));
 }
@@ -736,9 +725,7 @@ export class OrthogonalConnector {
     const spots: Point[] = [];
     const verticals: number[] = [];
     const horizontals: number[] = [];
-    // const sideA = pointA.side;
     const sideAVertical = isVerticalSide(pointA.side);
-    // const sideB = pointB.side;
     const sideBVertical = isVerticalSide(pointB.side);
     const originA = computePt(pointA);
     const originB = computePt(pointB);

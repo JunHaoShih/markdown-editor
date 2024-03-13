@@ -9,7 +9,8 @@ export function getValidName(names: string[], targetName: string, starter = 1): 
     return targetName;
   }
   if (names.find((name) => name === `${targetName} (${starter})`)) {
-    const newName = getValidName(names, targetName, starter += 1);
+    starter += 1;
+    const newName = getValidName(names, targetName, starter);
     return newName;
   }
   return `${targetName} (${starter})`;

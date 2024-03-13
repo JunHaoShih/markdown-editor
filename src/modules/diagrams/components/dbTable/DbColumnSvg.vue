@@ -212,7 +212,7 @@ function getRowBottomPath() {
   return `M ${startX} ${startY} H ${startX + props.width}`;
 }
 
-const relocateNodes: { (): void }[] = [
+const relocateNodes: (() => void)[] = [
   () => {
     const node = dbColumn.value.connectionNodes.find((cn) => cn.orient === 270);
     if (!node) {

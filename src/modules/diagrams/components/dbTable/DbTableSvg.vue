@@ -84,9 +84,8 @@ const props = defineProps<{
   modelValue: Shape,
 }>();
 
-type Emit = {
-  (e: 'update:modelValue', value: Shape): void
-}
+type Emit = (e: 'update:modelValue', value: Shape) => void;
+
 const emit = defineEmits<Emit>();
 
 const shape = computed({
@@ -235,7 +234,7 @@ function onSelectedChange(id: string) {
 }
 
 function unselectAll() {
-  // selectedIds.value.length = 0;
+  // Not used
 }
 
 function addSelectedChildren() {

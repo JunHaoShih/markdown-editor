@@ -23,9 +23,8 @@ const props = defineProps<{
   info: MoveDotInfo,
 }>();
 
-type Emit = {
-  (e: 'updateDots', value: MoveDotInfo): void
-}
+type Emit = (e: 'updateDots', value: MoveDotInfo) => void;
+
 const emit = defineEmits<Emit>();
 
 const moveDot = computed(
