@@ -430,6 +430,14 @@ function deleteNodeAndFolderItem(node: FolderTreeNode) {
   if (nodeIndex !== undefined && nodeIndex >= 0) {
     parentNode.children?.splice(nodeIndex, 1);
   }
+  // Delete cache
+  const repoIndex = markdownsStore.repos.findIndex((repo) => repo.id === node.id);
+  if (repoIndex >= 0) {
+    markdownsStore.repos.splice(repoIndex, 1);
+  }
+  if (folderTreeStore.fileName !== node.label) {
+    return;
+  }
   // Push route to parent node page after delete
   if (parentNode.id === workspaceRoot) {
     router.push('/workspace');
